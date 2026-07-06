@@ -1,0 +1,196 @@
+<mat-toolbar class="topbar horizontal-topbar border-b border-border px-0!">
+  <div class="container gap-2">
+    <div class="hidden sm:flex branding">
+      <app-branding></app-branding>
+    </div>
+
+    <!-- Mobile Menu -->
+    <button mat-icon-button (click)="toggleMobileNav.emit()" class="block! lg:hidden!">
+      <i class="iconify flex" data-icon="solar:hamburger-menu-linear"></i>
+    </button>
+    <!-- --------------------------------------------------------------- -->
+
+    <!-- --------------------------------------------------------------- -->
+    <!--  Search -->
+    <!-- --------------------------------------------------------------- -->
+    <button mat-icon-button (click)="openDialog()" class="flex">
+      <i class="iconify size-5.5!" data-icon="solar:magnifer-line-duotone"></i>
+    </button>
+
+    <div class="hidden lg:flex">
+      <!-- --------------------------------------------------------------- -->
+      <!--  Links -->
+      <!-- --------------------------------------------------------------- -->
+      <button mat-button [matMenuTriggerFor]="appsmenu" aria-label="Notifications">
+        <div class="flex items-center">
+          Apps <i-tabler name="chevron-down" class="size-4! ms-1"></i-tabler>
+        </div>
+      </button>
+      <mat-menu #appsmenu="matMenu" class="apps-dd cardWithShadow">
+        <div class="grid grid-cols-12 gap-4">
+          <div class="sm:col-span-8 col-span-12 border-r border-border pe-0">
+            <div class="p-6">
+              <div class="grid grid-cols-12 gap-6">
+                @for(appdd of apps; track appdd.title) {
+                <div class="sm:col-span-6 col-span-12 text-hover-primary">
+                  <a [routerLink]="[appdd.link]" class="flex items-center no-underline">
+                    <span class="text-primary bg-light rounded-sm size-10! flex items-center justify-center">
+                      <img [src]="appdd.img" width="20" />
+                    </span>
+
+                    <div class="ms-4">
+                      <h5 class="text-sm font-semibold m-0 textprimary  hover-text">
+                        {{ appdd.title }}
+                      </h5>
+                      <span class="text-xs text-body">{{ appdd.subtitle }}</span>
+                    </div>
+                  </a>
+                </div>
+                }
+              </div>
+            </div>
+            <div class="border-t border-border p-5 hidden lg:flex items-center justify-between">
+              <span class="flex items-center text-base font-medium">
+                <i-tabler name="help" class="size-5! me-2"></i-tabler>Frequently Asked Questions
+              </span>
+              <a [routerLink]="['/theme-pages/faq']" mat-flat-button color="primary">Check</a>
+            </div>
+          </div>
+          <div class="sm:col-span-4 col-span-12">
+            <div class="px-4 py-6 pb-0">
+              <h4 class="text-lg font-semibold mb-4">Quick Links</h4>
+              @for(quicklink of quicklinks; track quicklink.title) {
+              <div class="text-hover-primary">
+                <a [routerLink]="[quicklink.link]" class="hover-text no-underline text-sm font-semibold block py-1.5">{{
+                  quicklink.title }}</a>
+              </div>
+              }
+            </div>
+          </div>
+        </div>
+      </mat-menu>
+      <a mat-button href="javascript:void(0)">Chat</a>
+      <a mat-button href="javascript:void(0)">Calendar</a>
+      <a mat-button href="javascript:void(0)">Email</a>
+    </div>
+
+    <span class="flex-1"></span>
+
+    <!-- Mobile Menu -->
+    <div class="flex lg:hidden">
+      <button mat-icon-button (click)="toggleMobileFilterNav.emit()" class="flex lg:hidden justify-center">
+        <i class="iconify" data-icon="solar:menu-dots-linear"></i>
+      </button>
+    </div>
+
+    @if(options.theme=='light'){
+    <button mat-icon-button aria-label="lightdark" class="flex justify-center" (click)="setlightDark('dark')">
+      <i-tabler class="flex" [name]="'moon'"></i-tabler>
+    </button>
+    }@else{
+    <button mat-icon-button aria-label="lightdark" class="flex justify-center" (click)="setlightDark('light')">
+      <i-tabler class="flex" [name]="'sun'"></i-tabler>
+    </button>
+    }
+
+    <!-- --------------------------------------------------------------- -->
+    <!-- langugage Dropdown -->
+    <!-- --------------------------------------------------------------- -->
+    <button [matMenuTriggerFor]="flags" mat-icon-button>
+      <img [src]="selectedLanguage.icon" class="rounded-full object-cover size-5! mx-auto" />
+    </button>
+    <mat-menu #flags="matMenu" class="cardWithShadow" xPosition="before">
+      @for(lang of languages; track lang.icon) {
+      <button mat-menu-item (click)="changeLanguage(lang)">
+        <div class="flex items-center">
+          <img [src]="lang.icon" class="rounded-full object-cover me-2 size-5!" />
+          <span class=" text-sm">{{ lang.language }}</span>
+        </div>
+      </button>
+      }
+    </mat-menu>
+
+
+    <!-- --------------------------------------------------------------- -->
+    <!-- Notification Dropdown -->
+    <!-- --------------------------------------------------------------- -->
+    <button mat-icon-button matBadge="5" [matMenuTriggerFor]="notificationmenu" aria-label="Notifications"
+      class="notification-badge">
+      <i class="iconify" data-icon="solar:bell-line-duotone"></i>
+    </button>
+    <mat-menu #notificationmenu="matMenu" class="topbar-dd cardWithShadow">
+      <div class="flex items-center px-6 py-4">
+        <h6 class="text-base font-semibold m-0 ">Notifications</h6>
+        <span class="ms-auto">
+          <span class="bg-primary text-white px-2 py-1 font-medium rounded-sm text-xs">5 new</span>
+        </span>
+      </div>
+
+      @for(notification of notifications; track notification.title) {
+      <button mat-menu-item class="px-5! py-2!">
+        <div class="flex items-center">
+          <img [src]="notification.img" class="rounded-full" width="48" />
+          <div class="ms-4">
+            <h5 class="text-sm font-semibold m-0 ">
+              {{ notification.title }}
+            </h5>
+            <span>{{ notification.subtitle }}</span>
+          </div>
+        </div>
+      </button>
+      }
+
+      <div class="py-3 px-6">
+        <button mat-stroked-button color="primary" class="w-full">
+          See all notifications
+        </button>
+      </div>
+    </mat-menu>
+
+    <!-- --------------------------------------------------------------- -->
+    <!-- profile Dropdown -->
+    <!-- --------------------------------------------------------------- -->
+    <button class="p-0! flex! items-center! justify-center!" mat-icon-button [matMenuTriggerFor]="profilemenu"
+      aria-label="Notifications">
+      <img src="/assets/images/profile/user-1.jpg" class="rounded-full object-cover size-9!" width="36" />
+    </button>
+    <mat-menu #profilemenu="matMenu" class="topbar-dd cardWithShadow">
+      <ng-scrollbar class="relative">
+        <div class="px-6 py-4">
+          <h6 class="text-base font-semibold m-0 ">User Profile</h6>
+          <div class="flex items-center pb-6 border-b border-border mt-4">
+            <img src="/assets/images/profile/user-1.jpg" class="rounded-full" width="95" />
+            <div class="ms-4">
+              <h6 class="text-sm font-semibold m-0">Mathew Anderson</h6>
+              <span class="text-sm block mb-1 text-muted">Designer</span>
+              <span class="flex items-center text-muted">
+                <i-tabler name="mail" class="size-3.5! me-1"></i-tabler>
+                info&#64;modernize.com
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="px-6">
+          @for(profile of profiledd; track profile.title) {
+          <a class="py-3 no-underline block text-hover-primary" [routerLink]="[profile.link]">
+            <div class="flex items-center">
+              <button mat-mini-fab class="text-primary bg-light shadow-none rounded-sm">
+                <img [src]="profile.img" width="20" />
+              </button>
+              <div class="ms-4">
+                <h5 class="text-sm font-semibold m-0 textprimary  hover-text">
+                  {{ profile.title }}
+                </h5>
+                <span class="text-sm text-body">{{ profile.subtitle }}</span>
+              </div>
+            </div>
+          </a>
+          }
+        </div>
+        <div class="py-3 px-6">
+          <a [routerLink]="['/authentication/login']" mat-stroked-button color="primary" class="w-full">Logout</a>
+        </div>
+      </ng-scrollbar>
+    </mat-menu>
+  </div>
+</mat-toolbar>

@@ -1,0 +1,34 @@
+@if(pageInfo?.['title'] != 'Modern' && pageInfo?.['title'] != 'eCommerce' && pageInfo?.['title'] != 'Music' &&
+pageInfo?.['title'] != 'General'){
+<div class="bg-light-secondary rounded-sm py-4 px-6 mb-6 overflow-hidden">
+  <div class="grid grid-cols-12">
+    <div class="col-span-12 sm:col-span-8">
+      <h4 class="page-title m-0! text-xl font-semibold mb-3">
+        {{ pageInfo?.['title'] }}
+      </h4>
+      <div class="flex items-center overflow-hidden">
+        <ul class="breadcrumb">
+          @for (url of pageInfo?.['urls']; track url.url;let index = $index,last
+          = $last ) { @if(!last){
+
+          <li class="breadcrumb-item" [routerLink]="url.url">
+            <a [routerLink]="url.url">{{ url.title }}</a>
+          </li>
+          }@else {
+          <li class="breadcrumb-item">
+            <i-tabler name="circle-filled" class="size-2!"></i-tabler>
+          </li>
+          <li class="breadcrumb-item active text-sm">{{ url.title }}</li>
+          } }
+        </ul>
+      </div>
+    </div>
+    <div class="col-span-12 sm:col-span-4 text-right rtl:text-left relative hidden sm:block">
+      <div class="breadcrumb-icon absolute -top-6.5 right-0 max-h-[95px] max-w-[145px] rtl:left-0 rtl:right-auto">
+        <img src="/assets/images/breadcrumb/customer-support-img.png" alt="breadcrumb"
+          class="h-full w-full object-contain" />
+      </div>
+    </div>
+  </div>
+</div>
+}
