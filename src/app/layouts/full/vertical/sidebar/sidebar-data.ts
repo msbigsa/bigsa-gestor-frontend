@@ -30,7 +30,7 @@ export const navItems: NavItem[] = [
       {
         displayName: 'Convertir Word a HTML',
         iconName: 'bi:filetype-docx',
-        route: '/conversor-doc-html',
+        route: '/inicio/conversor-doc-html',
         /*children: [
           {
             displayName: 'Menu 1',

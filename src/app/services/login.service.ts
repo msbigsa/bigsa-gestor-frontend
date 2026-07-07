@@ -13,7 +13,7 @@ interface ILoginRequest {
 })
 export class LoginService {
 
-  private url: string = `${environment.HOST}/auth/login`;
+  private url: string = `${environment.HOST_LOGIN}/auth/login`;
 
   constructor(
     private http: HttpClient,
@@ -37,17 +37,17 @@ export class LoginService {
   }
 
   sendMail(username: string) {
-    return this.http.post<number>(`${environment.HOST}/mail/sendMail`, username, {
+    return this.http.post<number>(`${environment.HOST_LOGIN}/mail/sendMail`, username, {
       headers: new HttpHeaders().set('Content-Type', 'text/plain')
     });
   }
   
   checkTokenReset(random: string) {
-    return this.http.get<number>(`${environment.HOST}/mail/reset/check/${random}`);
+    return this.http.get<number>(`${environment.HOST_LOGIN}/mail/reset/check/${random}`);
   }
   
   reset(random: string, newPassword: string) {
-    return this.http.post(`${environment.HOST}/mail/reset/${random}`, newPassword, {
+    return this.http.post(`${environment.HOST_LOGIN}/mail/reset/${random}`, newPassword, {
       headers: new HttpHeaders().set('Content-Type', 'text/plain')
     });
   }

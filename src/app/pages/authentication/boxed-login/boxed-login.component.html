@@ -6,7 +6,7 @@
           <app-branding></app-branding>
         </div>
 
-        <div class="grid grid-cols-12 gap-6">
+        <!--div class="grid grid-cols-12 gap-6">
           <div class="col-span-6">
             <button mat-stroked-button class="w-full">
               <div class="flex items-center">
@@ -28,49 +28,49 @@
         <div
           class="or-border relative text-center before:content-[''] before:absolute before:left-0 before:top-1/2 
             before:w-[120px] before:h-px before:bg-(--mat-sys-outline) after:content-[''] after:absolute after:right-0 after:top-1/2 after:w-[120px] after:h-px after:bg-(--mat-sys-outline) mt-8">
-          or sign in with</div>
+          or sign in with</div-->
 
         <form class="mt-8" [formGroup]="form" (ngSubmit)="submit()">
-          <mat-label class="text-sm font-semibold mb-2 block">Username</mat-label>
+          <mat-label class="text-sm font-semibold mb-2 block">Usuario</mat-label>
           <mat-form-field appearance="outline" class="w-full" color="primary">
             <input matInput formControlName="uname" />
             @if(f['uname'].touched && f['uname'].invalid) {
             <mat-hint class="mb-4 absolute -top-[19px] right-[3px]">
               @if(f['uname'].errors && f['uname'].errors['required']) {
-              <div class="text-error">Name is required.</div>
+              <div class="text-error">Usuario es requerido.</div>
               } @if(f['uname'].errors && f['uname'].errors['minlength']) {
-              <div class="text-error">Name should be 6 character.</div>
+              <div class="text-error">Usuario debe contener al menos 3 caracteres.</div>
               }
             </mat-hint>
             }
           </mat-form-field>
           <!-- password -->
-          <mat-label class="text-sm font-semibold mb-2 block">Password</mat-label>
+          <mat-label class="text-sm font-semibold mb-2 block">Contraseña</mat-label>
           <mat-form-field appearance="outline" class="w-full" color="primary">
             <input matInput type="password" formControlName="password" />
             @if(f['password'].touched && f['password'].invalid) {
             <mat-hint class="mb-4 absolute -top-[19px] right-[3px]">
               @if(f['password'].errors && f['password'].errors['required']) {
-              <div class="text-error">Password is required.</div>
+              <div class="text-error">Contraseña es requerida.</div>
               }
             </mat-hint>
             }
           </mat-form-field>
 
           <div class="flex items-center mb-3">
-            <mat-checkbox color="primary">Remember this Device</mat-checkbox>
-            <a [routerLink]="['/authentication/boxed-forgot-pwd']"
-              class="text-primary font-semibold no-underline ms-auto text-sm">Forgot Password ?</a>
+            <mat-checkbox color="primary">Recordar este dispositivo</mat-checkbox>
+            <!--a [routerLink]="['/authentication/boxed-forgot-pwd']"
+              class="text-primary font-semibold no-underline ms-auto text-sm">Forgot Password ?</a-->
           </div>
           <button mat-flat-button color="primary" class="w-full" [disabled]="!form.valid">
             Sign In
           </button>
           <!-- input -->
         </form>
-        <span class="block font-medium text-center mt-6">New to Modernize?
+        <!--span class="block font-medium text-center mt-6">New to Modernize?
           <a [routerLink]="['/authentication/boxed-register']" class="no-underline text-primary font-medium text-sm">
             Create an account</a>
-        </span>
+        </span-->
       </mat-card-content>
     </mat-card>
   </div>

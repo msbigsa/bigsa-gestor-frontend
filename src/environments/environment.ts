@@ -1,7 +1,10 @@
 export const environment = {
   production: true,
   //backend: '',
-  HOST: 'https://sitio.cl/sys-truck-backend',
+  DOMAIN_LOGIN: 'sitio.cl',
+  HOST_LOGIN: 'https://sitio.cl/sys-truck-backend',
+  DOMAIN_HTML: 'sitio.cl',
+  HOST_HTML: 'https://sitio.cl/sys-truck-backend',
   //HOST_DEV: 'https://sitio.cl/sys-truck-backend',
   REINTENTS: 2,
   TOKEN_NAME: 'jwtToken',

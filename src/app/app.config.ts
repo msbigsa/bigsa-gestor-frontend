@@ -72,10 +72,12 @@ export const appConfig: ApplicationConfig = {
       JwtModule.forRoot({
         config: {
           tokenGetter,
-          allowedDomains: [environment.HOST],
+          allowedDomains: [
+            environment.DOMAIN_HTML
+          ],
           disallowedRoutes: [
-            `${environment.HOST}/auth/login/forgot`,
-            `${environment.HOST}/login`
+            `${environment.HOST_LOGIN}/authentication/login/forgot`,
+            `${environment.HOST_LOGIN}/authentication/login`
           ]
         }
       })
