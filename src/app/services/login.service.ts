@@ -27,7 +27,7 @@ export class LoginService {
 
   logout(){
     sessionStorage.clear();
-    console.log(`sessionStorage.clear() ejecutado`);
+    //console.log(`sessionStorage.clear() ejecutado`);
     this.router.navigate(['authentication/login']);
   }
 

@@ -1,5 +1,5 @@
 import { ApplicationConfig, importProvidersFrom, provideZoneChangeDetection, } from '@angular/core';
-import { provideHttpClient, HttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, HttpClient, withInterceptorsFromDi, withInterceptors } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { routes } from './app.routes';
 import {
@@ -23,6 +23,8 @@ import { MaterialModule } from './material.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { environment } from 'src/environments/environment';
 import { JwtModule } from '@auth0/angular-jwt';
+import { NgxUiLoaderModule } from 'ngx-ui-loader';
+import { loadingInterceptor } from './interceptors/loading.interceptor';
 
 export class CustomLoader implements TranslateLoader {
   constructor(private http: HttpClient, private prefix: string, private suffix: string) { }
@@ -52,7 +54,12 @@ export const appConfig: ApplicationConfig = {
       }),
       withComponentInputBinding()
     ),
-    provideHttpClient(withInterceptorsFromDi()),
+    provideHttpClient(
+       withInterceptors([
+        loadingInterceptor
+      ]), 
+      withInterceptorsFromDi()
+    ),
     provideClientHydration(),
     provideAnimationsAsync(),
     importProvidersFrom(
@@ -80,6 +87,37 @@ export const appConfig: ApplicationConfig = {
             `${environment.HOST_LOGIN}/authentication/login`
           ]
         }
+      }),
+
+      NgxUiLoaderModule.forRoot({
+        "bgsColor": "#297dd5",
+        "bgsOpacity": 0.6,
+        "bgsPosition": "bottom-right",
+        "bgsSize": 60,
+        "bgsType": "ball-scale-multiple",
+        "blur": 8,
+        "delay": 0,
+        "fastFadeOut": true,
+        "fgsColor": "#297dd5",
+        "fgsPosition": "center-center",
+        "fgsSize": 50,
+        "fgsType": "rectangle-bounce-pulse-out",
+        "gap": 24,
+        "logoPosition": "center-center",
+        "logoSize": 120,
+        "logoUrl": "",
+        "masterLoaderId": "master",
+        "overlayBorderRadius": "0",
+        "overlayColor": "rgba(40, 40, 40, 0.8)",
+        "pbColor": "#297dd5",
+        "pbDirection": "ltr",
+        "pbThickness": 4,
+        "hasProgressBar": true,
+        "text": "Cargando...",
+        "textColor": "#FFFFFF",
+        "textPosition": "center-center",
+        "maxTime": -1,
+        "minTime": 300
       })
     ),
   ],
