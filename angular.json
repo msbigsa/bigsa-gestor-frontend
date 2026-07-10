@@ -36,7 +36,8 @@
             "styles": [
               "src/globals.css",
               "src/styles.scss",
-              "src/assets/scss/style.scss"
+              "src/assets/scss/style.scss",
+              "node_modules/ngx-toastr/toastr.css"
             ],
             "scripts": [],
             "browser": "src/main.ts"
