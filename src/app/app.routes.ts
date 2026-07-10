@@ -16,12 +16,7 @@ export const routes: Routes = [
         path: 'inicio',
         loadChildren: () =>
           import('./pages/pages.routes').then((m) => m.PagesRoutes),
-      },
-      {
-        path: 'sample-page',
-        loadChildren: () =>
-          import('./pages/pages.routes').then((m) => m.PagesRoutes),
-      },
+      }
     ],
   },
   {

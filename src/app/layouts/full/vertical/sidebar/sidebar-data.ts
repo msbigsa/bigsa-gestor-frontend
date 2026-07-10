@@ -30,7 +30,7 @@ export const navItems: NavItem[] = [
       {
         displayName: 'Convertir Word a HTML',
         iconName: 'bi:filetype-docx',
-        route: '/inicio/conversor-doc-html',
+        route: '/inicio/html/conversor-doc-html',
         /*children: [
           {
             displayName: 'Menu 1',
@@ -49,7 +49,7 @@ export const navItems: NavItem[] = [
       {
         displayName: 'HTML Generados',
         iconName: 'streamline-ultimate:file-html',
-        route: '/lista-html',
+        route: 'inicio/html/listar-doc-html',
       },
     ],
   },

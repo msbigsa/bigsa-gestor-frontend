@@ -1,0 +1,83 @@
+<mat-card class="cardWithShadow">
+  <mat-card-content>
+    <div class="grid grid-cols-12 justify-between">
+      <div class="lg:col-span-6 col-span-12">
+        <mat-form-field appearance="outline" class="hide-hint">
+          <div class="flex flex-row items-center self-stretch gap-3">
+            <i class="iconify size-5.5!" data-icon="solar:magnifer-line-duotone"></i>
+            <input matInput placeholder="Search User" (keyup)="applyFilter($any($event.target).value)" />
+          </div>
+        </mat-form-field>
+      </div>
+      <div class="lg:col-span-6 col-span-12 flex items-center justify-end">
+        <!--button mat-flat-button (click)="openDialog('Add', {})" color="primary">
+          Add User
+        </button-->
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>
+<mat-card class="cardWithShadow">
+  <mat-card-content>
+    <div class="relative overflow-auto">
+      <table mat-table [dataSource]="dataSource" class="min-w-full">
+        <ng-container matColumnDef="#">
+          <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">#</th>
+          <td mat-cell *matCellDef="let element" class="whitespace-nowrap">{{ element.id }}</td>
+        </ng-container>
+        <ng-container matColumnDef="nombre">
+          <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Name</th>
+          <td mat-cell *matCellDef="let element" class="whitespace-nowrap">
+            <div class="flex items-center">
+              <div class="ms-4">
+                <p class="font-semibold text-base mb-1 mt-0">
+                  {{ element.nombre }}
+                </p>
+                <!--small class="text-sm">{{ element.Position }}</small-->
+              </div>
+            </div>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="nombreDocumento">
+          <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">
+            nombreDocumento
+          </th>
+          <td mat-cell *matCellDef="let element" class="whitespace-nowrap">{{ element.nombreDocumento }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="usrCodigo">
+          <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">
+            usrCodigo
+          </th>
+          <td mat-cell *matCellDef="let element" class="whitespace-nowrap">{{ element.usrCodigo }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="fechaSubida">
+          <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">
+            fechaSubida
+          </th>
+          <td mat-cell *matCellDef="let element" class="text-sm whitespace-nowrap">
+            {{ element.fechaSubida | date : "fullDate" }}
+          </td>
+        </ng-container>               
+        <ng-container matColumnDef="action">
+          <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">
+            Acción
+          </th>
+          <td mat-cell *matCellDef="let element" class="action-link whitespace-nowrap">
+            <!--a (click)="openDialog('Update', element)" class="me-2.5 cursor-pointer">
+              <i-tabler name="edit" class="size-4.5!"></i-tabler>
+            </a-->
+            <!--a (click)="openDialog('Delete', element)" class="me-2.5 cursor-pointer"-->
+            <a class="me-2.5 cursor-pointer">
+              <i-tabler name="trash" class="size-4.5!"></i-tabler>
+            </a>
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+      <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+    </div>
+  </mat-card-content>
+</mat-card>
