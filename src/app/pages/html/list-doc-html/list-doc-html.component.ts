@@ -20,6 +20,7 @@ import { ArchivoDoc } from 'src/app/models/ArchivoDoc';
 import { HtmlService } from 'src/app/services/html.service';
 import { Router } from '@angular/router';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-list-doc-html',
@@ -41,6 +42,7 @@ export class ListDocHtmlComponent implements OnInit, AfterViewInit {
   @ViewChild(MatSort) sort!: MatSort;
 
   private htmlService = inject(HtmlService);
+  private toastr = inject(ToastrService);
 
   archivosDoc: ArchivoDoc[] = [];
 
@@ -124,6 +126,7 @@ export class ListDocHtmlComponent implements OnInit, AfterViewInit {
     dialogRef.afterClosed().subscribe((confirmado) => {
       if (confirmado) {
         this.htmlService.eliminar(documento.id).subscribe(() => {
+          this.toastr.success('Documento eliminado correctamente', 'Exitoso');
           this.cargarDocumentos();
         });
       }

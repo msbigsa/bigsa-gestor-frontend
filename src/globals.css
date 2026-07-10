@@ -159,4 +159,14 @@
     .bg-light-warning {
         background-color: var(--color-light-warning) !important;
     }
+
+    /* Centrar y separar del header de toast*/
+    #toast-container.toast-top-center {
+    top: 10px !important;
+    }
+
+    /* Color del toast de error */
+    .toast-error {
+    background-color: #FA896B !important;
+    }
 }

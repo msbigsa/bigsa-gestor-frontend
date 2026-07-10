@@ -1,11 +1,13 @@
 .dropzone {
-  border: 2px dashed #d6dde5;
+  border: 2px dashed var(--mat-sys-outline-variant);
   border-radius: 16px;
   min-height: 220px;
   padding: 2rem;
   cursor: pointer;
-  transition: all 0.25s ease;
-  background: white;
+  //transition: all 0.25s ease;
+  background: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+
   display: flex;
   align-items: center;
   justify-content: center;
@@ -13,12 +15,20 @@
 
 .dropzone:hover {
   border-color: var(--mat-sys-primary);
-  background: rgba(25, 118, 210, 0.03);
+  background: color-mix(
+    in srgb,
+    var(--mat-sys-primary) 8%,
+    var(--mat-sys-surface)
+  );
 }
 
 .dragging {
   border-color: var(--mat-sys-primary);
-  background: #eef6ff;
+  background: color-mix(
+    in srgb,
+    var(--mat-sys-primary) 12%,
+    var(--mat-sys-surface)
+  );
   transform: scale(1.01);
 }
 
@@ -51,14 +61,15 @@
 
 .name {
   font-weight: 600;
+  color: var(--mat-sys-on-surface);
 }
 
 .size {
-  color: gray;
+  color: var(--mat-sys-on-surface-variant);
   font-size: 0.85rem;
 }
 
 .error {
-  color: #d32f2f;
+  color: var(--mat-sys-error);
   margin-top: 0.5rem;
 }

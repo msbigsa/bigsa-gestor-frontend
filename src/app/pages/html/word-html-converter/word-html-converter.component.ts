@@ -6,6 +6,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { ToastrService } from 'ngx-toastr';
 import { MaterialModule } from 'src/app/material.module';
 import { HtmlService } from 'src/app/services/html.service';
 import { FileDropzoneComponent } from 'src/app/shared/components/file-dropzone/file-dropzone.component';
@@ -26,6 +27,7 @@ export class WordHtmlConverterComponent {
   archivo!: File;
 
   private htmlService = inject(HtmlService);
+  private toastr = inject(ToastrService);
 
   form = new FormGroup({
     nombre: new FormControl('', [Validators.required, Validators.minLength(6)]),
@@ -70,6 +72,9 @@ export class WordHtmlConverterComponent {
 
     this.htmlService.docToHtml(formData).subscribe((data) => {
       //console.log(data);
+
+      this.toastr.success('HTML generado correctamente', 'Exitoso');
+
       const blob = data.body!;
 
       // Obtener el nombre enviado por Spring
