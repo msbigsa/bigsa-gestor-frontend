@@ -9,10 +9,10 @@ export const PagesRoutes: Routes = [
     path: '',
     component: StarterComponent,
     data: {
-      title: 'Starter Page',
+      title: 'Inicio',
       urls: [
-        { title: 'Dashboard', url: '/dashboards/dashboard1' },
-        { title: 'Starter Page' },
+        //{ title: 'Dashboard', url: '/dashboards/dashboard1' },
+        //{ title: 'Starter Page' },
       ],
     },
     canActivate: [CertGuard]

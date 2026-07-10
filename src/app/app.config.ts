@@ -26,6 +26,18 @@ import { JwtModule } from '@auth0/angular-jwt';
 import { NgxUiLoaderModule } from 'ngx-ui-loader';
 import { loadingInterceptor } from './interceptors/loading.interceptor';
 
+import { LOCALE_ID } from '@angular/core';
+import { MAT_DATE_LOCALE } from '@angular/material/core';
+import { MatPaginatorIntl } from '@angular/material/paginator';
+import { spanishPaginatorIntl } from './core/i18n/mat-paginator-intl-es';
+
+import { registerLocaleData } from '@angular/common';
+import localeEsCl from '@angular/common/locales/es-CL';
+import { serverErrorInterceptor } from './interceptors/server-errors.interceptor';
+import { provideToastr } from 'ngx-toastr';
+
+registerLocaleData(localeEsCl);
+
 export class CustomLoader implements TranslateLoader {
   constructor(private http: HttpClient, private prefix: string, private suffix: string) { }
 
@@ -45,6 +57,12 @@ export function tokenGetter() {
 export const appConfig: ApplicationConfig = {
   providers: [
     provideAnimationsAsync(), // required animations providers
+    provideToastr({
+      positionClass: 'toast-top-center',
+      timeOut: 3000,
+      preventDuplicates: true
+    }),
+
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(
       routes,
@@ -56,12 +74,26 @@ export const appConfig: ApplicationConfig = {
     ),
     provideHttpClient(
        withInterceptors([
-        loadingInterceptor
+        loadingInterceptor,
+        serverErrorInterceptor
       ]), 
       withInterceptorsFromDi()
     ),
     provideClientHydration(),
-    provideAnimationsAsync(),
+
+ {
+    provide: LOCALE_ID,
+    useValue: 'es-CL',
+  },
+  {
+    provide: MAT_DATE_LOCALE,
+    useValue: 'es-CL',
+  },
+  {
+    provide: MatPaginatorIntl,
+    useFactory: spanishPaginatorIntl,
+  },
+
     importProvidersFrom(
       FormsModule,
       ReactiveFormsModule,
