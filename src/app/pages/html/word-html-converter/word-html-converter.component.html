@@ -1,0 +1,57 @@
+<mat-card class="cardWithShadow">
+  <mat-card-header class="p-4!">
+    <mat-card-title class="mb-0 text-xl font-semibold">
+      Ingrese un nuevo archivo
+    </mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content class="border-t border-border p-6!">
+    <form [formGroup]="form">
+      <mat-label class="font-medium mb-2 block"> Nombre </mat-label>
+
+      <mat-form-field appearance="outline" class="w-full" color="primary">
+        <input matInput formControlName="nombre" />
+
+        @if (f.nombre.hasError("required")) {
+          <mat-error>El nombre es obligatorio.</mat-error>
+        }
+
+        @if (f.nombre.hasError("minlength")) {
+          <mat-error>El nombre debe tener al menos 6 caracteres.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-label class="font-medium mb-2 block mt-3"> Archivo </mat-label>
+
+      <app-file-dropzone
+        title="Suba un documento Word"
+        subtitle="Arrastre el archivo aquí o haga clic para seleccionarlo."
+        accept=".doc,.docx"
+        [maxSize]="10485760"
+        (fileSelected)="onFileSelected($event)"
+        (fileRemoved)="onFileRemoved()"
+      >
+      </app-file-dropzone>
+
+      @if (f.archivo.invalid && (f.archivo.touched || f.archivo.dirty)) {
+        <div class="file-error">
+          Debe seleccionar un archivo Word (.doc o .docx).
+        </div>
+      }
+
+      <div class="mt-6 flex justify-center">
+        <button
+          mat-flat-button
+          color="primary"
+          type="button"
+          class="px-6 py-5"
+          [disabled]="form.invalid"
+          (click)="generar()"
+        >
+          <mat-icon>description</mat-icon>
+          Generar HTML
+        </button>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>

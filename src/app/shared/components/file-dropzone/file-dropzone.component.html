@@ -1,0 +1,61 @@
+<input
+  #fileInput
+  hidden
+  type="file"
+  [accept]="accept"
+  (change)="onFileInput($event)"
+/>
+
+<div
+  class="dropzone"
+  [class.dragging]="dragging"
+  (click)="openFileDialog()"
+  (dragover)="onDragOver($event)"
+  (dragleave)="onDragLeave($event)"
+  (drop)="onDrop($event)"
+>
+  @if (!file) {
+    <div class="empty">
+      <mat-icon class="icon"> upload_file </mat-icon>
+
+      <h3>{{ title }}</h3>
+
+      <p>{{ subtitle }}</p>
+
+      <button mat-stroked-button color="primary" type="button">
+        Seleccionar archivo
+      </button>
+    </div>
+
+  } @else {
+    <div class="selected">
+      <div class="info">
+        <mat-icon> description </mat-icon>
+
+        <div>
+          <div class="name">
+            {{ file.name }}
+          </div>
+
+          <div class="size">
+            {{ fileSize }}
+          </div>
+        </div>
+      </div>
+
+      <button
+        mat-icon-button
+        color="warn"
+        (click)="removeFile(); $event.stopPropagation()"
+      >
+        <mat-icon> delete </mat-icon>
+      </button>
+    </div>
+  }
+</div>
+
+@if (error) {
+  <div class="error">
+    {{ error }}
+  </div>
+}
