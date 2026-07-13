@@ -21,37 +21,63 @@
         }
       </mat-form-field>
 
-      <mat-label class="font-medium mb-2 block mt-3"> Archivo </mat-label>
+      @if (subido) {
+        <div class="flex gap-4 mt-4">
+          <button
+            mat-flat-button
+            color="primary"
+            type="button"
+            class="px-6 py-5"
+            (click)="muestraDocumento()"
+          >
+            <mat-icon class="mr-2">article</mat-icon>
+            Ver documento generado
+          </button>
 
-      <app-file-dropzone
-        title="Suba un documento Word"
-        subtitle="Arrastre el archivo aquí o haga clic para seleccionarlo."
-        accept=".doc,.docx"
-        [maxSize]="10485760"
-        (fileSelected)="onFileSelected($event)"
-        (fileRemoved)="onFileRemoved()"
-      >
-      </app-file-dropzone>
+          <button
+            mat-flat-button
+            color="primary"
+            type="button"
+            class="px-6 py-5"
+            (click)="generarNuevoHtml()"
+          >
+            <mat-icon class="mr-2">refresh</mat-icon>
+            Generar nuevo HTML
+          </button>
+        </div>
+      } @else {
+        <mat-label class="font-medium mb-2 block mt-3"> Archivo </mat-label>
 
-      @if (f.archivo.invalid && (f.archivo.touched || f.archivo.dirty)) {
-        <div class="file-error">
-          Debe seleccionar un archivo Word (.doc o .docx).
+        <app-file-dropzone
+          title="Suba un documento Word"
+          subtitle="Arrastre el archivo aquí o haga clic para seleccionarlo."
+          accept=".doc,.docx"
+          [maxSize]="10485760"
+          (fileSelected)="onFileSelected($event)"
+          (fileRemoved)="onFileRemoved()"
+        >
+        </app-file-dropzone>
+
+        @if (f.archivo.invalid && (f.archivo.touched || f.archivo.dirty)) {
+          <div class="file-error">
+            Debe seleccionar un archivo Word (.doc o .docx).
+          </div>
+        }
+
+        <div class="mt-6 flex justify-center">
+          <button
+            mat-flat-button
+            color="primary"
+            type="button"
+            class="px-6 py-5"
+            [disabled]="form.invalid"
+            (click)="generar()"
+          >
+            <mat-icon>description</mat-icon>
+            Generar HTML
+          </button>
         </div>
       }
-
-      <div class="mt-6 flex justify-center">
-        <button
-          mat-flat-button
-          color="primary"
-          type="button"
-          class="px-6 py-5"
-          [disabled]="form.invalid"
-          (click)="generar()"
-        >
-          <mat-icon>description</mat-icon>
-          Generar HTML
-        </button>
-      </div>
     </form>
   </mat-card-content>
 </mat-card>

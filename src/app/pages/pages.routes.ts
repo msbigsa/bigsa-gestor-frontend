@@ -3,6 +3,7 @@ import { StarterComponent } from './starter/starter.component';
 import { CertGuard } from '../guard/cert.guard';
 import { WordHtmlConverterComponent } from './html/word-html-converter/word-html-converter.component';
 import { ListDocHtmlComponent } from './html/list-doc-html/list-doc-html.component';
+import { ResultadoDocHtmlComponent } from './html/resultado-doc-html/resultado-doc-html.component';
 
 export const PagesRoutes: Routes = [
   {
@@ -30,6 +31,14 @@ export const PagesRoutes: Routes = [
     component: ListDocHtmlComponent,
     data: {
       title: 'HTML Generados'      
+    },
+    canActivate: [CertGuard]
+  },
+  {
+    path: 'html/resultado-doc-html/:id',
+    component: ResultadoDocHtmlComponent,
+    data: {
+      title: 'HTML Generados por Documento Word'      
     },
     canActivate: [CertGuard]
   },

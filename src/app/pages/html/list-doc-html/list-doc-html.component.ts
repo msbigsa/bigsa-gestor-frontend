@@ -17,10 +17,10 @@ import { TablerIconsModule } from 'angular-tabler-icons';
 
 import { MaterialModule } from 'src/app/material.module';
 import { ArchivoDoc } from 'src/app/models/ArchivoDoc';
-import { HtmlService } from 'src/app/services/html.service';
 import { Router } from '@angular/router';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
 import { ToastrService } from 'ngx-toastr';
+import { HtmlDocumentoService } from 'src/app/services/htmlDocumento.service';
 
 @Component({
   selector: 'app-list-doc-html',
@@ -41,7 +41,7 @@ export class ListDocHtmlComponent implements OnInit, AfterViewInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  private htmlService = inject(HtmlService);
+  private htmlDocumentoService = inject(HtmlDocumentoService);
   private toastr = inject(ToastrService);
 
   archivosDoc: ArchivoDoc[] = [];
@@ -77,7 +77,7 @@ export class ListDocHtmlComponent implements OnInit, AfterViewInit {
   }
 
   cargarDocumentos(): void {
-    this.htmlService
+    this.htmlDocumentoService
       .listarDocumentosPaginado(0, this.pageSize)
       .subscribe((data) => {
         this.dataSource.data = data.content;
@@ -112,7 +112,7 @@ export class ListDocHtmlComponent implements OnInit, AfterViewInit {
     return this.datePipe.transform(fecha, "EEEE, d 'de' MMMM 'de' yyyy") ?? '';
   }
 
-  eliminar(documento: any): void {
+  eliminar(documento: ArchivoDoc): void {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
@@ -125,11 +125,17 @@ export class ListDocHtmlComponent implements OnInit, AfterViewInit {
 
     dialogRef.afterClosed().subscribe((confirmado) => {
       if (confirmado) {
-        this.htmlService.eliminar(documento.id).subscribe(() => {
+        this.htmlDocumentoService.eliminar(documento.id).subscribe(() => {
           this.toastr.success('Documento eliminado correctamente', 'Exitoso');
           this.cargarDocumentos();
         });
       }
     });
+  }
+
+  editar(documento: ArchivoDoc): void {
+    const url = `/inicio/html/resultado-doc-html/${documento.id}`;
+    //console.log(url);
+    this.router.navigate([url]);  
   }
 }

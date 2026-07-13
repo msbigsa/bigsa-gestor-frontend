@@ -6,8 +6,10 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { MaterialModule } from 'src/app/material.module';
+import { HtmlDoc } from 'src/app/models/HtmlDoc';
 import { HtmlService } from 'src/app/services/html.service';
 import { FileDropzoneComponent } from 'src/app/shared/components/file-dropzone/file-dropzone.component';
 
@@ -25,9 +27,16 @@ import { FileDropzoneComponent } from 'src/app/shared/components/file-dropzone/f
 export class WordHtmlConverterComponent {
   nombre: String = '';
   archivo!: File;
+  subido: boolean = false;
+
+  htmlDoc: HtmlDoc | null = null;
 
   private htmlService = inject(HtmlService);
   private toastr = inject(ToastrService);
+
+  constructor(
+    private router: Router,
+  ) {}
 
   form = new FormGroup({
     nombre: new FormControl('', [Validators.required, Validators.minLength(6)]),
@@ -72,36 +81,26 @@ export class WordHtmlConverterComponent {
 
     this.htmlService.docToHtml(formData).subscribe((data) => {
       //console.log(data);
+      this.htmlDoc = data;
 
       this.toastr.success('HTML generado correctamente', 'Exitoso');
 
-      const blob = data.body!;
+      this.form.disable();
+      this.subido = true;
 
-      // Obtener el nombre enviado por Spring
-      let fileName = `${this.form.value.nombre}.html`;
-
-      const contentDisposition = data.headers.get('Content-Disposition');
-
-      if (contentDisposition) {
-        const match = contentDisposition.match(/filename="?([^"]+)"?/);
-
-        if (match && match[1]) {
-          fileName = match[1];
-        }
-      }
-
-      // Descargar
-      const url = window.URL.createObjectURL(blob);
-
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = fileName;
-
-      document.body.appendChild(a);
-      a.click();
-
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
     });
+  }
+
+  muestraDocumento() {
+    const url = `/inicio/html/resultado-doc-html/${this.htmlDoc?.idDocumento}`;
+    //console.log(url);
+    this.router.navigate([url]);
+  }
+
+  generarNuevoHtml() {
+    this.form.reset();
+    this.form.enable();
+    this.subido = false;
+    this.htmlDoc = null;
   }
 }
