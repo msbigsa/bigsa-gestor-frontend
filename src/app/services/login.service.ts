@@ -1,7 +1,8 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpContext, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
+import { SKIP_GLOBAL_LOADING } from '../interceptors/loading.token';
 
 interface ILoginRequest {
   username: string;
@@ -20,10 +21,17 @@ export class LoginService {
     private router: Router
   ) { }
 
-  login(username: string, password: string){
-    const body: ILoginRequest = {username, password};
-    return this.http.post<any>(this.url, body);
-  }
+  login(username: string, password: string) {
+  const body: ILoginRequest = { username, password };
+
+  return this.http.post<any>(
+    this.url,
+    body,
+    {
+      context: new HttpContext().set(SKIP_GLOBAL_LOADING, true)
+    }
+  );
+}
 
   logout(){
     sessionStorage.clear();

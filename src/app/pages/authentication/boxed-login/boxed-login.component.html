@@ -62,8 +62,17 @@
             <!--a [routerLink]="['/authentication/boxed-forgot-pwd']"
               class="text-primary font-semibold no-underline ms-auto text-sm">Forgot Password ?</a-->
           </div>
-          <button mat-flat-button color="primary" class="w-full" [disabled]="!form.valid">
-            Ingresar
+          <button
+            mat-flat-button
+            color="primary"
+            class="w-full flex items-center justify-center"
+            [disabled]="!form.valid || loading"
+          >
+            @if (!loading) {
+              Ingresar
+            } @else {
+              <mat-spinner diameter="20"></mat-spinner>
+            }
           </button>
           <!-- input -->
         </form>

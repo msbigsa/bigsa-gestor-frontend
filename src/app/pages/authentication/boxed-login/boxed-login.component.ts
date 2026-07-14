@@ -12,6 +12,7 @@ import { MaterialModule } from '../../../material.module';
 import { BrandingComponent } from '../../../layouts/full/vertical/sidebar/branding.component';
 import { environment } from 'src/environments/environment';
 import { LoginService } from 'src/app/services/login.service';
+import { finalize } from 'rxjs';
 
 
 @Component({
@@ -31,6 +32,8 @@ export class AppBoxedLoginComponent {
   username: string = '';
   password: string = '';
 
+  loading = false;
+
   private loginService = inject(LoginService);
 
   constructor(private settings: CoreService, private router: Router) {}
@@ -44,16 +47,40 @@ export class AppBoxedLoginComponent {
     return this.form.controls;
   }
 
-  submit() {
-    // console.log(this.form.value);
-    
+    submit(): void {
+
+    if (this.form.invalid || this.loading) {
+      return;
+    }
+
+    this.loading = true;
+    this.form.disable();
+
     this.username = this.form.get('uname')?.value ?? '';
     this.password = this.form.get('password')?.value ?? '';
-    
-    this.loginService.login(this.username, this.password).subscribe(data => {  
-      sessionStorage.setItem(environment.TOKEN_NAME, data.jwtToken)      
-      //this.router.navigate(['/dashboards/dashboard1']);
-      this.router.navigate(['/inicio']);
-    });    
+
+    this.loginService
+      .login(this.username, this.password)
+      .pipe(
+        finalize(() => {
+          this.loading = false;
+          this.form.enable();
+        })
+      )
+      .subscribe({
+        next: (data) => {
+          sessionStorage.setItem(
+            environment.TOKEN_NAME,
+            data.jwtToken
+          );
+
+          
+          this.router.navigate(['/inicio']);
+        },
+        error: (error) => {
+          console.error(error);
+          this.form.enable();
+        }
+      });
   }
 }
