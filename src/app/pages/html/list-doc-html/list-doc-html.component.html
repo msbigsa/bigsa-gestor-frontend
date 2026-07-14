@@ -4,20 +4,22 @@
       <div class="lg:col-span-6 col-span-12">
         <mat-form-field appearance="outline" class="w-full hide-hint">
           <div class="flex flex-row items-center self-stretch gap-3">
-            <i class="iconify size-5.5!" data-icon="solar:magnifer-line-duotone"></i>
-            <input matInput placeholder="Buscar por nombre, documento o usuario..." (keyup)="applyFilter($any($event.target).value)" />
+            <i
+              class="iconify size-5.5!"
+              data-icon="solar:magnifer-line-duotone"
+            ></i>
+            <input
+              matInput
+              placeholder="Buscar por nombre, documento o usuario..."
+              [formControl]="filtroControl"
+            />
           </div>
         </mat-form-field>
       </div>
       <div class="lg:col-span-6 col-span-12 flex items-center justify-end">
-        <button
-          mat-flat-button
-          color="primary"
-          (click)="irAGenerarHtml()">
-
+        <button mat-flat-button color="primary" (click)="irAGenerarHtml()">
           <mat-icon class="mr-2">add</mat-icon>
           Generar HTML
-
         </button>
       </div>
     </div>
@@ -26,13 +28,19 @@
 <mat-card class="cardWithShadow">
   <mat-card-content>
     <div class="relative overflow-auto">
-      <table mat-table [dataSource]="dataSource" class="min-w-full">
+      <table mat-table matSort [dataSource]="documentos()" class="min-w-full">
         <ng-container matColumnDef="#">
-          <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">#</th>
-          <td mat-cell *matCellDef="let element" class="whitespace-nowrap">{{ element.id }}</td>
+          <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">
+            #
+          </th>
+          <td mat-cell *matCellDef="let element" class="whitespace-nowrap">
+            {{ element.id }}
+          </td>
         </ng-container>
         <ng-container matColumnDef="nombre">
-          <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Nombre</th>
+          <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">
+            Nombre
+          </th>
           <td mat-cell *matCellDef="let element" class="whitespace-nowrap">
             <div class="flex items-center">
               <div class="ms-4">
@@ -48,43 +56,71 @@
           <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">
             Nombre Documento
           </th>
-          <td mat-cell *matCellDef="let element" class="whitespace-nowrap">{{ element.nombreDocumento }}</td>
+          <td mat-cell *matCellDef="let element" class="whitespace-nowrap">
+            {{ element.nombreDocumento }}
+          </td>
         </ng-container>
 
         <ng-container matColumnDef="usrCodigo">
           <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">
             Código Usuario
           </th>
-          <td mat-cell *matCellDef="let element" class="whitespace-nowrap">{{ element.usrCodigo }}</td>
+          <td mat-cell *matCellDef="let element" class="whitespace-nowrap">
+            {{ element.usrCodigo }}
+          </td>
         </ng-container>
 
         <ng-container matColumnDef="fechaSubida">
           <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">
             Fecha Subida
           </th>
-          <td mat-cell *matCellDef="let element" class="text-sm whitespace-nowrap">
+          <td
+            mat-cell
+            *matCellDef="let element"
+            class="text-sm whitespace-nowrap"
+          >
             <span [matTooltip]="getFechaCompleta(element.fechaSubida)">
-              {{ element.fechaSubida | date:'mediumDate' }}
+              {{ element.fechaSubida | date: "mediumDate" }}
             </span>
           </td>
-        </ng-container>               
+        </ng-container>
         <ng-container matColumnDef="accion">
           <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">
             Acción
           </th>
-          <td mat-cell *matCellDef="let element" class="action-link whitespace-nowrap">
+          <td
+            mat-cell
+            *matCellDef="let element"
+            class="action-link whitespace-nowrap"
+          >
             <a (click)="editar(element)" class="me-2.5 cursor-pointer">
-              <i-tabler name="edit" class="size-4.5! text-green-600" matTooltip="Revisar HTML"></i-tabler>
+              <i-tabler
+                name="edit"
+                class="size-4.5! text-green-600"
+                matTooltip="Revisar HTML"
+              ></i-tabler>
             </a>
             <a (click)="eliminar(element)" class="me-2.5 cursor-pointer">
-              <i-tabler name="trash" class="size-4.5! text-red-600" matTooltip="Eliminar HTML"></i-tabler>
+              <i-tabler
+                name="trash"
+                class="size-4.5! text-red-600"
+                matTooltip="Eliminar HTML"
+              ></i-tabler>
             </a>
           </td>
         </ng-container>
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
       </table>
-      <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+      <mat-paginator
+        [pageSize]="pageSize()"
+        [length]="totalElements()"
+        [pageIndex]="pageIndex()"
+        [pageSize]="pageSize()"
+        [pageSizeOptions]="[5, 10, 20]"
+        showFirstLastButtons
+        (page)="showMore($event)"
+      ></mat-paginator>
     </div>
   </mat-card-content>
 </mat-card>

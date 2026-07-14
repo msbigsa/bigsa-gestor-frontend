@@ -2,7 +2,6 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { HtmlDoc } from '../models/HtmlDoc';
 import { ArchivoDoc } from '../models/ArchivoDoc';
 
 @Injectable({
@@ -10,32 +9,33 @@ import { ArchivoDoc } from '../models/ArchivoDoc';
 })
 export class HtmlDocumentoService {
   
+  url = `${environment.HOST_HTML}/documentos/v1`;
+
   private http = inject(HttpClient);
 
 
    
-  listarDocumentosPaginado(page: number, size: number): Observable<any> {
-    const parametros = new HttpParams().set('page', page).set('size', size);
+  listarDocumentosPaginado(page: number, size: number, filter: string): Observable<any> {
+    const parametros = new HttpParams()
+                            .set('page', page)
+                            .set('size', size)
+                            .set('filter', filter);
 
-    const url = `${environment.HOST_HTML}/documentos`;
+    
 
-    return this.http.get<any>(`${url}/paginado`, {
+    return this.http.get<any>(`${this.url}/paginado`, {
       params: parametros,
     });
   }
 
   public obtener(id: number): Observable<ArchivoDoc> {
 
-    const url = `${environment.HOST_HTML}/documentos`;
-
-    return this.http.get<ArchivoDoc>(`${url}/${id}`);
+    return this.http.get<ArchivoDoc>(`${this.url}/${id}`);
   }
 
   public eliminar(id: any): Observable<void> {
 
-    const url = `${environment.HOST_HTML}/documentos`;
-
-    return this.http.delete<void>(`${url}/${id}`);
+    return this.http.delete<void>(`${this.url}/${id}`);
   }
 
 }

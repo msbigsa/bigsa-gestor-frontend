@@ -1,14 +1,6 @@
-import {
-  AfterViewInit,
-  Component,
-  OnInit,
-  ViewChild,
-  inject,
-} from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
-import { MatTable, MatTableDataSource } from '@angular/material/table';
-import { MatPaginator } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { MatNativeDateModule } from '@angular/material/core';
 
@@ -21,6 +13,8 @@ import { Router } from '@angular/router';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
 import { ToastrService } from 'ngx-toastr';
 import { HtmlDocumentoService } from 'src/app/services/htmlDocumento.service';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { debounceTime, distinctUntilChanged, filter } from 'rxjs';
 
 @Component({
   selector: 'app-list-doc-html',
@@ -28,29 +22,35 @@ import { HtmlDocumentoService } from 'src/app/services/htmlDocumento.service';
   imports: [
     CommonModule,
     MaterialModule,
+    MatPaginatorModule,
     TablerIconsModule,
     MatNativeDateModule,
     NgScrollbarModule,
+    ReactiveFormsModule
   ],
   providers: [DatePipe],
   templateUrl: './list-doc-html.component.html',
   styleUrl: './list-doc-html.component.scss',
 })
-export class ListDocHtmlComponent implements OnInit, AfterViewInit {
-  @ViewChild(MatTable) table!: MatTable<ArchivoDoc>;
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
+export class ListDocHtmlComponent implements OnInit {
+  private readonly htmlDocumentoService = inject(HtmlDocumentoService);
+  private readonly toastr = inject(ToastrService);
 
-  private htmlDocumentoService = inject(HtmlDocumentoService);
-  private toastr = inject(ToastrService);
+  constructor(
+    public dialog: MatDialog,
+    public datePipe: DatePipe,
+    private router: Router,
+  ) {}
 
-  archivosDoc: ArchivoDoc[] = [];
+  readonly documentos = signal<ArchivoDoc[]>([]);
+  readonly pageIndex = signal(0);
+  readonly pageSize = signal(10);
+  readonly totalElements = signal(0);
+  readonly filtro = signal('');
 
-  pageSize = 10;
-  totalElements = 0;
-  searchText = '';
+  readonly filtroControl = new FormControl('', { nonNullable: true });
 
-  displayedColumns: string[] = [
+  readonly displayedColumns: string[] = [
     '#',
     'nombre',
     'nombreDocumento',
@@ -59,49 +59,38 @@ export class ListDocHtmlComponent implements OnInit, AfterViewInit {
     'accion',
   ];
 
-  dataSource = new MatTableDataSource<ArchivoDoc>([]);
-
-  constructor(
-    public dialog: MatDialog,
-    public datePipe: DatePipe,
-    private router: Router,
-  ) {}
-
   ngOnInit(): void {
+    this.filtroControl.valueChanges
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        filter(valor => valor.trim().length === 0 || valor.trim().length >= 3)
+      )
+      .subscribe(valor => {
+
+        this.filtro.set(valor.trim());
+        this.pageIndex.set(0);
+        this.cargarDocumentos();
+
+      });
+
     this.cargarDocumentos();
   }
 
-  ngAfterViewInit(): void {
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
-  }
-
   cargarDocumentos(): void {
-    this.htmlDocumentoService
-      .listarDocumentosPaginado(0, this.pageSize)
-      .subscribe((data) => {
-        this.dataSource.data = data.content;
-        this.totalElements = data.totalElements;
-
-        // Si la vista ya está inicializada
-        if (this.paginator) {
-          this.dataSource.paginator = this.paginator;
-        }
-
-        if (this.sort) {
-          this.dataSource.sort = this.sort;
-        }
-
-        this.table?.renderRows();
+    this.htmlDocumentoService.listarDocumentosPaginado(this.pageIndex(), this.pageSize(), this.filtro()).subscribe((data) => {
+        
+          this.documentos.set(data.content);
+          this.totalElements.set(data.totalElements);
+        
       });
   }
 
-  applyFilter(filterValue: string): void {
-    this.dataSource.filter = filterValue.trim().toLowerCase();
+  showMore(event: PageEvent): void {
+    this.pageIndex.set(event.pageIndex);
+    this.pageSize.set(event.pageSize);
 
-    if (this.dataSource.paginator) {
-      this.dataSource.paginator.firstPage();
-    }
+    this.cargarDocumentos();
   }
 
   irAGenerarHtml(): void {
@@ -124,18 +113,33 @@ export class ListDocHtmlComponent implements OnInit, AfterViewInit {
     });
 
     dialogRef.afterClosed().subscribe((confirmado) => {
-      if (confirmado) {
-        this.htmlDocumentoService.eliminar(documento.id).subscribe(() => {
-          this.toastr.success('Documento eliminado correctamente', 'Exitoso');
-          this.cargarDocumentos();
-        });
+      if (!confirmado) {
+        return;
       }
+
+      this.htmlDocumentoService.eliminar(documento.id).subscribe(() => {
+        this.toastr.success('Documento eliminado correctamente', 'Exitoso');
+
+        if (this.documentos().length === 1 && this.pageIndex() > 0) {
+          this.pageIndex.update((v) => v - 1);
+        }
+
+        this.cargarDocumentos();
+      });
     });
   }
 
   editar(documento: ArchivoDoc): void {
-    const url = `/inicio/html/resultado-doc-html/${documento.id}`;
-    //console.log(url);
-    this.router.navigate([url]);  
+    this.router.navigate([`/inicio/html/resultado-doc-html/${documento.id}`]);
   }
+
+  onFilterChange(valor: string) {
+
+    this.filtro.set(valor);
+
+    this.pageIndex.set(0);
+
+    this.cargarDocumentos();
+
+}
 }
