@@ -33,9 +33,13 @@ export class HtmlDocumentoService {
     return this.http.get<ArchivoDoc>(`${this.url}/${id}`);
   }
 
-  public eliminar(id: any): Observable<void> {
+  public eliminar(id: number): Observable<void> {
 
     return this.http.delete<void>(`${this.url}/${id}`);
+  }
+
+  public listarHtmlResultado(id: number): Observable<any> {
+    return this.http.get<any>(`${this.url}/${id}/resultados`);
   }
 
 }

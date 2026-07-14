@@ -117,7 +117,7 @@ export class ListDocHtmlComponent implements OnInit {
         return;
       }
 
-      this.htmlDocumentoService.eliminar(documento.id).subscribe(() => {
+      this.htmlDocumentoService.eliminar(documento.id!).subscribe(() => {
         this.toastr.success('Documento eliminado correctamente', 'Exitoso');
 
         if (this.documentos().length === 1 && this.pageIndex() > 0) {
@@ -133,13 +133,4 @@ export class ListDocHtmlComponent implements OnInit {
     this.router.navigate([`/inicio/html/resultado-doc-html/${documento.id}`]);
   }
 
-  onFilterChange(valor: string) {
-
-    this.filtro.set(valor);
-
-    this.pageIndex.set(0);
-
-    this.cargarDocumentos();
-
-}
 }
