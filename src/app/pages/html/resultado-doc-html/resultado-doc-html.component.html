@@ -3,84 +3,12 @@
   Volver
 </button>
 
-<!-- Cabecera -->
-<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-  <div class="flex items-center gap-4">
-    <div class="icon-container">
-      <mat-icon color="primary">description</mat-icon>
-    </div>
+<app-documento-resumen
+    [documento]="documento">
+</app-documento-resumen>
 
-    <div>
-      <h2 class="f-s-22 f-w-600 m-0">{{ documento?.nombre }}</h2>
-      <span class="text-muted">{{ documento?.nombreDocumento }}</span>
-    </div>
-  </div>
-  <div class="flex justify-end">
-    <button mat-flat-button color="primary" type="button">
-      <mat-icon>published_with_changes</mat-icon>
-      Generar nueva versión
-    </button>
-  </div>
-</div>
-
-<!--mat-divider class="mb-6"></mat-divider-->
-
-<!-- Resumen -->
-<div class="summary-card">
-  <div class="summary-item">
-    <div class="summary-icon primary">
-      <mat-icon>person</mat-icon>
-    </div>
-
-    <div class="summary-info">
-      <span class="summary-label">Usuario</span>
-      <span class="summary-value">{{ documento?.usrCodigo }}</span>
-    </div>
-  </div>
-
-  <div class="summary-item">
-    <div class="summary-icon success">
-      <mat-icon>calendar_month</mat-icon>
-    </div>
-
-    <div class="summary-info">
-      <span class="summary-label">Fecha carga</span>
-      <span class="summary-value">
-        {{ documento?.fechaSubida | date: "dd/MM/yyyy HH:mm" }}
-      </span>
-    </div>
-  </div>
-
-  <div class="summary-item">
-    <div class="summary-icon warning">
-      <mat-icon>sell</mat-icon>
-    </div>
-
-    <div class="summary-info">
-      <span class="summary-label">Última versión</span>
-      <span class="summary-value">v8</span>
-    </div>
-  </div>
-
-  <div class="summary-item">
-    <div class="summary-icon info">
-      <mat-icon>schedule</mat-icon>
-    </div>
-
-    <div class="summary-info">
-      <span class="summary-label">Última generación</span>
-      <span class="summary-value"> 12/12/2026 </span>
-    </div>
-  </div>
-
-  <!--div class="summary-item">
-    <div class="summary-icon secondary">
-      <mat-icon>layers</mat-icon>
-    </div>
-
-    <div class="summary-info">
-      <span class="summary-label">Versiones</span>
-      <span class="summary-value">8</span>
-    </div>
-  </div-->
-</div>
+<app-html-versiones-table
+  [htmls]="htmls"
+  (descargarHtml)="descargar($event)"
+  (eliminarHtml)="eliminar($event)">
+</app-html-versiones-table>

@@ -1,0 +1,78 @@
+<mat-card class="cardWithShadow">
+  <mat-card-content>
+    <div class="relative overflow-auto">
+      <table mat-table matSort [dataSource]="dataSource" class="min-w-full">
+        <ng-container matColumnDef="#">
+          <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">
+            #
+          </th>
+          <td mat-cell *matCellDef="let element" class="whitespace-nowrap">
+            {{ element.id }}
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="version">
+          <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">
+            Versión
+          </th>
+          <td mat-cell *matCellDef="let element" class="whitespace-nowrap">
+            <div class="flex items-center">
+              <div class="ms-4">
+                <p class="font-semibold text-base mb-1 mt-0">
+                  {{ element.version }}
+                </p>
+                <!--small class="text-sm">{{ element.Position }}</small-->
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="fechaCreacion">
+          <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">
+            Fecha Creación
+          </th>
+          <td
+            mat-cell
+            *matCellDef="let element"
+            class="text-sm whitespace-nowrap"
+          >
+            <span [matTooltip]="getFechaCompleta(element.fechaCreacion)">
+              {{ element.fechaCreacion | date: "mediumDate" }}
+            </span>
+          </td>
+        </ng-container>
+         <ng-container matColumnDef="accion">
+          <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">
+            Acción
+          </th>
+          <td
+            mat-cell
+            *matCellDef="let element"
+            class="action-link whitespace-nowrap"
+          >
+            <a (click)="descargar(element)" class="me-2.5 cursor-pointer">
+              <i-tabler
+                name="file-download"
+                class="size-4.5! text-primary"
+                matTooltip="Descargar HTML"
+              ></i-tabler>
+            </a>
+            <a (click)="eliminar(element)" class="me-2.5 cursor-pointer">
+              <i-tabler
+                name="trash"
+                class="size-4.5! text-red-600"
+                matTooltip="Eliminar HTML"
+              ></i-tabler>
+            </a>
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+      <mat-paginator
+        [pageSize]="5"
+        [pageSizeOptions]="[5, 10, 20]"
+        showFirstLastButtons        
+      ></mat-paginator>
+    </div>
+  </mat-card-content>
+</mat-card>
