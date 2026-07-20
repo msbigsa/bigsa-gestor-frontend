@@ -4,11 +4,14 @@
 </button>
 
 <app-documento-resumen
-    [documento]="documento">
+  [documento]="documento"
+  (nuevaVersionHtml)="nuevaVersion($event)"
+>
 </app-documento-resumen>
 
 <app-html-versiones-table
   [htmls]="htmls"
   (descargarHtml)="descargar($event)"
-  (eliminarHtml)="eliminar($event)">
+  (eliminarHtml)="eliminar($event)"
+>
 </app-html-versiones-table>

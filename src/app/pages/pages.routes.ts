@@ -27,6 +27,14 @@ export const PagesRoutes: Routes = [
     canActivate: [CertGuard]
   },
   {
+    path: 'html/actualizar-doc-html/:id',
+    component: WordHtmlConverterComponent,
+    data: {
+      title: 'Convertir Word a HTML'      
+    },
+    canActivate: [CertGuard]
+  },
+  {
     path: 'html/listar-doc-html',
     component: ListDocHtmlComponent,
     data: {

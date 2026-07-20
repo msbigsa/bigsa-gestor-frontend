@@ -6,11 +6,13 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { MaterialModule } from 'src/app/material.module';
+import { ArchivoDoc } from 'src/app/models/ArchivoDoc';
 import { HtmlDoc } from 'src/app/models/HtmlDoc';
 import { HtmlService } from 'src/app/services/html.service';
+import { HtmlDocumentoService } from 'src/app/services/htmlDocumento.service';
 import { FileDropzoneComponent } from 'src/app/shared/components/file-dropzone/file-dropzone.component';
 
 @Component({
@@ -31,12 +33,23 @@ export class WordHtmlConverterComponent {
 
   htmlDoc: HtmlDoc | null = null;
 
+  id = 0;
+  documento: ArchivoDoc | null = null;
+
   private htmlService = inject(HtmlService);
+  private htmlDocumentoService = inject(HtmlDocumentoService);
   private toastr = inject(ToastrService);
 
   constructor(
     private router: Router,
-  ) {}
+    private route: ActivatedRoute,
+  ) {
+     this.route.params.subscribe((data) => {
+      this.id = Number(data['id']);
+
+      this.cargarDocumento();
+    });
+  }
 
   form = new FormGroup({
     nombre: new FormControl('', [Validators.required, Validators.minLength(6)]),
@@ -45,6 +58,17 @@ export class WordHtmlConverterComponent {
 
   get f() {
     return this.form.controls;
+  }
+
+  cargarDocumento(): void {
+    this.htmlDocumentoService.obtener(this.id).subscribe((data) => {
+      this.documento = data;
+      //console.log(this.documento);
+
+      this.form.patchValue({
+        nombre: this.documento.nombre,
+      });
+    });
   }
 
   onFileSelected(file: File) {
@@ -79,16 +103,30 @@ export class WordHtmlConverterComponent {
 
     //console.log(formData);
 
-    this.htmlService.docToHtml(formData).subscribe((data) => {
+    if (this.id > 0) {
+      this.htmlService.actualizaDocToHtml(formData, this.id).subscribe((data) => {
       //console.log(data);
-      this.htmlDoc = data;
+        this.htmlDoc = data;
 
-      this.toastr.success('HTML generado correctamente', 'Exitoso');
+        this.toastr.success('HTML actualizado correctamente', 'Exitoso');
 
-      this.form.disable();
-      this.subido = true;
+        this.form.disable();
+        this.subido = true;
 
-    });
+      }); 
+    } else {
+      this.htmlService.docToHtml(formData).subscribe((data) => {
+      //console.log(data);
+        this.htmlDoc = data;
+
+        this.toastr.success('HTML generado correctamente', 'Exitoso');
+
+        this.form.disable();
+        this.subido = true;
+
+      }); 
+    }
+    
   }
 
   muestraDocumento() {

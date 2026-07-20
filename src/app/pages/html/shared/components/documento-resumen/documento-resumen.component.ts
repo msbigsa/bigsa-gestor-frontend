@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, input } from '@angular/core';
+import { Component, EventEmitter, input, Output } from '@angular/core';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { MaterialModule } from 'src/app/material.module';
 import { ArchivoDoc } from 'src/app/models/ArchivoDoc';
@@ -13,5 +13,12 @@ import { ArchivoDoc } from 'src/app/models/ArchivoDoc';
 export class DocumentoResumenComponent {
 
   readonly documento = input<ArchivoDoc | null>(null);
+
+  @Output()
+  nuevaVersionHtml = new EventEmitter<boolean>();
+
+  nuevaVersion() {
+    this.nuevaVersionHtml.emit(true);
+  }
 
 }

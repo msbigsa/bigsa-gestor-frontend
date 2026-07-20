@@ -8,14 +8,19 @@ import { HtmlDoc } from '../models/HtmlDoc';
   providedIn: 'root',
 })
 export class HtmlService {
+
+  url = `${environment.HOST_HTML}/convertir/v1`;
   
   private http = inject(HttpClient);
  
-  docToHtml(formData: FormData): Observable<HtmlDoc> {
-    const url = `${environment.HOST_HTML}/convertir/v1/doc-html`;
+  docToHtml(formData: FormData): Observable<HtmlDoc> {    
+    //console.log(`html service ${url}`);    
+    return this.http.post<HtmlDoc>(`${this.url}/doc-html`, formData);
+  }
 
+  actualizaDocToHtml(formData: FormData, id: number): Observable<HtmlDoc> {
     //console.log(`html service ${url}`);
-    return this.http.post<HtmlDoc>(url, formData);
+    return this.http.post<HtmlDoc>(`${this.url}/doc-html/${id}`, formData);
   }
 
 }

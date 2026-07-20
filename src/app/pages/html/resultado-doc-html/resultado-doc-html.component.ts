@@ -13,6 +13,7 @@ import { HtmlDocumentoResultadoService } from 'src/app/services/htmlDocumentoRes
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
 import { DocumentoResumenComponent } from '../shared/components/documento-resumen/documento-resumen.component';
 import { HtmlVersionesTableComponent } from '../shared/components/html-versiones-table/html-versiones-table.component';
+import { FileDropzoneComponent } from 'src/app/shared/components/file-dropzone/file-dropzone.component';
 
 @Component({
   selector: 'app-resultado-doc-html',
@@ -21,7 +22,7 @@ import { HtmlVersionesTableComponent } from '../shared/components/html-versiones
     MaterialModule,
     TablerIconsModule,
     DocumentoResumenComponent,
-    HtmlVersionesTableComponent,
+    HtmlVersionesTableComponent
   ],
   templateUrl: './resultado-doc-html.component.html',
   styleUrl: './resultado-doc-html.component.scss',
@@ -132,5 +133,11 @@ export class ResultadoDocHtmlComponent implements OnInit {
           this.cargarHtmls();
         });
     });
+  }
+
+  nuevaVersion(generaNuevaVersion: boolean) {
+    if (generaNuevaVersion) {
+      this.router.navigate([`/inicio/html/actualizar-doc-html/${this.id}`]);
+    }
   }
 }
