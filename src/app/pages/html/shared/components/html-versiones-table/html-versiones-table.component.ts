@@ -29,6 +29,9 @@ export class HtmlVersionesTableComponent implements AfterViewInit {
   @Output()
   descargarHtml = new EventEmitter<ArchivoDocResultado>();
 
+   @Output()
+  previsualizarHtml = new EventEmitter<ArchivoDocResultado>();
+
   @Output()
   eliminarHtml = new EventEmitter<ArchivoDocResultado>();
 
@@ -63,6 +66,10 @@ export class HtmlVersionesTableComponent implements AfterViewInit {
 
   descargar(html: ArchivoDocResultado): void {
     this.descargarHtml.emit(html);
+  }
+
+  previsualizar(html: ArchivoDocResultado): void {
+    this.previsualizarHtml.emit(html);
   }
 
   eliminar(html: ArchivoDocResultado): void {

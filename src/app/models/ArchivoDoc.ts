@@ -3,5 +3,7 @@ export interface ArchivoDoc {
     nombre?: string;
     nombreDocumento?: string;       
     usrCodigo: string;
-    fechaSubida: string    
+    fechaSubida: string;
+    versionActual: number;
+    fechaUltimaGeneracion: string;    
 }

@@ -14,6 +14,7 @@ import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog
 import { DocumentoResumenComponent } from '../shared/components/documento-resumen/documento-resumen.component';
 import { HtmlVersionesTableComponent } from '../shared/components/html-versiones-table/html-versiones-table.component';
 import { FileDropzoneComponent } from 'src/app/shared/components/file-dropzone/file-dropzone.component';
+import { HtmlPreviewDialogComponent } from '../shared/components/html-preview-dialog/html-preview-dialog.component';
 
 @Component({
   selector: 'app-resultado-doc-html',
@@ -35,24 +36,25 @@ export class ResultadoDocHtmlComponent implements OnInit {
   id = 0;
 
   private htmlDocumentoService = inject(HtmlDocumentoService);
-  private htmlDocumentoResultadoService = inject(
-    HtmlDocumentoResultadoService
-  );
+  private htmlDocumentoResultadoService = inject(HtmlDocumentoResultadoService);
   private readonly toastr = inject(ToastrService);
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
     public dialog: MatDialog
-  ) {
+  ) {    
     this.route.params.subscribe((data) => {
-      this.id = Number(data['id']);
-
-      this.cargarDocumento();
+      const id = Number(data['id']);     
+      if (id) {
+        //console.log(id);
+        this.id = id;
+        this.cargarDocumento();
+      }
     });
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void { }
 
   cargarDocumento(): void {
     this.htmlDocumentoService.obtener(this.id).subscribe((data) => {
@@ -104,6 +106,23 @@ export class ResultadoDocHtmlComponent implements OnInit {
 
         window.URL.revokeObjectURL(url);
       });
+  }
+
+  previsualizar(html: ArchivoDocResultado): void {
+    this.htmlDocumentoResultadoService.descargarHtml(html.id!).subscribe((data) => {
+
+      this.dialog.open(HtmlPreviewDialogComponent,
+        {
+          width: '90vw',
+          maxWidth: '95vw',
+          height: '90vh',
+          data: {
+            html: data.html
+          }
+        }
+      );
+
+    });
   }
 
   eliminar(html: ArchivoDocResultado): void {

@@ -1,7 +1,8 @@
 export interface HtmlDoc {
     idDocumento?: number;
     nombre?: string;
-	archivo: string;  
+	archivo: string;
+    html: string;  
 }
 
 

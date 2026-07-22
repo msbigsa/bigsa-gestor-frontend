@@ -45,9 +45,12 @@ export class WordHtmlConverterComponent {
     private route: ActivatedRoute,
   ) {
      this.route.params.subscribe((data) => {
-      this.id = Number(data['id']);
-
-      this.cargarDocumento();
+      const id = Number(data['id']);     
+      if (id) {
+        //console.log(id);
+        this.id = id;
+        this.cargarDocumento();
+      }
     });
   }
 
@@ -66,8 +69,10 @@ export class WordHtmlConverterComponent {
       //console.log(this.documento);
 
       this.form.patchValue({
-        nombre: this.documento.nombre,
+        nombre: this.documento.nombre
       });
+
+      this.form.get('nombre')?.disable();
     });
   }
 

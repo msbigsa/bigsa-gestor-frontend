@@ -2,6 +2,7 @@ import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
+import { HtmlDoc } from '../models/HtmlDoc';
 
 @Injectable({
   providedIn: 'root',
@@ -16,6 +17,11 @@ export class HtmlDocumentoResultadoService {
       responseType: 'blob',
       observe: 'response',
     });
+  }
+
+   public descargarHtml(idResultado: number): Observable<HtmlDoc> {
+    return this.http.get<HtmlDoc>(
+      `${this.url}/${idResultado}/descargar-html`);
   }
 
   public eliminar(id: number): Observable<void> {

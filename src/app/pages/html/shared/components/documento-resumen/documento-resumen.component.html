@@ -49,7 +49,9 @@
 
     <div class="summary-info">
       <span class="summary-label">Última versión</span>
-      <span class="summary-value">v8</span>
+      <span class="summary-value">
+        {{ documento()?.versionActual }}
+      </span>
     </div>
   </div>
 
@@ -60,7 +62,7 @@
 
     <div class="summary-info">
       <span class="summary-label">Última generación</span>
-      <span class="summary-value"> 12/12/2026 </span>
+      <span class="summary-value"> {{ documento()?.fechaUltimaGeneracion | date: "dd/MM/yyyy HH:mm" }} </span>
     </div>
   </div>
 
