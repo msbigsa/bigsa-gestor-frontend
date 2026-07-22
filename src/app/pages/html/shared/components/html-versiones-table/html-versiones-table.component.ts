@@ -36,7 +36,7 @@ export class HtmlVersionesTableComponent implements AfterViewInit {
   eliminarHtml = new EventEmitter<ArchivoDocResultado>();
 
   @Input()
-  set htmls(value: ArchivoDocResultado[]) {
+  set resultadosHtml(value: ArchivoDocResultado[]) {
     this.dataSource.data = value ?? [];
   }
 
@@ -47,6 +47,7 @@ export class HtmlVersionesTableComponent implements AfterViewInit {
   readonly displayedColumns: string[] = [
     '#',
     'version',
+    'usrCodigo',
     'fechaCreacion',
     'accion',
   ];

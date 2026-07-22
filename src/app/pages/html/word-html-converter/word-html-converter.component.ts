@@ -1,11 +1,6 @@
-import { Component, inject } from '@angular/core';
-import {
-  FormControl,
-  FormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators,} from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { MaterialModule } from 'src/app/material.module';
@@ -26,8 +21,8 @@ import { FileDropzoneComponent } from 'src/app/shared/components/file-dropzone/f
   templateUrl: './word-html-converter.component.html',
   styleUrl: './word-html-converter.component.scss',
 })
-export class WordHtmlConverterComponent {
-  nombre: String = '';
+export class WordHtmlConverterComponent implements OnInit {
+
   archivo!: File;
   subido: boolean = false;
 
@@ -36,18 +31,22 @@ export class WordHtmlConverterComponent {
   id = 0;
   documento: ArchivoDoc | null = null;
 
-  private htmlService = inject(HtmlService);
-  private htmlDocumentoService = inject(HtmlDocumentoService);
-  private toastr = inject(ToastrService);
+  private readonly htmlService = inject(HtmlService);
+  private readonly htmlDocumentoService = inject(HtmlDocumentoService);
+  private readonly toastr = inject(ToastrService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+  private readonly destroyRef = inject(DestroyRef);
 
-  constructor(
-    private router: Router,
-    private route: ActivatedRoute,
-  ) {
-     this.route.params.subscribe((data) => {
-      const id = Number(data['id']);     
+  ngOnInit(): void {
+    this.route.paramMap
+    .pipe(
+      takeUntilDestroyed(this.destroyRef)
+    )
+    .subscribe(params => {
+      const id = Number(params.get('id'));
+
       if (id) {
-        //console.log(id);
         this.id = id;
         this.cargarDocumento();
       }
@@ -95,18 +94,23 @@ export class WordHtmlConverterComponent {
     });
   }
 
+  private crearFormData(): FormData {
+
+    const formData = new FormData();
+
+    formData.append('nombre', this.form.value.nombre!);
+    formData.append('file', this.form.value.archivo!);
+    //console.log(formData);
+    return formData;
+  }
+
   generar() {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
 
-    const formData = new FormData();
-
-    formData.append('nombre', this.form.value.nombre!);
-    formData.append('file', this.form.value.archivo!);
-
-    //console.log(formData);
+    const formData = this.crearFormData();
 
     if (this.id > 0) {
       this.htmlService.actualizaDocToHtml(formData, this.id).subscribe((data) => {
@@ -134,15 +138,25 @@ export class WordHtmlConverterComponent {
     
   }
 
-  muestraDocumento() {
-    const url = `/inicio/html/resultado-doc-html/${this.htmlDoc?.idDocumento}`;
-    //console.log(url);
-    this.router.navigate([url]);
+  muestraDocumento(): void {
+
+    if (!this.htmlDoc?.idDocumento) {
+      return;
+    }
+
+    this.router.navigate([
+      '/inicio/html/resultado-doc-html',
+      this.htmlDoc.idDocumento
+    ]);
   }
 
   generarNuevoHtml() {
     this.form.reset();
     this.form.enable();
+
+    this.form.markAsPristine();
+    this.form.markAsUntouched();
+
     this.subido = false;
     this.htmlDoc = null;
   }

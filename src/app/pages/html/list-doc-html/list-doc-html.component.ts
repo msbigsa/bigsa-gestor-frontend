@@ -33,14 +33,12 @@ import { debounceTime, distinctUntilChanged, filter } from 'rxjs';
   styleUrl: './list-doc-html.component.scss',
 })
 export class ListDocHtmlComponent implements OnInit {
+
   private readonly htmlDocumentoService = inject(HtmlDocumentoService);
   private readonly toastr = inject(ToastrService);
-
-  constructor(
-    public dialog: MatDialog,
-    public datePipe: DatePipe,
-    private router: Router,
-  ) {}
+  private readonly dialog =  inject(MatDialog);
+  private readonly datePipe = inject(DatePipe);
+  private readonly router = inject(Router);
 
   readonly documentos = signal<ArchivoDoc[]>([]);
   readonly pageIndex = signal(0);

@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { ToastrService } from 'ngx-toastr';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { MaterialModule } from 'src/app/material.module';
 import { ArchivoDoc } from 'src/app/models/ArchivoDoc';
@@ -13,7 +14,6 @@ import { HtmlDocumentoResultadoService } from 'src/app/services/htmlDocumentoRes
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
 import { DocumentoResumenComponent } from '../shared/components/documento-resumen/documento-resumen.component';
 import { HtmlVersionesTableComponent } from '../shared/components/html-versiones-table/html-versiones-table.component';
-import { FileDropzoneComponent } from 'src/app/shared/components/file-dropzone/file-dropzone.component';
 import { HtmlPreviewDialogComponent } from '../shared/components/html-preview-dialog/html-preview-dialog.component';
 
 @Component({
@@ -31,30 +31,32 @@ import { HtmlPreviewDialogComponent } from '../shared/components/html-preview-di
 export class ResultadoDocHtmlComponent implements OnInit {
   documento: ArchivoDoc | null = null;
 
-  htmls: ArchivoDocResultado[] = [];
+  resultadosHtml: ArchivoDocResultado[] = [];
 
   id = 0;
 
-  private htmlDocumentoService = inject(HtmlDocumentoService);
-  private htmlDocumentoResultadoService = inject(HtmlDocumentoResultadoService);
+  private readonly htmlDocumentoService = inject(HtmlDocumentoService);
+  private readonly htmlDocumentoResultadoService = inject(HtmlDocumentoResultadoService);
   private readonly toastr = inject(ToastrService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+  private readonly dialog = inject(MatDialog);
+  private readonly destroyRef = inject(DestroyRef);
 
-  constructor(
-    private router: Router,
-    private route: ActivatedRoute,
-    public dialog: MatDialog
-  ) {    
-    this.route.params.subscribe((data) => {
-      const id = Number(data['id']);     
+  ngOnInit(): void {
+    this.route.paramMap
+    .pipe(
+      takeUntilDestroyed(this.destroyRef)
+    )
+    .subscribe(params => {
+      const id = Number(params.get('id'));
+
       if (id) {
-        //console.log(id);
         this.id = id;
         this.cargarDocumento();
       }
     });
   }
-
-  ngOnInit(): void { }
 
   cargarDocumento(): void {
     this.htmlDocumentoService.obtener(this.id).subscribe((data) => {
@@ -68,7 +70,7 @@ export class ResultadoDocHtmlComponent implements OnInit {
     this.htmlDocumentoService
       .listarHtmlResultado(this.id)
       .subscribe((data) => {
-        this.htmls = data;
+        this.resultadosHtml = data;
       });
   }
 
@@ -110,18 +112,16 @@ export class ResultadoDocHtmlComponent implements OnInit {
 
   previsualizar(html: ArchivoDocResultado): void {
     this.htmlDocumentoResultadoService.descargarHtml(html.id!).subscribe((data) => {
+      this.abrirPreview(data.html);
+    });
+  }
 
-      this.dialog.open(HtmlPreviewDialogComponent,
-        {
-          width: '90vw',
-          maxWidth: '95vw',
-          height: '90vh',
-          data: {
-            html: data.html
-          }
-        }
-      );
-
+  private abrirPreview(html: string): void {
+    this.dialog.open(HtmlPreviewDialogComponent, {
+      width: '90vw',
+      maxWidth: '95vw',
+      height: '90vh',
+      data: { html }
     });
   }
 
@@ -156,7 +156,9 @@ export class ResultadoDocHtmlComponent implements OnInit {
 
   nuevaVersion(generaNuevaVersion: boolean) {
     if (generaNuevaVersion) {
-      this.router.navigate([`/inicio/html/actualizar-doc-html/${this.id}`]);
+      this.router.navigate(['/inicio/html/actualizar-doc-html', this.id]);
     }
   }
+
+  
 }
