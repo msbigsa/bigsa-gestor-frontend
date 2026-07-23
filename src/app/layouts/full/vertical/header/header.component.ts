@@ -5,6 +5,7 @@ import {
   Input,
   ViewEncapsulation,
   inject,
+  OnInit,
 } from '@angular/core';
 import { CoreService } from 'src/app/services/core.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -18,6 +19,8 @@ import { FormsModule } from '@angular/forms';
 import { NgScrollbarModule } from 'ngx-scrollbar';
 import { AppSettings } from 'src/app/config';
 import { LoginService } from 'src/app/services/login.service';
+import { Usuario } from 'src/app/models/Usuario';
+import { LowerCasePipe, TitleCasePipe } from '@angular/common';
 
 interface notifications {
   id: number;
@@ -54,12 +57,14 @@ interface quicklinks {
     RouterModule,
     NgScrollbarModule,
     TablerIconsModule,
-    MaterialModule
+    MaterialModule,
+    TitleCasePipe,
+    LowerCasePipe
   ],
   templateUrl: './header.component.html',
   encapsulation: ViewEncapsulation.None
 })
-export class HeaderComponent {
+export class HeaderComponent implements OnInit {
 
   private loginService = inject(LoginService);
 
@@ -104,6 +109,10 @@ export class HeaderComponent {
 
   @Output() optionsChange = new EventEmitter<AppSettings>();
 
+  private readonly login = inject(LoginService);
+
+  usuario: Usuario;
+
   constructor(
     private settings: CoreService,
     private vsidenav: CoreService,
@@ -111,6 +120,10 @@ export class HeaderComponent {
     private translate: TranslateService
   ) {
     translate.setDefaultLang('en');
+  }
+
+  ngOnInit(): void {
+    this.loadProfile();
   }
 
   options = this.settings.getOptions();
@@ -138,7 +151,7 @@ export class HeaderComponent {
   }
 
   notifications: notifications[] = [
-    {
+   /* {
       id: 1,
       img: '/assets/images/profile/user-1.jpg',
       title: 'Roman Joined thes Team!',
@@ -167,11 +180,11 @@ export class HeaderComponent {
       img: '/assets/images/profile/user-5.jpg',
       title: 'Roman Joined the Team!',
       subtitle: 'Congratulatse him',
-    },
+    },*/
   ];
 
   profiledd: profiledd[] = [
-    {
+    /*{
       id: 1,
       img: '/assets/images/svgs/icon-account.svg',
       title: 'My Profile',
@@ -191,7 +204,7 @@ export class HeaderComponent {
       title: 'My Tasks',
       subtitle: 'To-do and Daily Tasks',
       link: '/',
-    },
+    },*/
   ];
 
   apps: apps[] = [
@@ -298,6 +311,13 @@ export class HeaderComponent {
 
   logout() {
     this.loginService.logout();
+  }
+
+  loadProfile(): void {
+    this.loginService.profile().subscribe((data) => {
+      console.log(data)
+      this.usuario = data;
+    });
   }
 }
 

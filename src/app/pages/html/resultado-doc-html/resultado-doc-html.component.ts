@@ -70,6 +70,7 @@ export class ResultadoDocHtmlComponent implements OnInit {
     this.htmlDocumentoService
       .listarHtmlResultado(this.id)
       .subscribe((data) => {
+        console.log(data);
         this.resultadosHtml = data;
       });
   }

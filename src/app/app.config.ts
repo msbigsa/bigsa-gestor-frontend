@@ -113,7 +113,7 @@ export const appConfig: ApplicationConfig = {
           tokenGetter,
           allowedDomains: [
             environment.DOMAIN_HTML
-          ],
+          ],          
           disallowedRoutes: [
             `${environment.HOST_LOGIN}/authentication/login/forgot`,
             `${environment.HOST_LOGIN}/authentication/login`

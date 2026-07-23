@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
 import { SKIP_GLOBAL_LOADING } from '../interceptors/loading.token';
+import { Usuario } from '../models/Usuario';
 
 interface ILoginRequest {
   username: string;
@@ -57,4 +58,17 @@ export class LoginService {
       headers: new HttpHeaders().set('Content-Type', 'text/plain')
     });
   }
+
+  profile() {
+  const token = sessionStorage.getItem(environment.TOKEN_NAME);
+
+  return this.http.get<Usuario>(
+    `${environment.HOST_LOGIN}/profile`,
+    {
+      headers: new HttpHeaders({
+        Authorization: `Bearer ${token}`
+      })
+    }
+  );
+}
 }

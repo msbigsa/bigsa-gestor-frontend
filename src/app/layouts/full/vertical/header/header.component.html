@@ -99,10 +99,10 @@
   <!-- --------------------------------------------------------------- -->
   <!-- langugage Dropdown -->
   <!-- --------------------------------------------------------------- -->
-  <button [matMenuTriggerFor]="flags" mat-icon-button>
+  <!--button [matMenuTriggerFor]="flags" mat-icon-button>
     <img [src]="selectedLanguage.icon" class="rounded-full object-cover size-5!" />
-  </button>
-  <mat-menu #flags="matMenu" class="cardWithShadow" xPosition="before">
+  </!--button>
+  <mat-menu-- #flags="matMenu" class="cardWithShadow" xPosition="before">
     @for(lang of languages; track lang.icon) {
     <button mat-menu-item (click)="changeLanguage(lang)">
       <div class="flex items-center">
@@ -111,11 +111,11 @@
       </div>
     </button>
     }
-  </mat-menu>
+  </mat-menu-->
   <!-- --------------------------------------------------------------- -->
   <!-- Notification Dropdown -->
   <!-- --------------------------------------------------------------- -->
-  <button mat-icon-button matBadge="5" [matMenuTriggerFor]="notificationmenu" aria-label="Notifications"
+  <button mat-icon-button matBadge="0" [matMenuTriggerFor]="notificationmenu" aria-label="Notifications"
     class="notification-badge">
     <i class="iconify" data-icon="solar:bell-line-duotone"></i>
   </button>
@@ -123,7 +123,7 @@
     <div class="flex items-center px-6 py-4">
       <h6 class="text-base font-semibold m-0 ">Notifications</h6>
       <span class="ms-auto">
-        <span class="bg-primary text-white px-2 py-1 font-medium rounded-sm text-xs">5 new</span>
+        <span class="bg-primary text-white px-2 py-1 font-medium rounded-sm text-xs">0 new</span>
       </span>
     </div>
     @for(notification of notifications; track notification.title) {
@@ -155,15 +155,15 @@
   <mat-menu #profilemenu="matMenu" class="topbar-dd cardWithShadow">
     <ng-scrollbar class="relative">
       <div class="px-6 py-4">
-        <h6 class="text-base font-semibold m-0 ">User Profile</h6>
+        <h6 class="text-base font-semibold m-0 ">Perfil de Usuario</h6>
         <div class="flex items-center py-4 border-b border-border mt-4">
           <img src="/assets/images/profile/user-1.jpg" class="rounded-full" width="95" />
           <div class="ms-4">
-            <h6 class="text-sm font-semibold m-0">Mathew Anderson</h6>
-            <span class="text-sm block mb-1 text-muted">Designer</span>
+            <h6 class="text-sm font-semibold m-0"> {{ usuario.descripcion | titlecase  }} </h6>
+            <span class="text-sm block mb-1 text-muted"> {{ usuario.nivel.descripcion | titlecase }} </span>
             <span class="flex items-center text-muted">
               <i-tabler name="mail" class="size-3.5! me-1"></i-tabler>
-              info&#64;modernize.com
+              {{ usuario.correo | lowercase }}
             </span>
           </div>
         </div>
