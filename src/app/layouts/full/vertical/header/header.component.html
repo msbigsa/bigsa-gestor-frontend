@@ -159,11 +159,11 @@
         <div class="flex items-center py-4 border-b border-border mt-4">
           <img src="/assets/images/profile/user-1.jpg" class="rounded-full" width="95" />
           <div class="ms-4">
-            <h6 class="text-sm font-semibold m-0"> {{ usuario.descripcion | titlecase  }} </h6>
-            <span class="text-sm block mb-1 text-muted"> {{ usuario.nivel.descripcion | titlecase }} </span>
+            <h6 class="text-sm font-semibold m-0"> {{ usuario()?.descripcion | titlecase  }} </h6>
+            <span class="text-sm block mb-1 text-muted"> {{ usuario()?.nivel?.descripcion | titlecase }} </span>
             <span class="flex items-center text-muted">
               <i-tabler name="mail" class="size-3.5! me-1"></i-tabler>
-              {{ usuario.correo | lowercase }}
+              {{ usuario()?.correo | lowercase }}
             </span>
           </div>
         </div>

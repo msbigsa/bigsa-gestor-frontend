@@ -1,5 +1,5 @@
 import { BreakpointObserver, MediaMatcher } from '@angular/cdk/layout';
-import { ChangeDetectorRef, Component, inject, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit, signal, ViewChild, ViewEncapsulation } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { MatSidenav, MatSidenavContent } from '@angular/material/sidenav';
 import { CoreService } from 'src/app/services/core.service';
@@ -21,6 +21,7 @@ import { AppHorizontalSidebarComponent } from './horizontal/sidebar/sidebar.comp
 import { AppBreadcrumbComponent } from './shared/breadcrumb/breadcrumb.component';
 import { CustomizerComponent } from './shared/customizer/customizer.component';
 import { LoginService } from 'src/app/services/login.service';
+import { Usuario } from 'src/app/models/Usuario';
 
 const MOBILE_VIEW = 'screen and (max-width: 768px)';
 const TABLET_VIEW = 'screen and (min-width: 769px) and (max-width: 1024px)';
@@ -67,6 +68,7 @@ export class FullComponent implements OnInit {
   navItems = navItems;
 
   private loginService = inject(LoginService);
+  usuario = signal<Usuario | null>(null);
 
   @ViewChild('leftsidenav')
   public sidenav: MatSidenav;
@@ -231,7 +233,9 @@ export class FullComponent implements OnInit {
     this.cdr.detectChanges(); // Ensures Angular updates the view
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.usuario = this.loginService.profile;
+  }
 
   ngOnDestroy() {
     this.layoutChangesSubscription.unsubscribe();

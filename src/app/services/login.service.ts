@@ -1,9 +1,10 @@
 import { HttpClient, HttpContext, HttpHeaders } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
 import { SKIP_GLOBAL_LOADING } from '../interceptors/loading.token';
 import { Usuario } from '../models/Usuario';
+import { Observable, tap } from 'rxjs';
 
 interface ILoginRequest {
   username: string;
@@ -18,7 +19,24 @@ export class LoginService {
   private url: string = `${environment.HOST_LOGIN}/auth/login`;
 
   private readonly http =  inject(HttpClient);
-  private readonly router = inject(Router);  
+  private readonly router = inject(Router);
+
+  readonly profile = signal<Usuario | null>(null);
+  
+  cargarPerfil(): Observable<Usuario> {
+    const token = sessionStorage.getItem(environment.TOKEN_NAME);
+
+    return this.http.get<Usuario>(
+      `${environment.HOST_LOGIN}/profile`,
+      {
+        headers: new HttpHeaders({
+          Authorization: `Bearer ${token}`
+        })
+      }
+    ).pipe(
+      tap(usuario => this.profile.set(usuario))
+    );
+  }
 
   login(username: string, password: string) {
   const body: ILoginRequest = { username, password };
@@ -58,17 +76,4 @@ export class LoginService {
       headers: new HttpHeaders().set('Content-Type', 'text/plain')
     });
   }
-
-  profile() {
-  const token = sessionStorage.getItem(environment.TOKEN_NAME);
-
-  return this.http.get<Usuario>(
-    `${environment.HOST_LOGIN}/profile`,
-    {
-      headers: new HttpHeaders({
-        Authorization: `Bearer ${token}`
-      })
-    }
-  );
-}
 }

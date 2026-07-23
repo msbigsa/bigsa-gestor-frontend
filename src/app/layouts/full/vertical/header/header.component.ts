@@ -6,6 +6,7 @@ import {
   ViewEncapsulation,
   inject,
   OnInit,
+  signal,
 } from '@angular/core';
 import { CoreService } from 'src/app/services/core.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -111,7 +112,7 @@ export class HeaderComponent implements OnInit {
 
   private readonly login = inject(LoginService);
 
-  usuario: Usuario;
+  usuario = signal<Usuario | null>(null);
 
   constructor(
     private settings: CoreService,
@@ -314,10 +315,8 @@ export class HeaderComponent implements OnInit {
   }
 
   loadProfile(): void {
-    this.loginService.profile().subscribe((data) => {
-      console.log(data)
-      this.usuario = data;
-    });
+    this.loginService.cargarPerfil().subscribe();
+    this.usuario = this.loginService.profile;
   }
 }
 
