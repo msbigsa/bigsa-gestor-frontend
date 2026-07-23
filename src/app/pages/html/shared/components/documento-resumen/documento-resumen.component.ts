@@ -13,6 +13,7 @@ import { ArchivoDoc } from 'src/app/models/ArchivoDoc';
 export class DocumentoResumenComponent {
 
   readonly documento = input<ArchivoDoc | null>(null);
+  readonly muestraBoton = input<boolean>(true);
 
   @Output()
   nuevaVersionHtml = new EventEmitter<boolean>();

@@ -3,12 +3,12 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
 
-  border: 1px solid #e9ecef;
+  border: 1px solid var(--mat-sys-outline);
   border-radius: 14px;
 
   overflow: hidden;
 
-  background: white;
+  background: var(--mat-sys-surface);
   margin: 24px 0px;
 }
 
@@ -21,7 +21,7 @@
   padding: 22px;
 
   &:not(:last-child) {
-    border-right: 1px solid #edf2f7;
+    border-right: 1px solid var(--mat-sys-outline);
   }
 }
 
@@ -85,7 +85,7 @@
   margin-top:4px;
   font-size:16px;
   font-weight:600;
-  color:#2a3547;
+  color: var(--mat-sys-on-surface);
 }
 
 @media (max-width:1200px){
@@ -119,4 +119,10 @@
     border-bottom:none;
   }
 
+}
+.codigo-doc {
+  font-size: 13px !important;
+  font-weight:bold !important;
+  color: #6b7280;
+  margin-bottom: 2px;
 }

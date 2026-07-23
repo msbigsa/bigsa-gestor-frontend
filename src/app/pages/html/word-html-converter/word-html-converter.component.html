@@ -1,3 +1,15 @@
+@if (esActualizacion) {
+  <button mat-button color="primary" (click)="volver()" class="mb-4">
+    <mat-icon>arrow_back</mat-icon>
+    Volver
+  </button>
+  <app-documento-resumen
+    [documento]="documento"
+    [muestraBoton]="false"
+  >
+  </app-documento-resumen>
+}
+
 <mat-card class="cardWithShadow">
   <mat-card-header class="p-4!">
     <mat-card-title class="mb-0 text-xl font-semibold">
@@ -34,16 +46,18 @@
             Ver documento generado
           </button>
 
-          <button
-            mat-flat-button
-            color="primary"
-            type="button"
-            class="px-6 py-5"
-            (click)="generarNuevoHtml()"
-          >
-            <mat-icon class="mr-2">refresh</mat-icon>
-            Generar nuevo HTML
-          </button>
+          @if (!esActualizacion) {
+            <button
+              mat-flat-button
+              color="primary"
+              type="button"
+              class="px-6 py-5"
+              (click)="generarNuevoHtml()"
+            >
+              <mat-icon class="mr-2">refresh</mat-icon>
+              Generar nuevo HTML
+            </button>
+          }
         </div>
       } @else {
         <mat-label class="font-medium mb-2 block mt-3"> Archivo </mat-label>

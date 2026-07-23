@@ -9,6 +9,7 @@ import { HtmlDoc } from 'src/app/models/HtmlDoc';
 import { HtmlService } from 'src/app/services/html.service';
 import { HtmlDocumentoService } from 'src/app/services/htmlDocumento.service';
 import { FileDropzoneComponent } from 'src/app/shared/components/file-dropzone/file-dropzone.component';
+import { DocumentoResumenComponent } from '../shared/components/documento-resumen/documento-resumen.component';
 
 @Component({
   selector: 'app-word-html-converter',
@@ -17,6 +18,7 @@ import { FileDropzoneComponent } from 'src/app/shared/components/file-dropzone/f
     FormsModule,
     ReactiveFormsModule,
     FileDropzoneComponent,
+    DocumentoResumenComponent
   ],
   templateUrl: './word-html-converter.component.html',
   styleUrl: './word-html-converter.component.scss',
@@ -27,6 +29,7 @@ export class WordHtmlConverterComponent implements OnInit {
   
   htmlDoc: HtmlDoc | null = null;
   subido: boolean = false;
+  esActualizacion: boolean = false;
 
   id = 0;
   documento: ArchivoDoc | null = null;
@@ -49,6 +52,7 @@ export class WordHtmlConverterComponent implements OnInit {
         if (id) {
           this.id = id;
           this.cargarDocumento();
+          this.esActualizacion = this.id > 0;
         }
       });
   }
@@ -110,11 +114,9 @@ export class WordHtmlConverterComponent implements OnInit {
       return;
     }
 
-    const formData = this.crearFormData();
+    const formData = this.crearFormData();    
 
-    const esActualizacion = this.id > 0;
-
-    const request$ = esActualizacion
+    const request$ = this.esActualizacion
       ? this.htmlService.actualizaDocToHtml(formData, this.id)
       : this.htmlService.docToHtml(formData);
 
@@ -124,7 +126,7 @@ export class WordHtmlConverterComponent implements OnInit {
         this.htmlDoc = data;
 
         this.toastr.success(
-          esActualizacion
+          this.esActualizacion
             ? 'HTML actualizado correctamente'
             : 'HTML generado correctamente',
           'Exitoso'
@@ -156,5 +158,9 @@ export class WordHtmlConverterComponent implements OnInit {
 
     this.subido = false;
     this.htmlDoc = null;
+  }
+
+  volver() {
+     this.router.navigate(['/inicio/html/resultado-doc-html', this.id]);
   }
 }
