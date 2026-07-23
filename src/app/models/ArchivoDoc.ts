@@ -1,8 +1,10 @@
+import { Usuario } from "./Usuario";
+
 export interface ArchivoDoc {
     id?: number;
     nombre?: string;
     nombreDocumento?: string;       
-    usrCodigo: string;
+    usuario: Usuario;
     fechaSubida: string;
     versionActual: number;
     fechaUltimaGeneracion: string;    

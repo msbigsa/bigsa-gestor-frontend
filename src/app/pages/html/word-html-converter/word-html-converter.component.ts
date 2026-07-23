@@ -1,6 +1,6 @@
 import { Component, DestroyRef, inject, OnInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators,} from '@angular/forms';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators, } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { MaterialModule } from 'src/app/material.module';
@@ -24,9 +24,9 @@ import { FileDropzoneComponent } from 'src/app/shared/components/file-dropzone/f
 export class WordHtmlConverterComponent implements OnInit {
 
   archivo!: File;
-  subido: boolean = false;
-
+  
   htmlDoc: HtmlDoc | null = null;
+  subido: boolean = false;
 
   id = 0;
   documento: ArchivoDoc | null = null;
@@ -40,17 +40,17 @@ export class WordHtmlConverterComponent implements OnInit {
 
   ngOnInit(): void {
     this.route.paramMap
-    .pipe(
-      takeUntilDestroyed(this.destroyRef)
-    )
-    .subscribe(params => {
-      const id = Number(params.get('id'));
+      .pipe(
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(params => {
+        const id = Number(params.get('id'));
 
-      if (id) {
-        this.id = id;
-        this.cargarDocumento();
-      }
-    });
+        if (id) {
+          this.id = id;
+          this.cargarDocumento();
+        }
+      });
   }
 
   form = new FormGroup({
@@ -104,7 +104,7 @@ export class WordHtmlConverterComponent implements OnInit {
     return formData;
   }
 
-  generar() {
+  generar(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -112,30 +112,27 @@ export class WordHtmlConverterComponent implements OnInit {
 
     const formData = this.crearFormData();
 
-    if (this.id > 0) {
-      this.htmlService.actualizaDocToHtml(formData, this.id).subscribe((data) => {
-      //console.log(data);
+    const esActualizacion = this.id > 0;
+
+    const request$ = esActualizacion
+      ? this.htmlService.actualizaDocToHtml(formData, this.id)
+      : this.htmlService.docToHtml(formData);
+
+    request$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(data => {
         this.htmlDoc = data;
 
-        this.toastr.success('HTML actualizado correctamente', 'Exitoso');
+        this.toastr.success(
+          esActualizacion
+            ? 'HTML actualizado correctamente'
+            : 'HTML generado correctamente',
+          'Exitoso'
+        );
 
         this.form.disable();
         this.subido = true;
-
-      }); 
-    } else {
-      this.htmlService.docToHtml(formData).subscribe((data) => {
-      //console.log(data);
-        this.htmlDoc = data;
-
-        this.toastr.success('HTML generado correctamente', 'Exitoso');
-
-        this.form.disable();
-        this.subido = true;
-
-      }); 
-    }
-    
+      });
   }
 
   muestraDocumento(): void {

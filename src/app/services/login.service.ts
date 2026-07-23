@@ -1,5 +1,5 @@
 import { HttpClient, HttpContext, HttpHeaders } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
 import { SKIP_GLOBAL_LOADING } from '../interceptors/loading.token';
@@ -16,10 +16,8 @@ export class LoginService {
 
   private url: string = `${environment.HOST_LOGIN}/auth/login`;
 
-  constructor(
-    private http: HttpClient,
-    private router: Router
-  ) { }
+  private readonly http =  inject(HttpClient);
+  private readonly router = inject(Router);  
 
   login(username: string, password: string) {
   const body: ILoginRequest = { username, password };

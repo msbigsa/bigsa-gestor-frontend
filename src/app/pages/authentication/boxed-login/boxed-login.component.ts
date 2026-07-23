@@ -34,9 +34,10 @@ export class AppBoxedLoginComponent {
 
   loading = false;
 
-  private loginService = inject(LoginService);
+  private readonly loginService = inject(LoginService);
+  private readonly router = inject(Router);
 
-  constructor(private settings: CoreService, private router: Router) {}
+  constructor(private settings: CoreService) { }
 
   form = new FormGroup({
     uname: new FormControl('', [Validators.required, Validators.minLength(3)]),
@@ -47,7 +48,7 @@ export class AppBoxedLoginComponent {
     return this.form.controls;
   }
 
-    submit(): void {
+  submit(): void {
 
     if (this.form.invalid || this.loading) {
       return;
@@ -74,7 +75,7 @@ export class AppBoxedLoginComponent {
             data.jwtToken
           );
 
-          
+
           this.router.navigate(['/inicio']);
         },
         error: (error) => {

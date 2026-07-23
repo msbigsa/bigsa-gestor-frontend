@@ -48,6 +48,7 @@ export class HtmlVersionesTableComponent implements AfterViewInit {
     '#',
     'version',
     'usrCodigo',
+    'usrNombre',
     'fechaCreacion',
     'accion',
   ];

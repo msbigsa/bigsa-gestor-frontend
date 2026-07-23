@@ -25,7 +25,9 @@
 
     <div class="summary-info">
       <span class="summary-label">Usuario</span>
-      <span class="summary-value">{{ documento()?.usrCodigo }}</span>
+      <span class="summary-value" matTooltip="{{ documento()?.usuario?.descripcion }}">
+        ({{ documento()?.usuario?.codigo }}) {{ documento()?.usuario?.nombre }}
+      </span>
     </div>
   </div>
 

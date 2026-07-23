@@ -12,16 +12,12 @@ export class HtmlDocumentoService {
   url = `${environment.HOST_HTML}/documentos/v1`;
 
   private http = inject(HttpClient);
-
-
    
   listarDocumentosPaginado(page: number, size: number, filter: string): Observable<any> {
     const parametros = new HttpParams()
                             .set('page', page)
                             .set('size', size)
-                            .set('filter', filter);
-
-    
+                            .set('filter', filter);    
 
     return this.http.get<any>(`${this.url}/paginado`, {
       params: parametros,

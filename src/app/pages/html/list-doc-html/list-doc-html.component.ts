@@ -53,6 +53,7 @@ export class ListDocHtmlComponent implements OnInit {
     'nombre',
     'nombreDocumento',
     'usrCodigo',
+    'usrNombre',
     'fechaSubida',
     'accion',
   ];
