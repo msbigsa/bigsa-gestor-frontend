@@ -15,10 +15,17 @@ export class HtmlPreviewDialogComponent implements AfterViewInit {
   @ViewChild('iframe')
   iframe!: ElementRef<HTMLIFrameElement>;
 
+  version: number = 0;
+
   constructor(
     @Inject(MAT_DIALOG_DATA)
-    public data: { html: string }
-  ) {}
+    public data: {
+      html: string;
+      version: number;
+    }
+  ) {
+    this.version = data.version;
+  }
 
   ngAfterViewInit(): void {
 

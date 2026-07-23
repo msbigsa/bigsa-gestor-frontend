@@ -113,16 +113,19 @@ export class ResultadoDocHtmlComponent implements OnInit {
 
   previsualizar(html: ArchivoDocResultado): void {
     this.htmlDocumentoResultadoService.descargarHtml(html.id!).subscribe((data) => {
-      this.abrirPreview(data.html);
+      this.abrirPreview(data.html, html.version!);
     });
   }
 
-  private abrirPreview(html: string): void {
+  private abrirPreview(html: string, version: number): void {
     this.dialog.open(HtmlPreviewDialogComponent, {
       width: '90vw',
       maxWidth: '95vw',
       height: '90vh',
-      data: { html }
+      data: {
+        html: html,
+        version: version
+      }
     });
   }
 
