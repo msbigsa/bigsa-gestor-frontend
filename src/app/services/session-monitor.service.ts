@@ -38,7 +38,7 @@ export class SessionMonitorService {
     const warningTime =
       expiration.getTime()
       - Date.now()
-      - (10 * 60 * 1000);
+      - (5 * 60 * 1000);
 
     if (warningTime <= 0) {
       return;

@@ -27,7 +27,7 @@ export class SessionWarningDialogComponent implements OnInit {
 
   private readonly destroyRef = inject(DestroyRef);
 
-  readonly initialSeconds = 300;
+  readonly initialSeconds = 300; // 5 minutos
 
   readonly secondsRemaining = signal(this.initialSeconds);
 
