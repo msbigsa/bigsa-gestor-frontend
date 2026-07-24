@@ -27,7 +27,7 @@
 </mat-card>
 <mat-card class="cardWithShadow">
   <mat-card-content>
-    <div class="relative overflow-auto">
+    <div class="relative overflow-auto max-h-[70vh]">
       <table mat-table matSort [dataSource]="documentos()" class="min-w-full">
         <ng-container matColumnDef="#">
           <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">
@@ -118,10 +118,11 @@
             </a>
           </td>
         </ng-container>
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-      </table>
-      <mat-paginator
+      </table>      
+    </div>
+    <mat-paginator
         [pageSize]="pageSize()"
         [length]="totalElements()"
         [pageIndex]="pageIndex()"
@@ -130,6 +131,5 @@
         showFirstLastButtons
         (page)="showMore($event)"
       ></mat-paginator>
-    </div>
   </mat-card-content>
 </mat-card>

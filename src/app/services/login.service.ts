@@ -1,14 +1,35 @@
-import { HttpClient, HttpContext, HttpHeaders } from '@angular/common/http';
-import { inject, Injectable, signal } from '@angular/core';
+import {
+  HttpClient,
+  HttpContext,
+  HttpHeaders
+} from '@angular/common/http';
+
+import {
+  inject,
+  Injectable,
+  signal
+} from '@angular/core';
+
 import { Router } from '@angular/router';
+
+import {
+  Observable,
+  tap
+} from 'rxjs';
+
 import { environment } from 'src/environments/environment';
 import { SKIP_GLOBAL_LOADING } from '../interceptors/loading.token';
 import { Usuario } from '../models/Usuario';
-import { Observable, tap } from 'rxjs';
+import { LoginResponse } from '../models/LoginResponse';
+import { SessionMonitorService } from './session-monitor.service';
 
 interface ILoginRequest {
   username: string;
   password: string;
+}
+
+interface IRefreshRequest {
+  refreshToken: string;
 }
 
 @Injectable({
@@ -16,18 +37,42 @@ interface ILoginRequest {
 })
 export class LoginService {
 
-  private url: string = `${environment.HOST_LOGIN}/auth/login`;
+  private readonly url =
+    `${environment.HOST_LOGIN}/auth`;
 
-  private readonly http =  inject(HttpClient);
+  private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
+  private readonly sessionMonitor = inject(SessionMonitorService);
 
   readonly profile = signal<Usuario | null>(null);
-  
+
+  constructor() {
+
+    this.sessionMonitor.refreshRequested.subscribe(() => {
+        this.refreshToken()
+          .subscribe({
+
+            next: (response) => {
+
+              this.guardarSesion(
+                response as LoginResponse
+              );
+
+              this.sessionMonitor.start();
+            },
+
+            error: () => {
+              this.logout();
+            }
+          });
+      });
+  }
+
   cargarPerfil(): Observable<Usuario> {
+
     const token = sessionStorage.getItem(environment.TOKEN_NAME);
 
-    return this.http.get<Usuario>(
-      `${environment.HOST_LOGIN}/profile`,
+    return this.http.get<Usuario>(`${environment.HOST_LOGIN}/profile`,
       {
         headers: new HttpHeaders({
           Authorization: `Bearer ${token}`
@@ -38,42 +83,78 @@ export class LoginService {
     );
   }
 
-  login(username: string, password: string) {
-  const body: ILoginRequest = { username, password };
+  login(username: string, password: string): Observable<LoginResponse> {
 
-  return this.http.post<any>(
-    this.url,
-    body,
-    {
-      context: new HttpContext().set(SKIP_GLOBAL_LOADING, true)
-    }
-  );
-}
+    const body: ILoginRequest = { username, password };
 
-  logout(){
+    return this.http.post<LoginResponse>(
+      `${this.url}/login`,
+      body,
+      {
+        context: new HttpContext()
+          .set(SKIP_GLOBAL_LOADING, true)
+      }
+    );
+  }
+
+  logout(): void {
+
+    this.sessionMonitor.stop();
+
     sessionStorage.clear();
-    //console.log(`sessionStorage.clear() ejecutado`);
+
     this.router.navigate(['authentication/login']);
   }
 
-  isLogged(){
+  isLogged(): boolean {
+
     const token = sessionStorage.getItem(environment.TOKEN_NAME);
+
     return token != null;
   }
 
   sendMail(username: string) {
-    return this.http.post<number>(`${environment.HOST_LOGIN}/mail/sendMail`, username, {
-      headers: new HttpHeaders().set('Content-Type', 'text/plain')
-    });
+
+    return this.http.post(`${environment.HOST_LOGIN}/mail/sendMail`, username,
+      {
+        headers: new HttpHeaders()
+          .set('Content-Type', 'text/plain')
+      }
+    );
   }
-  
+
   checkTokenReset(random: string) {
-    return this.http.get<number>(`${environment.HOST_LOGIN}/mail/reset/check/${random}`);
+
+    return this.http.get(`${environment.HOST_LOGIN}/mail/reset/check/${random}`);
   }
-  
+
   reset(random: string, newPassword: string) {
-    return this.http.post(`${environment.HOST_LOGIN}/mail/reset/${random}`, newPassword, {
-      headers: new HttpHeaders().set('Content-Type', 'text/plain')
-    });
+
+    return this.http.post(`${environment.HOST_LOGIN}/mail/reset/${random}`, newPassword,
+      {
+        headers: new HttpHeaders()
+          .set('Content-Type', 'text/plain')
+      }
+    );
+  }
+
+  refreshToken(): Observable<LoginResponse> {
+
+    const refreshToken = sessionStorage.getItem(environment.REFRESH_TOKEN_NAME);
+
+    if (!refreshToken) {
+      throw new Error('No existe refresh token');
+    }
+
+    const body: IRefreshRequest = { refreshToken };
+
+    return this.http.post<LoginResponse>(`${this.url}/refresh`, body);
+  }
+
+  guardarSesion(response: LoginResponse): void {
+
+    sessionStorage.setItem(environment.TOKEN_NAME, response.jwtToken);
+
+    sessionStorage.setItem(environment.REFRESH_TOKEN_NAME, response.refreshToken);
   }
 }

@@ -13,6 +13,7 @@ import { BrandingComponent } from '../../../layouts/full/vertical/sidebar/brandi
 import { environment } from 'src/environments/environment';
 import { LoginService } from 'src/app/services/login.service';
 import { finalize } from 'rxjs';
+import { SessionMonitorService } from 'src/app/services/session-monitor.service';
 
 
 @Component({
@@ -36,6 +37,7 @@ export class AppBoxedLoginComponent {
 
   private readonly loginService = inject(LoginService);
   private readonly router = inject(Router);
+  private readonly sessionMonitor = inject(SessionMonitorService);
 
   constructor(private settings: CoreService) { }
 
@@ -57,11 +59,11 @@ export class AppBoxedLoginComponent {
     this.loading = true;
     this.form.disable();
 
-    this.username = this.form.get('uname')?.value ?? '';
-    this.password = this.form.get('password')?.value ?? '';
+    const username = this.form.get('uname')?.value ?? '';
+    const password = this.form.get('password')?.value ?? '';
 
     this.loginService
-      .login(this.username, this.password)
+      .login(username, password)
       .pipe(
         finalize(() => {
           this.loading = false;
@@ -69,18 +71,18 @@ export class AppBoxedLoginComponent {
         })
       )
       .subscribe({
-        next: (data) => {
-          sessionStorage.setItem(
-            environment.TOKEN_NAME,
-            data.jwtToken
-          );
 
+        next: (data) => {
+
+          this.loginService.guardarSesion(data);
+
+          this.sessionMonitor.start();
 
           this.router.navigate(['/inicio']);
         },
+
         error: (error) => {
           console.error(error);
-          this.form.enable();
         }
       });
   }

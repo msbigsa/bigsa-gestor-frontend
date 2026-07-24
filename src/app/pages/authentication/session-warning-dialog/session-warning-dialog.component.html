@@ -1,0 +1,53 @@
+<div class="dialog-header">
+
+    <i-tabler name="clock-hour-4" class="session-icon">
+    </i-tabler>
+
+    <h2 mat-dialog-title>
+        Sesión próxima a expirar
+    </h2>
+
+</div>
+
+<mat-dialog-content>
+
+    <p class="message">
+        Por seguridad, tu sesión está por expirar.
+    </p>
+
+    <p class="message">
+        ¿Deseas continuar trabajando?
+    </p>
+
+    <div class="countdown" [class.warning]="secondsRemaining() <= 30">
+
+        {{ formattedTime }}
+
+    </div>
+
+    <mat-progress-bar mode="determinate" [value]="progress">
+    </mat-progress-bar>
+
+    <p class="warning-message" *ngIf="secondsRemaining() <= 30">
+
+        La sesión se cerrará automáticamente.
+
+    </p>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+
+    <button mat-button [mat-dialog-close]="false">
+
+        Salir
+
+    </button>
+
+    <button mat-flat-button color="primary" [mat-dialog-close]="true">
+
+        Continuar
+
+    </button>
+
+</mat-dialog-actions>
