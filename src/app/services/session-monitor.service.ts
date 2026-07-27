@@ -18,7 +18,7 @@ export class SessionMonitorService {
   private readonly jwtHelper = new JwtHelperService();
 
   private readonly dialog = inject(MatDialog);
-  
+
   start(): void {
 
     this.stop();
@@ -38,7 +38,12 @@ export class SessionMonitorService {
     const warningTime =
       expiration.getTime()
       - Date.now()
-      - (5 * 60 * 1000);
+      - (environment.TOKEN_WARNING_MINUTES * 60 * 1000);
+
+    /*console.log(`Ahora: ${Date.now()}`);
+    console.log(`Expira: ${expiration?.getTime()}`);
+    console.log('TOKEN_WARNING_MINUTES:', environment.TOKEN_WARNING_MINUTES);
+    console.log(`warningTime: ${warningTime}`);*/
 
     if (warningTime <= 0) {
       return;

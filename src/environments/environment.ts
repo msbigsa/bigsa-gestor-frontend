@@ -9,6 +9,7 @@ export const environment = {
   REINTENTS: 2,
   TOKEN_NAME: 'jwtToken',
   REFRESH_TOKEN_NAME: 'refreshToken',
+  TOKEN_WARNING_MINUTES: 5,
   //INCIDENTE_ID: 'INC-ID',
   S_K: 'aEIu9S7cvZUnPJWezau3rKUCxj4BLtpCVzhVSyam93prJOxofs7688P0OD5tmTIsLL6u7G9HpXvT'
 };

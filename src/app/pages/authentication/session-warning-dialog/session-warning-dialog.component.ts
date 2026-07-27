@@ -12,6 +12,7 @@ import { MatDialogRef } from '@angular/material/dialog';
 
 import { MaterialModule } from 'src/app/material.module';
 import { TablerIconComponent } from 'angular-tabler-icons';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-session-warning-dialog',
@@ -27,7 +28,7 @@ export class SessionWarningDialogComponent implements OnInit {
 
   private readonly destroyRef = inject(DestroyRef);
 
-  readonly initialSeconds = 300; // 5 minutos
+  readonly initialSeconds = environment.TOKEN_WARNING_MINUTES * 60;
 
   readonly secondsRemaining = signal(this.initialSeconds);
 
