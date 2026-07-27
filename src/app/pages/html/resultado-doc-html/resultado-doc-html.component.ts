@@ -45,17 +45,17 @@ export class ResultadoDocHtmlComponent implements OnInit {
 
   ngOnInit(): void {
     this.route.paramMap
-    .pipe(
-      takeUntilDestroyed(this.destroyRef)
-    )
-    .subscribe(params => {
-      const id = Number(params.get('id'));
+      .pipe(
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(params => {
+        const id = Number(params.get('id'));
 
-      if (id) {
-        this.id = id;
-        this.cargarDocumento();
-      }
-    });
+        if (id) {
+          this.id = id;
+          this.cargarDocumento();
+        }
+      });
   }
 
   cargarDocumento(): void {
@@ -145,17 +145,56 @@ export class ResultadoDocHtmlComponent implements OnInit {
         return;
       }
 
-      this.htmlDocumentoResultadoService
-        .eliminar(html.id!)
-        .subscribe(() => {
-          this.toastr.success(
-            'HTML eliminado correctamente',
-            'Exitoso'
-          );
-
-          this.cargarHtmls();
+      if (this.esUltimoHtml()) {
+        const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+          width: '400px',
+          data: {
+            title: 'Eliminar HTML',
+            message: `Es la última versión del documento ¿Desea eliminar el registro completo?`,
+            confirmText: 'Si, documento completo',
+            cancelText: 'No, sólo HTML',
+          },
         });
+
+        dialogRef.afterClosed().subscribe((confirmado) => {
+          if (confirmado) {
+            this.eliminaDocumentoCompleto();
+          } else {
+            this.eliminaHtml(html.id!);
+          }
+        });
+      } else {
+        this.eliminaHtml(html.id!);
+      }
     });
+  }
+
+  eliminaDocumentoCompleto() {
+    this.htmlDocumentoService.eliminar(this.documento?.id!).subscribe(() => {
+       this.toastr.success(
+          'Documento y HTML eliminados correctamente',
+          'Exitoso'
+        );
+
+        this.router.navigate(['/inicio/html/listar-doc-html']);
+    });
+  }
+
+  eliminaHtml(id: number): void {
+    this.htmlDocumentoResultadoService
+      .eliminar(id)
+      .subscribe(() => {
+        this.toastr.success(
+          'HTML eliminado correctamente',
+          'Exitoso'
+        );
+
+        this.cargarDocumento();
+      });
+  }
+
+  esUltimoHtml() {
+    return this.resultadosHtml.length == 1;
   }
 
   nuevaVersion(generaNuevaVersion: boolean) {
@@ -164,5 +203,5 @@ export class ResultadoDocHtmlComponent implements OnInit {
     }
   }
 
-  
+
 }

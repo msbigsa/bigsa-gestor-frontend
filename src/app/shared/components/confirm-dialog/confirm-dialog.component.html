@@ -11,14 +11,14 @@
   <button 
     mat-button 
     (click)="cancelar()">
-    Cancelar
+    {{ data.cancelText }}
   </button>
 
   <button 
     mat-flat-button
     color="warn"
-    (click)="confirmar()">
-    Eliminar
+    (click)="confirmar()">    
+    {{ data.confirmText }}
   </button>
 
 </mat-dialog-actions>
