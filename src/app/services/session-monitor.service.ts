@@ -5,6 +5,7 @@ import { JwtHelperService } from '@auth0/angular-jwt';
 
 import { SessionWarningDialogComponent } from '../pages/authentication/session-warning-dialog/session-warning-dialog.component';
 import { environment } from 'src/environments/environment';
+import { SESSION_ACTIONS, SessionDialogResult } from '../pages/authentication/session-dialog-result';
 
 @Injectable({
   providedIn: 'root',
@@ -14,6 +15,8 @@ export class SessionMonitorService {
   private timeoutId?: number;
 
   readonly refreshRequested = new Subject<void>();
+
+  readonly logoutRequested = new Subject<void>();
 
   private readonly jwtHelper = new JwtHelperService();
 
@@ -56,7 +59,11 @@ export class SessionMonitorService {
 
   private showWarning(): void {
 
-    const dialogRef = this.dialog.open(
+    const dialogRef = this.dialog.open<
+      SessionWarningDialogComponent,
+      void,
+      SessionDialogResult
+    >(
       SessionWarningDialogComponent,
       {
         width: '450px',
@@ -64,15 +71,20 @@ export class SessionMonitorService {
       }
     );
 
-    dialogRef.afterClosed()
-      .subscribe(continuar => {
+    dialogRef.afterClosed().subscribe(result => {
 
-        if (!continuar) {
-          return;
-        }
+      switch (result) {
 
-        this.refreshRequested.next();
-      });
+        case SESSION_ACTIONS.REFRESH:
+          this.refreshRequested.next();
+          break;
+
+        case SESSION_ACTIONS.EXPIRED:
+          this.logoutRequested.next();
+          break;
+      }
+
+    });
   }
 
   stop(): void {

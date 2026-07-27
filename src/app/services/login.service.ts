@@ -5,6 +5,7 @@ import {
 } from '@angular/common/http';
 
 import {
+  DestroyRef,
   inject,
   Injectable,
   signal
@@ -22,6 +23,7 @@ import { SKIP_GLOBAL_LOADING } from '../interceptors/loading.token';
 import { Usuario } from '../models/Usuario';
 import { LoginResponse } from '../models/LoginResponse';
 import { SessionMonitorService } from './session-monitor.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 interface ILoginRequest {
   username: string;
@@ -43,12 +45,15 @@ export class LoginService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
   private readonly sessionMonitor = inject(SessionMonitorService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly profile = signal<Usuario | null>(null);
 
   constructor() {
 
-    this.sessionMonitor.refreshRequested.subscribe(() => {
+    this.sessionMonitor.refreshRequested
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
         this.refreshToken()
           .subscribe({
 
@@ -65,6 +70,12 @@ export class LoginService {
               this.logout();
             }
           });
+      });
+
+    this.sessionMonitor.logoutRequested
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.logout();
       });
   }
 

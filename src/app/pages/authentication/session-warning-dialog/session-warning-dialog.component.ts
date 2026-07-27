@@ -13,6 +13,9 @@ import { MatDialogRef } from '@angular/material/dialog';
 import { MaterialModule } from 'src/app/material.module';
 import { TablerIconComponent } from 'angular-tabler-icons';
 import { environment } from 'src/environments/environment';
+import { SESSION_ACTIONS } from '../session-dialog-result';
+import type { SessionDialogResult } from '../session-dialog-result';
+
 
 @Component({
   selector: 'app-session-warning-dialog',
@@ -32,8 +35,10 @@ export class SessionWarningDialogComponent implements OnInit {
 
   readonly secondsRemaining = signal(this.initialSeconds);
 
+  readonly SESSION_ACTIONS = SESSION_ACTIONS;
+
   constructor(
-    private readonly dialogRef: MatDialogRef<SessionWarningDialogComponent>
+    private readonly dialogRef: MatDialogRef<SessionWarningDialogComponent, SessionDialogResult>    
   ) { }
 
   ngOnInit(): void {
@@ -49,7 +54,7 @@ export class SessionWarningDialogComponent implements OnInit {
         this.secondsRemaining.set(remaining);
 
         if (remaining <= 0) {
-          this.dialogRef.close(false);
+          this.dialogRef.close(SESSION_ACTIONS.EXPIRED);
         }
       });
   }
