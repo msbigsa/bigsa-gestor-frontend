@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TablerIconsModule } from 'angular-tabler-icons';
@@ -15,6 +15,7 @@ import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog
 import { DocumentoResumenComponent } from '../shared/components/documento-resumen/documento-resumen.component';
 import { HtmlVersionesTableComponent } from '../shared/components/html-versiones-table/html-versiones-table.component';
 import { HtmlPreviewDialogComponent } from '../shared/components/html-preview-dialog/html-preview-dialog.component';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-resultado-doc-html',
@@ -29,9 +30,14 @@ import { HtmlPreviewDialogComponent } from '../shared/components/html-preview-di
   styleUrl: './resultado-doc-html.component.scss',
 })
 export class ResultadoDocHtmlComponent implements OnInit {
-  documento: ArchivoDoc | null = null;
 
-  resultadosHtml: ArchivoDocResultado[] = [];
+  readonly documento = signal<ArchivoDoc | null>(null);
+
+  readonly resultadosHtml = signal<ArchivoDocResultado[]>([]);
+
+  readonly esUltimoHtml = computed(
+    () => this.resultadosHtml().length === 1
+  );
 
   id = 0;
 
@@ -59,22 +65,15 @@ export class ResultadoDocHtmlComponent implements OnInit {
   }
 
   cargarDocumento(): void {
-    this.htmlDocumentoService.obtener(this.id).subscribe((data) => {
-      this.documento = data;
-    });
-
-    this.cargarHtmls();
-  }
-
-  cargarHtmls(): void {
-    this.htmlDocumentoService
-      .listarHtmlResultado(this.id)
-      .subscribe((data) => {
-        //console.log(data);
-        this.resultadosHtml = data;
+    forkJoin({
+      documento: this.htmlDocumentoService.obtener(this.id),
+      htmls: this.htmlDocumentoService.listarHtmlResultado(this.id)
+    })
+      .subscribe(({ documento, htmls }) => {
+        this.documento.set(documento);
+        this.resultadosHtml.set(htmls);
       });
   }
-
   volver(): void {
     this.router.navigate(['/inicio/html/listar-doc-html']);
   }
@@ -130,53 +129,77 @@ export class ResultadoDocHtmlComponent implements OnInit {
   }
 
   eliminar(html: ArchivoDocResultado): void {
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      width: '400px',
-      data: {
-        title: 'Eliminar HTML',
-        message: `¿Está seguro que desea eliminar el HTML con versión "${html.version}"?`,
-        confirmText: 'Eliminar',
-        cancelText: 'Cancelar',
-      },
-    });
+    this.confirmarEliminarHtml(html)
+      .subscribe(confirmado => {
 
-    dialogRef.afterClosed().subscribe((confirmado) => {
-      if (!confirmado) {
-        return;
-      }
+        if (!confirmado) {
+          return;
+        }
 
-      if (this.esUltimoHtml()) {
-        const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-          width: '400px',
-          data: {
-            title: 'Eliminar HTML',
-            message: `Es la última versión del documento ¿Desea eliminar el registro completo?`,
-            confirmText: 'Si, documento completo',
-            cancelText: 'No, sólo HTML',
-          },
-        });
-
-        dialogRef.afterClosed().subscribe((confirmado) => {
-          if (confirmado) {
-            this.eliminaDocumentoCompleto();
-          } else {
-            this.eliminaHtml(html.id!);
-          }
-        });
-      } else {
-        this.eliminaHtml(html.id!);
-      }
-    });
+        this.procesarEliminacion(html);
+      });
   }
 
-  eliminaDocumentoCompleto() {
-    this.htmlDocumentoService.eliminar(this.documento?.id!).subscribe(() => {
-       this.toastr.success(
-          'Documento y HTML eliminados correctamente',
-          'Exitoso'
-        );
+  private procesarEliminacion(
+    html: ArchivoDocResultado
+  ): void {
 
-        this.router.navigate(['/inicio/html/listar-doc-html']);
+    if (!this.esUltimoHtml()) {
+      this.eliminaHtml(html.id!);
+      return;
+    }
+
+    this.confirmarEliminarDocumentoCompleto()
+      .subscribe(eliminarDocumento => {
+
+        if (eliminarDocumento) {
+          this.eliminaDocumentoCompleto();
+        } else {
+          this.eliminaHtml(html.id!);
+        }
+      });
+  }
+
+  private confirmarEliminarHtml(
+    html: ArchivoDocResultado
+  ) {
+    return this.dialog.open(
+      ConfirmDialogComponent,
+      {
+        width: '400px',
+        data: {
+          title: 'Eliminar HTML',
+          message: `¿Está seguro que desea eliminar el HTML con versión "${html.version}"?`,
+          confirmText: 'Eliminar',
+          cancelText: 'Cancelar'
+        }
+      }
+    ).afterClosed();
+  }
+
+  private confirmarEliminarDocumentoCompleto() {
+    return this.dialog.open(
+      ConfirmDialogComponent,
+      {
+        width: '400px',
+        data: {
+          title: 'Eliminar HTML',
+          message: 'Es la última versión del documento ¿Desea eliminar el registro completo?',
+          confirmText: 'Si, documento completo',
+          cancelText: 'No, sólo HTML'
+        }
+      }
+    ).afterClosed();
+  }
+
+  eliminaDocumentoCompleto(): void {
+    this.htmlDocumentoService.eliminar(this.documento()?.id!).subscribe(() => {
+      this.toastr.success(
+        'Documento y HTML eliminados correctamente',
+        'Exitoso'
+      );
+
+      this.router.navigate(['/inicio/html/listar-doc-html']);
     });
   }
 
@@ -191,10 +214,6 @@ export class ResultadoDocHtmlComponent implements OnInit {
 
         this.cargarDocumento();
       });
-  }
-
-  esUltimoHtml() {
-    return this.resultadosHtml.length == 1;
   }
 
   nuevaVersion(generaNuevaVersion: boolean) {

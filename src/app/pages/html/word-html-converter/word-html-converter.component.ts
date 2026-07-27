@@ -132,6 +132,10 @@ export class WordHtmlConverterComponent implements OnInit {
           'Exitoso'
         );
 
+        if (this.esActualizacion) {
+          this.cargarDocumento();
+        }
+
         this.form.disable();
         this.subido = true;
       });
