@@ -2,7 +2,7 @@
   #fileInput
   hidden
   type="file"
-  [accept]="accept"
+  [accept]="accept()"
   (change)="onFileInput($event)"
 />
 
@@ -18,9 +18,9 @@
     <div class="empty">
       <mat-icon class="icon"> upload_file </mat-icon>
 
-      <h3>{{ title }}</h3>
+      <h3>{{ title() }}</h3>
 
-      <p>{{ subtitle }}</p>
+      <p>{{ subtitle() }}</p>
 
       <button mat-stroked-button color="primary" type="button">
         Seleccionar archivo

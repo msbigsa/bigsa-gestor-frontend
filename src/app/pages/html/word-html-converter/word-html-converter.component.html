@@ -63,9 +63,9 @@
         <mat-label class="font-medium mb-2 block mt-3"> Archivo </mat-label>
 
         <app-file-dropzone
-          title="Suba un documento Word"
-          subtitle="Arrastre el archivo aquí o haga clic para seleccionarlo."
-          accept=".doc,.docx"
+          [title]="'Suba un documento Word'"
+          [subtitle]="'Arrastre el archivo aquí o haga clic para seleccionarlo.'"
+          [accept]="'.doc,.docx'"
           [maxSize]="10485760"
           (fileSelected)="onFileSelected($event)"
           (fileRemoved)="onFileRemoved()"

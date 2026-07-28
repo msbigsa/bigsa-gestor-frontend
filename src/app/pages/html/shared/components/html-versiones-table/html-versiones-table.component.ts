@@ -2,11 +2,10 @@ import { CommonModule, DatePipe } from '@angular/common';
 import {
   AfterViewInit,
   Component,
-  EventEmitter,
   Input,
-  Output,
   ViewChild,
   inject,
+  output,
 } from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
@@ -25,15 +24,10 @@ import { ArchivoDocResultado } from 'src/app/models/ArchivoDocResultado';
 export class HtmlVersionesTableComponent implements AfterViewInit {
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
-
-  @Output()
-  descargarHtml = new EventEmitter<ArchivoDocResultado>();
-
-   @Output()
-  previsualizarHtml = new EventEmitter<ArchivoDocResultado>();
-
-  @Output()
-  eliminarHtml = new EventEmitter<ArchivoDocResultado>();
+  
+  descargarHtml = output<ArchivoDocResultado>();  
+  previsualizarHtml = output<ArchivoDocResultado>();  
+  eliminarHtml = output<ArchivoDocResultado>();
 
   @Input()
   set resultadosHtml(value: ArchivoDocResultado[]) {

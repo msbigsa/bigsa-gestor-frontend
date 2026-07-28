@@ -1,9 +1,8 @@
 import {
   Component,
   ElementRef,
-  EventEmitter,
-  Input,
-  Output,
+  input,
+  output,
   ViewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -17,17 +16,13 @@ import { MatButtonModule } from '@angular/material/button';
   styleUrls: ['./file-dropzone.component.scss'],
 })
 export class FileDropzoneComponent {
-  @Input() title = 'Seleccione un archivo';
-
-  @Input() subtitle = 'Arrastre el archivo aquí o haga clic para seleccionarlo';
-
-  @Input() accept = '*';
-
-  @Input() maxSize = 10 * 1024 * 1024; //10 MB
-
-  @Output() fileSelected = new EventEmitter<File>();
-
-  @Output() fileRemoved = new EventEmitter<void>();
+  
+  title = input<string>('Seleccione un archivo');
+  subtitle = input<string>('Arrastre el archivo aquí o haga clic para seleccionarlo');
+  accept = input<string>('*');
+  maxSize = input<number>(10 * 1024 * 1024); //10 MB
+  fileSelected = output<File>();
+  fileRemoved = output<void>();
 
   @ViewChild('fileInput')
   fileInput!: ElementRef<HTMLInputElement>;
@@ -87,7 +82,7 @@ export class FileDropzoneComponent {
   private processFile(file: File): void {
     this.error = '';
 
-    if (file.size > this.maxSize) {
+    if (file.size > this.maxSize()) {
       this.error = 'El archivo supera el tamaño permitido.';
 
       return;
@@ -96,8 +91,8 @@ export class FileDropzoneComponent {
     const extension = '.' + file.name.split('.').pop()?.toLowerCase();
 
     if (
-      this.accept !== '*' &&
-      !this.accept
+      this.accept() !== '*' &&
+      !this.accept()
         .split(',')
         .map((x) => x.trim())
         .includes(extension)
