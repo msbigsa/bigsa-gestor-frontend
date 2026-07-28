@@ -9,9 +9,9 @@ import { HtmlDoc } from '../models/HtmlDoc';
 })
 export class HtmlService {
 
-  url = `${environment.HOST_HTML}/convertir/v1`;
+  private readonly url = `${environment.HOST_HTML}/convertir/v1`;
   
-  private http = inject(HttpClient);
+  private readonly http = inject(HttpClient);
  
   docToHtml(formData: FormData): Observable<HtmlDoc> {    
     //console.log(`html service ${url}`);    

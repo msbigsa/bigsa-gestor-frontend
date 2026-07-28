@@ -39,8 +39,7 @@ interface IRefreshRequest {
 })
 export class LoginService {
 
-  private readonly url =
-    `${environment.HOST_LOGIN}/auth`;
+  private readonly url = `${environment.HOST_LOGIN}/auth`;
 
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);

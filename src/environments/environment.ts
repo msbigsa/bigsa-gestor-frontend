@@ -1,11 +1,7 @@
 export const environment = {
   production: true,
-  //backend: '',
-  DOMAIN_LOGIN: 'sitio.cl',
-  HOST_LOGIN: 'https://sitio.cl/sys-truck-backend',
-  DOMAIN_HTML: 'sitio.cl',
-  HOST_HTML: 'https://sitio.cl/sys-truck-backend',
-  //HOST_DEV: 'https://sitio.cl/sys-truck-backend',
+  HOST_LOGIN: 'http://localhost:8080/ms-bigsa-auth',
+  HOST_HTML: 'http://localhost:8080/ms-bigsa-html-converter',
   REINTENTS: 2,
   TOKEN_NAME: 'jwtToken',
   REFRESH_TOKEN_NAME: 'refreshToken',

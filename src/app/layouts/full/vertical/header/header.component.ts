@@ -81,7 +81,7 @@ export class HeaderComponent implements OnInit {
     language: 'English',
     code: 'en',
     type: 'US',
-    icon: '/assets/images/flag/icon-flag-en.svg',
+    icon: './assets/images/flag/icon-flag-en.svg',
   };
 
   public languages: any[] = [
@@ -89,22 +89,22 @@ export class HeaderComponent implements OnInit {
       language: 'English',
       code: 'en',
       type: 'US',
-      icon: '/assets/images/flag/icon-flag-en.svg',
+      icon: './assets/images/flag/icon-flag-en.svg',
     },
     {
       language: 'Español',
       code: 'es',
-      icon: '/assets/images/flag/icon-flag-es.svg',
+      icon: './assets/images/flag/icon-flag-es.svg',
     },
     {
       language: 'Français',
       code: 'fr',
-      icon: '/assets/images/flag/icon-flag-fr.svg',
+      icon: './assets/images/flag/icon-flag-fr.svg',
     },
     {
       language: 'German',
       code: 'de',
-      icon: '/assets/images/flag/icon-flag-de.svg',
+      icon: './assets/images/flag/icon-flag-de.svg',
     },
   ];
 
@@ -211,56 +211,56 @@ export class HeaderComponent implements OnInit {
   apps: apps[] = [
     {
       id: 1,
-      img: '/assets/images/svgs/icon-dd-chat.svg',
+      img: './assets/images/svgs/icon-dd-chat.svg',
       title: 'Chat Application',
       subtitle: 'Messages & Emails',
       link: '/',
     },
     {
       id: 2,
-      img: '/assets/images/svgs/icon-dd-cart.svg',
+      img: './assets/images/svgs/icon-dd-cart.svg',
       title: 'Todo App',
       subtitle: 'Completed task',
       link: '/',
     },
     {
       id: 3,
-      img: '/assets/images/svgs/icon-dd-invoice.svg',
+      img: './assets/images/svgs/icon-dd-invoice.svg',
       title: 'Invoice App',
       subtitle: 'Get latest invoice',
       link: '/',
     },
     {
       id: 4,
-      img: '/assets/images/svgs/icon-dd-date.svg',
+      img: './assets/images/svgs/icon-dd-date.svg',
       title: 'Calendar App',
       subtitle: 'Get Dates',
       link: '/',
     },
     {
       id: 5,
-      img: '/assets/images/svgs/icon-dd-mobile.svg',
+      img: './assets/images/svgs/icon-dd-mobile.svg',
       title: 'Contact Application',
       subtitle: '2 Unsaved Contacts',
       link: '/',
     },
     {
       id: 6,
-      img: '/assets/images/svgs/icon-dd-lifebuoy.svg',
+      img: './assets/images/svgs/icon-dd-lifebuoy.svg',
       title: 'Tickets App',
       subtitle: 'Create new ticket',
       link: '/',
     },
     {
       id: 7,
-      img: '/assets/images/svgs/icon-dd-message-box.svg',
+      img: './assets/images/svgs/icon-dd-message-box.svg',
       title: 'Email App',
       subtitle: 'Get new emails',
       link: '/',
     },
     {
       id: 8,
-      img: '/assets/images/svgs/icon-dd-application.svg',
+      img: './assets/images/svgs/icon-dd-application.svg',
       title: 'Conatct List',
       subtitle: 'Create new contact',
       link: '/',

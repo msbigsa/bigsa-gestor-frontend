@@ -9,9 +9,9 @@ import { ArchivoDoc } from '../models/ArchivoDoc';
 })
 export class HtmlDocumentoService {
   
-  url = `${environment.HOST_HTML}/documentos/v1`;
+  private readonly url = `${environment.HOST_HTML}/documentos/v1`;
 
-  private http = inject(HttpClient);
+  private readonly http = inject(HttpClient);
    
   listarDocumentosPaginado(page: number, size: number, filter: string): Observable<any> {
     const parametros = new HttpParams()

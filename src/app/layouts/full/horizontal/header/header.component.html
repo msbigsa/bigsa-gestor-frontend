@@ -17,11 +17,11 @@
       <i class="iconify size-5.5!" data-icon="solar:magnifer-line-duotone"></i>
     </button>
 
-    <div class="hidden lg:flex">
+    <!--div class="hidden lg:flex"-->
       <!-- --------------------------------------------------------------- -->
       <!--  Links -->
       <!-- --------------------------------------------------------------- -->
-      <button mat-button [matMenuTriggerFor]="appsmenu" aria-label="Notifications">
+      <!--button mat-button [matMenuTriggerFor]="appsmenu" aria-label="Notifications">
         <div class="flex items-center">
           Apps <i-tabler name="chevron-down" class="size-4! ms-1"></i-tabler>
         </div>
@@ -72,7 +72,7 @@
       <a mat-button href="javascript:void(0)">Chat</a>
       <a mat-button href="javascript:void(0)">Calendar</a>
       <a mat-button href="javascript:void(0)">Email</a>
-    </div>
+    </div-->
 
     <span class="flex-1"></span>
 
@@ -152,14 +152,14 @@
     <!-- --------------------------------------------------------------- -->
     <button class="p-0! flex! items-center! justify-center!" mat-icon-button [matMenuTriggerFor]="profilemenu"
       aria-label="Notifications">
-      <img src="/assets/images/profile/user-1.jpg" class="rounded-full object-cover size-9!" width="36" />
+      <img src="./assets/images/profile/user-1.jpg" class="rounded-full object-cover size-9!" width="36" />
     </button>
     <mat-menu #profilemenu="matMenu" class="topbar-dd cardWithShadow">
       <ng-scrollbar class="relative">
         <div class="px-6 py-4">
           <h6 class="text-base font-semibold m-0 ">User Profile</h6>
           <div class="flex items-center pb-6 border-b border-border mt-4">
-            <img src="/assets/images/profile/user-1.jpg" class="rounded-full" width="95" />
+            <img src="./assets/images/profile/user-1.jpg" class="rounded-full" width="95" />
             <div class="ms-4">
               <h6 class="text-sm font-semibold m-0">Mathew Anderson</h6>
               <span class="text-sm block mb-1 text-muted">Designer</span>

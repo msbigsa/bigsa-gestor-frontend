@@ -8,9 +8,9 @@ import { HtmlDoc } from '../models/HtmlDoc';
   providedIn: 'root',
 })
 export class HtmlDocumentoResultadoService {
-  url = `${environment.HOST_HTML}/resultados/v1`;
+  private readonly url = `${environment.HOST_HTML}/resultados/v1`;
 
-  private http = inject(HttpClient);
+  private readonly http = inject(HttpClient);
 
   public descargar(id: number): Observable<HttpResponse<Blob>> {
     return this.http.get(`${this.url}/${id}/descargar`, {
