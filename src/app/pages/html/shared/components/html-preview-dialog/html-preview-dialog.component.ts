@@ -1,5 +1,5 @@
-import { AfterViewInit, Component, ElementRef, Inject, ViewChild } from '@angular/core';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { AfterViewInit, Component, ElementRef, inject, Inject, ViewChild } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MaterialModule } from 'src/app/material.module';
 
 @Component({
@@ -16,6 +16,8 @@ export class HtmlPreviewDialogComponent implements AfterViewInit {
   iframe!: ElementRef<HTMLIFrameElement>;
 
   version: number = 0;
+
+  private readonly dialogRef = inject(MatDialogRef<HtmlPreviewDialogComponent>);
 
   constructor(
     @Inject(MAT_DIALOG_DATA)
@@ -37,5 +39,9 @@ export class HtmlPreviewDialogComponent implements AfterViewInit {
       doc.write(this.data.html);
       doc.close();
     }
+  }
+
+  cerrar(): void {
+    this.dialogRef.close();
   }
 }

@@ -170,3 +170,17 @@
     background-color: #FA896B !important;
     }
 }
+
+.mat-mdc-option .mdc-list-item__primary-text {
+  overflow: visible !important;
+  text-overflow: unset !important;
+  white-space: nowrap !important;
+}
+
+.mat-mdc-option {
+  min-height: 48px;
+}
+
+.mat-mdc-select-panel {
+  min-width: 100px !important;
+}

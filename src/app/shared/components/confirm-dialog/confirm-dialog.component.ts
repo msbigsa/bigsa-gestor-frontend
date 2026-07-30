@@ -6,13 +6,17 @@ import {
 
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
+import { ConfirmDialogResult } from './confirm-dialog-result.enum';
 
 
 export interface ConfirmDialogData {
   title: string;
-  message: string;
+  message: string;  
+  cancelText: string;
   confirmText: string;
-  cancelText: string
+
+  confirmTextAdic?: string;
+  useConfirmTextAdic?: boolean;
 }
 
 
@@ -28,17 +32,19 @@ export interface ConfirmDialogData {
 export class ConfirmDialogComponent {
 
   constructor(
-    private dialogRef: MatDialogRef<ConfirmDialogComponent>,
+    private dialogRef: MatDialogRef<ConfirmDialogComponent,ConfirmDialogResult>,
     @Inject(MAT_DIALOG_DATA) public data: ConfirmDialogData
   ) {}
 
+  confirmarAdicional(): void {
+  this.dialogRef.close(ConfirmDialogResult.CONFIRM_ADDITIONAL);
+}
 
-  confirmar(): void {
-    this.dialogRef.close(true);
-  }
+confirmar(): void {
+  this.dialogRef.close(ConfirmDialogResult.CONFIRM);
+}
 
-
-  cancelar(): void {
-    this.dialogRef.close(false);
-  }
+cancelar(): void {
+  this.dialogRef.close(ConfirmDialogResult.CANCEL);
+}
 }

@@ -15,6 +15,7 @@ import { ToastrService } from 'ngx-toastr';
 import { HtmlDocumentoService } from 'src/app/services/htmlDocumento.service';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { debounceTime, distinctUntilChanged, filter } from 'rxjs';
+import { ConfirmDialogResult } from 'src/app/shared/components/confirm-dialog/confirm-dialog-result.enum';
 
 @Component({
   selector: 'app-list-doc-html',
@@ -103,16 +104,17 @@ export class ListDocHtmlComponent implements OnInit {
   eliminar(documento: ArchivoDoc): void {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
+      disableClose: true,
       data: {
         title: 'Eliminar documento',
         message: `¿Está seguro que desea eliminar "${documento.nombre}"?`,
         confirmText: 'Eliminar',
-        cancelText: 'Cancelar',
+        cancelText: 'Cancelar'        
       },
     });
 
-    dialogRef.afterClosed().subscribe((confirmado) => {
-      if (!confirmado) {
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result === ConfirmDialogResult.CANCEL) {
         return;
       }
 

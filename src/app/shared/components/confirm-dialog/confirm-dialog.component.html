@@ -21,4 +21,13 @@
     {{ data.confirmText }}
   </button>
 
+ @if (data.useConfirmTextAdic) {
+  <button
+    mat-flat-button
+    color="primary"
+    (click)="confirmarAdicional()">
+    {{ data.confirmTextAdic }}
+  </button>
+}
+
 </mat-dialog-actions>

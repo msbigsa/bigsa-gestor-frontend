@@ -1,7 +1,7 @@
 export const environment = {
   production: true,
-  HOST_LOGIN: 'http://localhost:8080/ms-bigsa-auth',
-  HOST_HTML: 'http://localhost:8080/ms-bigsa-html-converter',
+  HOST_LOGIN: 'http://localhost:8082/ms-bigsa-auth',
+  HOST_HTML: 'http://localhost:8082/ms-bigsa-html-converter',
   REINTENTS: 2,
   TOKEN_NAME: 'jwtToken',
   REFRESH_TOKEN_NAME: 'refreshToken',

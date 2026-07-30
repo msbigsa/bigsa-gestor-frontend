@@ -16,6 +16,7 @@ import { DocumentoResumenComponent } from '../shared/components/documento-resume
 import { HtmlVersionesTableComponent } from '../shared/components/html-versiones-table/html-versiones-table.component';
 import { HtmlPreviewDialogComponent } from '../shared/components/html-preview-dialog/html-preview-dialog.component';
 import { forkJoin } from 'rxjs';
+import { ConfirmDialogResult } from 'src/app/shared/components/confirm-dialog/confirm-dialog-result.enum';
 
 @Component({
   selector: 'app-resultado-doc-html',
@@ -130,9 +131,9 @@ export class ResultadoDocHtmlComponent implements OnInit {
 
   eliminar(html: ArchivoDocResultado): void {
     this.confirmarEliminarHtml(html)
-      .subscribe(confirmado => {
+      .subscribe(result => {
 
-        if (!confirmado) {
+        if (result === ConfirmDialogResult.CANCEL) {
           return;
         }
 
@@ -142,11 +143,11 @@ export class ResultadoDocHtmlComponent implements OnInit {
         }
 
         this.confirmarEliminarUltimaVersion()
-          .subscribe(eliminarDocumento => {
+          .subscribe(result => {
 
-            if (eliminarDocumento) {
+            if (result === ConfirmDialogResult.CONFIRM_ADDITIONAL) {
               this.eliminaDocumentoCompleto();
-            } else {
+            } else if (result === ConfirmDialogResult.CONFIRM) {
               this.eliminaHtml(html.id!);
             }
           });
@@ -158,11 +159,12 @@ export class ResultadoDocHtmlComponent implements OnInit {
   ) {
     return this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
+      disableClose: true,
       data: {
         title: 'Eliminar HTML',
         message: `¿Está seguro que desea eliminar el HTML con versión "${html.version}"?`,
         confirmText: 'Eliminar',
-        cancelText: 'Cancelar',
+        cancelText: 'Cancelar'        
       },
     }).afterClosed();
   }
@@ -170,11 +172,14 @@ export class ResultadoDocHtmlComponent implements OnInit {
   private confirmarEliminarUltimaVersion() {
     return this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
+      disableClose: true,
       data: {
         title: 'Eliminar HTML',
         message: 'Es la última versión del documento ¿Desea eliminar el registro completo?',
-        confirmText: 'Si, documento completo',
-        cancelText: 'No, sólo HTML',
+        confirmTextAdic: 'Si',
+        confirmText: 'No, sólo HTML',
+        cancelText: 'Cancelar',
+        useConfirmTextAdic: true        
       },
     }).afterClosed();
   }
