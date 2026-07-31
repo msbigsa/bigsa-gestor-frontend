@@ -5,6 +5,7 @@ import { routes } from './app.routes';
 import {
   provideRouter,
   withComponentInputBinding,
+  withHashLocation,
   withInMemoryScrolling,
 } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
@@ -66,6 +67,7 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(
       routes,
+      withHashLocation(),
       withInMemoryScrolling({
         scrollPositionRestoration: 'enabled',
         anchorScrolling: 'enabled',
