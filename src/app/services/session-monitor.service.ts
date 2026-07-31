@@ -59,15 +59,30 @@ export class SessionMonitorService {
 
   private showWarning(): void {
 
+    const token = sessionStorage.getItem(environment.TOKEN_NAME);
+
+    if (!token) {
+      return;
+    }
+
+    const expiration = this.jwtHelper.getTokenExpirationDate(token);
+
+    if (!expiration) {
+      return;
+    }
+
     const dialogRef = this.dialog.open<
       SessionWarningDialogComponent,
-      void,
+      { expirationTime: number },
       SessionDialogResult
     >(
       SessionWarningDialogComponent,
       {
         width: '450px',
-        disableClose: true
+        disableClose: true,
+        data: {
+          expirationTime: expiration.getTime()
+        }
       }
     );
 

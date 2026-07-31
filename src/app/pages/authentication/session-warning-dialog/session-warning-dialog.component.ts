@@ -1,21 +1,23 @@
 import {
   Component,
   DestroyRef,
-  inject,
   OnInit,
+  inject,
   signal
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { interval } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogRef
+} from '@angular/material/dialog';
 
 import { MaterialModule } from 'src/app/material.module';
 import { TablerIconComponent } from 'angular-tabler-icons';
-import { environment } from 'src/environments/environment';
+
 import { SESSION_ACTIONS } from '../session-dialog-result';
 import type { SessionDialogResult } from '../session-dialog-result';
-
 
 @Component({
   selector: 'app-session-warning-dialog',
@@ -31,17 +33,34 @@ export class SessionWarningDialogComponent implements OnInit {
 
   private readonly destroyRef = inject(DestroyRef);
 
-  readonly initialSeconds = environment.TOKEN_WARNING_MINUTES * 60;
+  readonly data = inject(MAT_DIALOG_DATA) as {
+    expirationTime: number;
+  };
 
-  readonly secondsRemaining = signal(this.initialSeconds);
+  readonly secondsRemaining = signal(0);
+
+  readonly initialSeconds = signal(0);
 
   readonly SESSION_ACTIONS = SESSION_ACTIONS;
 
   constructor(
-    private readonly dialogRef: MatDialogRef<SessionWarningDialogComponent, SessionDialogResult>    
+    private readonly dialogRef: MatDialogRef<
+      SessionWarningDialogComponent,
+      SessionDialogResult
+    >
   ) { }
 
   ngOnInit(): void {
+
+    const initial = Math.max(
+      0,
+      Math.floor(
+        (this.data.expirationTime - Date.now()) / 1000
+      )
+    );
+
+    this.initialSeconds.set(initial);
+    this.secondsRemaining.set(initial);
 
     interval(1000)
       .pipe(
@@ -49,7 +68,12 @@ export class SessionWarningDialogComponent implements OnInit {
       )
       .subscribe(() => {
 
-        const remaining = this.secondsRemaining() - 1;
+        const remaining = Math.max(
+          0,
+          Math.floor(
+            (this.data.expirationTime - Date.now()) / 1000
+          )
+        );
 
         this.secondsRemaining.set(remaining);
 
@@ -66,12 +90,20 @@ export class SessionWarningDialogComponent implements OnInit {
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
 
-    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    return `${minutes.toString().padStart(2, '0')}:${seconds
+      .toString()
+      .padStart(2, '0')}`;
   }
 
   get progress(): number {
 
-    return (this.secondsRemaining() / this.initialSeconds) * 100;
+    const initial = this.initialSeconds();
+
+    if (!initial) {
+      return 0;
+    }
+
+    return (this.secondsRemaining() / initial) * 100;
   }
 
 }
