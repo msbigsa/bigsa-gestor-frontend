@@ -1,0 +1,45 @@
+.dialog-header {
+  margin-top: 10px;  
+  border-bottom: 1px solid rgba(0, 0, 0, .12);
+  padding-bottom: 16px;
+  padding-left: 5px;
+  margin-bottom: 16px;
+}
+
+.dialog-header-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dialog-header-icon {
+  color: var(--mat-sys-primary);
+}
+
+.dialog-header-icon.warning {
+  color: #f59e0b;
+}
+
+.dialog-header-icon.danger {
+  color: #dc2626;
+}
+
+.dialog-header-icon.success {
+  color: #16a34a;
+}
+
+.confirm-dialog-content {
+  text-align: center;
+  padding-top: 8px;
+}
+
+.dialog-title {
+  font-weight: 600;
+  font-size: 17px;
+  line-height: 24px;
+}
+
+.dialog-message {
+  margin: 0;
+  font-size: 15px;
+}

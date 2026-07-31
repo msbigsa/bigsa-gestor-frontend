@@ -1,33 +1,57 @@
-<h2 mat-dialog-title>
-  {{ data.title }}
-</h2>
+<div class="dialog-header">
 
-<mat-dialog-content>
-  {{ data.message }}
+  <div class="dialog-header-content">
+
+    <mat-icon
+      class="dialog-header-icon"
+      [class.danger]="data.type === 'danger'"
+      [class.warning]="data.type === 'warning'"
+      [class.success]="data.type === 'success'">
+      {{ icon }}
+    </mat-icon>
+
+    <span class="dialog-title">
+      {{ data.title }}
+    </span>
+
+  </div>
+
+</div>
+
+<mat-dialog-content class="confirm-dialog-content">
+
+  <p class="dialog-message">
+    {{ data.message }}
+  </p>
+
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
 
-  <button 
-    mat-button 
-    (click)="cancelar()">
-    {{ data.cancelText }}
-  </button>
+  @if (data.cancelText?.trim()) {
+    <button
+      mat-button
+      (click)="cancelar()">
+      {{ data.cancelText }}
+    </button>
+  }
 
-  <button 
-    mat-flat-button
-    color="warn"
-    (click)="confirmar()">    
-    {{ data.confirmText }}
-  </button>
+  @if (data.confirmText?.trim()) {
+    <button
+      mat-flat-button
+      [color]="buttonColor"
+      (click)="confirmar()">
+      {{ data.confirmText }}
+    </button>
+  }
 
- @if (data.useConfirmTextAdic) {
-  <button
-    mat-flat-button
-    color="primary"
-    (click)="confirmarAdicional()">
-    {{ data.confirmTextAdic }}
-  </button>
-}
+  @if (data.confirmTextAdic?.trim()) {
+    <button
+      mat-flat-button
+      color="primary"
+      (click)="confirmarAdicional()">
+      {{ data.confirmTextAdic }}
+    </button>
+  }
 
 </mat-dialog-actions>
