@@ -59,6 +59,10 @@ export class ResultadoDocHtmlComponent implements OnInit {
         const id = Number(params.get('id'));
 
         if (id) {
+
+          this.documento.set(null);
+          this.resultadosHtml.set([]);
+
           this.id = id;
           this.cargarDocumento();
         }
@@ -70,11 +74,22 @@ export class ResultadoDocHtmlComponent implements OnInit {
       documento: this.htmlDocumentoService.obtener(this.id),
       htmls: this.htmlDocumentoService.listarHtmlResultado(this.id)
     })
-      .subscribe(({ documento, htmls }) => {
-        this.documento.set(documento);
-        this.resultadosHtml.set(htmls);
+      .subscribe({
+        next: ({ documento, htmls }) => {
+
+          this.documento.set(documento);
+          this.resultadosHtml.set(htmls);
+
+        },
+        error: () => {
+
+          this.documento.set(null);
+          this.resultadosHtml.set([]);
+
+        }
       });
   }
+
   volver(): void {
     this.router.navigate(['/inicio/html/listar-doc-html']);
   }
@@ -164,7 +179,7 @@ export class ResultadoDocHtmlComponent implements OnInit {
         title: 'Eliminar HTML',
         message: `¿Está seguro que desea eliminar el HTML con versión "${html.version}"?`,
         confirmText: 'Eliminar',
-        cancelText: 'Cancelar'        
+        cancelText: 'Cancelar'
       },
     }).afterClosed();
   }
@@ -179,7 +194,7 @@ export class ResultadoDocHtmlComponent implements OnInit {
         confirmTextAdic: 'Si',
         confirmText: 'No, sólo HTML',
         cancelText: 'Cancelar',
-        useConfirmTextAdic: true        
+        useConfirmTextAdic: true
       },
     }).afterClosed();
   }

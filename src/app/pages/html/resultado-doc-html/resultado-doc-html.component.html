@@ -3,16 +3,18 @@
   Volver
 </button>
 
-<app-documento-resumen
-  [documento]="documento()"
-  (nuevaVersionHtml)="nuevaVersion($event)"
->
-</app-documento-resumen>
+<!--@if (documento(); as doc) {-->
 
-<app-html-versiones-table
-  [resultadosHtml]="resultadosHtml()"
-  (descargarHtml)="descargar($event)"
-  (previsualizarHtml)="previsualizar($event)"
-  (eliminarHtml)="eliminar($event)"
->
-</app-html-versiones-table>
+  <app-documento-resumen    
+    [documento] = "documento()"
+    (nuevaVersionHtml)="nuevaVersion($event)">
+  </app-documento-resumen>
+
+  <app-html-versiones-table
+    [resultadosHtml]="resultadosHtml()"
+    (descargarHtml)="descargar($event)"
+    (previsualizarHtml)="previsualizar($event)"
+    (eliminarHtml)="eliminar($event)">
+  </app-html-versiones-table>
+
+<!--}-->

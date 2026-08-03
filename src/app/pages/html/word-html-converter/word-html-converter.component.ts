@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators, } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -27,12 +27,12 @@ export class WordHtmlConverterComponent implements OnInit {
 
   archivo!: File;
   
-  htmlDoc: HtmlDoc | null = null;
+   readonly htmlDoc = signal<HtmlDoc | null>(null);
   subido: boolean = false;
   esActualizacion: boolean = false;
 
-  id = 0;
-  documento: ArchivoDoc | null = null;
+  id = 0;  
+  readonly documento = signal<ArchivoDoc | null>(null);
 
   private readonly htmlService = inject(HtmlService);
   private readonly htmlDocumentoService = inject(HtmlDocumentoService);
@@ -54,7 +54,8 @@ export class WordHtmlConverterComponent implements OnInit {
           this.cargarDocumento();
           this.esActualizacion = this.id > 0;
         }
-      });
+      })
+      ;
   }
 
   form = new FormGroup({
@@ -67,12 +68,14 @@ export class WordHtmlConverterComponent implements OnInit {
   }
 
   cargarDocumento(): void {
+
+    this.documento.set(null);
+
     this.htmlDocumentoService.obtener(this.id).subscribe((data) => {
-      this.documento = data;
-      //console.log(this.documento);
+      this.documento.set(data);
 
       this.form.patchValue({
-        nombre: this.documento.nombre
+        nombre: data.nombre
       });
 
       this.form.get('nombre')?.disable();
@@ -123,7 +126,7 @@ export class WordHtmlConverterComponent implements OnInit {
     request$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(data => {
-        this.htmlDoc = data;
+        this.htmlDoc.set(data);
 
         this.toastr.success(
           this.esActualizacion
@@ -143,13 +146,13 @@ export class WordHtmlConverterComponent implements OnInit {
 
   muestraDocumento(): void {
 
-    if (!this.htmlDoc?.idDocumento) {
+    if (!this.htmlDoc()?.idDocumento) {
       return;
     }
 
     this.router.navigate([
       '/inicio/html/resultado-doc-html',
-      this.htmlDoc.idDocumento
+      this.htmlDoc()?.idDocumento
     ]);
   }
 
@@ -161,7 +164,7 @@ export class WordHtmlConverterComponent implements OnInit {
     this.form.markAsUntouched();
 
     this.subido = false;
-    this.htmlDoc = null;
+    this.htmlDoc.set(null);
   }
 
   volver() {

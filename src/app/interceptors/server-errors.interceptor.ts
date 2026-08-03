@@ -24,6 +24,7 @@ export const serverErrorInterceptor: HttpInterceptorFn = (req, next) => {
     catchError((error: HttpErrorResponse) => {
 
       let errorMessage = '';
+      let is404Error: boolean = false;
 
       if (error.error instanceof ErrorEvent) {
 
@@ -45,6 +46,7 @@ export const serverErrorInterceptor: HttpInterceptorFn = (req, next) => {
 
           case 404:
             errorMessage = 'Recurso no encontrado';
+            is404Error = true;
             break;
 
           case 500:
@@ -79,6 +81,10 @@ export const serverErrorInterceptor: HttpInterceptorFn = (req, next) => {
       );*/
 
       toastr.error(errorMessage, 'Error');
+
+      if (is404Error) {
+        router.navigate(['/noEncontrado']);
+      }
 
       return throwError(() => error);
 

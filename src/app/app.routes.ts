@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { BlankComponent } from './layouts/blank/blank.component';
 import { FullComponent } from './layouts/full/full.component';
+import { AppErrorComponent } from './pages/authentication/error/error.component';
 
 export const routes: Routes = [
   {
@@ -31,6 +32,10 @@ export const routes: Routes = [
           ),
       },
     ],
+  },
+  {
+    path: 'noEncontrado',
+    component: AppErrorComponent,
   },
   {
     path: '**',
