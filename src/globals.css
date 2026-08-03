@@ -184,3 +184,15 @@
 .mat-mdc-select-panel {
   min-width: 100px !important;
 }
+
+.interactive-row {
+  cursor: pointer;
+}
+
+.interactive-row .mat-mdc-cell {
+  transition: background-color 150ms ease;
+}
+
+.interactive-row:hover .mat-mdc-cell {
+  background-color: var(--mat-sys-surface-container-high);
+}
