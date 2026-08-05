@@ -23,3 +23,8 @@ export const defaults: AppSettings = {
   language: 'en-us',
   navPos: 'side',
 };
+
+export const THEMES = {
+  LIGHT: 'light',
+  DARK: 'dark',
+} as const;
