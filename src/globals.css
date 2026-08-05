@@ -196,3 +196,19 @@
 .interactive-row:hover .mat-mdc-cell {
   background-color: var(--mat-sys-surface-container-high);
 }
+
+/* Botones Material deshabilitados */
+button[disabled],
+button:disabled {
+  opacity: 0.45;
+}
+
+/* Íconos Tabler dentro de botones deshabilitados */
+button[disabled] i-tabler,
+button:disabled i-tabler {
+  opacity: 0.45;
+}
+
+.mat-mdc-tooltip-surface {
+  white-space: pre-line;
+}

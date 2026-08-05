@@ -105,14 +105,14 @@
             <a (click)="editar(element)" class="me-2.5 cursor-pointer">
               <i-tabler
                 name="edit"
-                class="size-4.5! text-green-600"
-                matTooltip="Revisar HTML"
+                class="size-5 text-green-600"
+                [matTooltip]="element.versionActual > 0 ? 'Revisar HTML' : 'Revisar HTML\n (No existen versiones HTML)'"
               ></i-tabler>
             </a>
             <a (click)="eliminar(element)" class="me-2.5 cursor-pointer">
               <i-tabler
                 name="trash"
-                class="size-4.5! text-red-600"
+                class="size-5! text-red-600"
                 matTooltip="Eliminar HTML"
               ></i-tabler>
             </a>
