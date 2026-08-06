@@ -95,51 +95,25 @@ export class ResultadoDocHtmlComponent implements OnInit {
   }
 
   descargar(html: ArchivoDocResultado): void {
-    this.htmlDocumentoResultadoService
-      .descargar(html.id!)
-      .subscribe((response) => {
-        const blob = response.body!;
-
-        const contentDisposition =
-          response.headers.get('Content-Disposition');
-
-        let nombreArchivo = 'archivo.zip';
-
-        if (contentDisposition) {
-          const match = contentDisposition.match(
-            /filename="?([^"]+)"?/
-          );
-
-          if (match) {
-            nombreArchivo = match[1];
-          }
-        }
-
-        const url = window.URL.createObjectURL(blob);
-
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = nombreArchivo;
-        a.click();
-
-        window.URL.revokeObjectURL(url);
-      });
+    this.htmlDocumentoResultadoService.descargarArchivo(html.id!);
   }
 
   previsualizar(html: ArchivoDocResultado): void {
     this.htmlDocumentoResultadoService.descargarHtml(html.id!).subscribe((data) => {
-      this.abrirPreview(data.html, html.version!);
+      this.abrirPreview(html.id!, data.html, html.version!);
     });
   }
 
-  private abrirPreview(html: string, version: number): void {
+  private abrirPreview(id: number, html: string, version: number): void {
     this.dialog.open(HtmlPreviewDialogComponent, {
       width: '90vw',
-      maxWidth: '95vw',
       height: '90vh',
+      maxWidth: '90vw',
+      maxHeight: '90vh',
       data: {
-        html: html,
-        version: version
+        id,
+        html,
+        version
       }
     });
   }

@@ -19,6 +19,38 @@ export class HtmlDocumentoResultadoService {
     });
   }
 
+  public descargarArchivo(id: number): void {
+    this.descargar(id).subscribe((response) => {
+      const blob = response.body!;
+
+      const contentDisposition =
+        response.headers.get('Content-Disposition');
+
+      let nombreArchivo = 'archivo.zip';
+
+      //console.log(contentDisposition);
+
+      if (contentDisposition) {
+        const match = contentDisposition.match(
+          /filename="?([^"]+)"?/
+        );
+
+        if (match) {
+          nombreArchivo = match[1];
+        }
+      }
+
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = nombreArchivo;
+      a.click();
+
+      window.URL.revokeObjectURL(url);
+    });
+  }
+
    public descargarHtml(idResultado: number): Observable<HtmlDoc> {
     return this.http.get<HtmlDoc>(
       `${this.url}/${idResultado}/descargar-html`);

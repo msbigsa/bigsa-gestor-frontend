@@ -1,10 +1,36 @@
-<h2 mat-dialog-title>Previsualización Documento como HTML (Versión {{ version }})</h2>
+<div class="dialog-header">
+
+  <div class="dialog-header-content">
+
+    <mat-icon class="dialog-header-icon">description</mat-icon>
+
+    <div class="dialog-header-text">
+      <h2 mat-dialog-title>Previsualización Documento</h2>
+      <span class="version-chip">Versión {{ version }}</span>
+    </div>
+
+  </div>
+
+  <button
+    mat-icon-button
+    class="close-button"
+    aria-label="Cerrar"
+    matTooltip="Cerrar"
+    (click)="cerrar()">
+    <mat-icon>close</mat-icon>
+  </button>
+
+</div>
 
 <mat-dialog-content>
 
   <iframe
-    #iframe
-    class="preview-frame">
+    class="preview-frame"
+    [class.loaded]="loaded"
+    title="Previsualización del documento"
+    sandbox="allow-same-origin"
+    [srcdoc]="htmlSrcdoc"
+    (load)="onIframeLoad($event)">
   </iframe>
 
 </mat-dialog-content>
@@ -15,6 +41,15 @@
     mat-button 
     (click)="cerrar()">
     Cerrar
+  </button>
+
+  <button 
+    mat-flat-button
+    color="primary"
+    type="button"
+    class="px-6 py-5"
+    (click)="descargar()">
+    Descargar
   </button>
 
 </mat-dialog-actions>
