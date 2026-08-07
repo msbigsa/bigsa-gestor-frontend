@@ -51,6 +51,12 @@ export class HtmlVersionesTableComponent implements AfterViewInit {
     this.dataSource.paginator = this.paginator;
   }
 
+  getCorrelativo(dataIndex: number): number {
+    const pageIndex = this.dataSource.paginator?.pageIndex ?? 0;
+    const pageSize = this.dataSource.paginator?.pageSize ?? 0;
+    return pageIndex * pageSize + dataIndex + 1;
+  }
+
   getFechaCompleta(fecha: Date | string): string {
     return (
       this.datePipe.transform(
