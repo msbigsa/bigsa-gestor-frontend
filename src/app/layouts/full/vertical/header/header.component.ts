@@ -143,6 +143,7 @@ export class HeaderComponent implements OnInit {
 
   setlightDark(theme: string) {
     this.options.theme = theme;
+    this.settings.setOptions({ theme });
     this.emitOptions();
   }
 

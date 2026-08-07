@@ -34,7 +34,7 @@ export class CustomizerComponent {
 
   constructor(private settings: CoreService) { }
   setDark() {
-    this.settings.setOptions({ theme: 'dark' });
+    this.settings.setOptions({ theme: this.options.theme });
     this.emitOptions();
   }
 
