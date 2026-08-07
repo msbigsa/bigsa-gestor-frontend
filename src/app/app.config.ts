@@ -9,7 +9,6 @@ import {
   withInMemoryScrolling,
 } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { provideClientHydration } from '@angular/platform-browser';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 
 
@@ -81,8 +80,6 @@ export const appConfig: ApplicationConfig = {
       ]), 
       withInterceptorsFromDi()
     ),
-    provideClientHydration(),
-
  {
     provide: LOCALE_ID,
     useValue: 'es-CL',
@@ -115,7 +112,8 @@ export const appConfig: ApplicationConfig = {
           tokenGetter,
           allowedDomains: [
             new URL(environment.HOST_HTML).host,
-          ],          
+            new URL(environment.HOST_AVISO_COBRANZA).host,
+          ],
           disallowedRoutes: [
             `${environment.HOST_LOGIN}/auth/login/forgot`,
             `${environment.HOST_LOGIN}/auth/login`

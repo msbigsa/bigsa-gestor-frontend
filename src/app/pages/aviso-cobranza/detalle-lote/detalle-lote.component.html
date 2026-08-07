@@ -1,0 +1,349 @@
+<button mat-button color="primary" (click)="volver()" class="mb-4">
+  <mat-icon class="mr-1">arrow_back</mat-icon>
+  Volver al listado
+</button>
+
+@if (lote(); as loteActual) {
+  <mat-card class="cardWithShadow mb-6">
+    <mat-card-content class="p-6!">
+      <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+        <div>
+          <h2 class="text-xl font-semibold mb-1">
+            Lote #{{ loteActual.loteId }} — {{ loteActual.nombreArchivoOrigen }}
+          </h2>
+          <span [matTooltip]="getFechaCompleta(loteActual.fechaCarga)" class="text-sm text-gray-500">
+            Cargado el {{ loteActual.fechaCarga | date: "short" }}
+          </span>
+          <span class="text-sm text-gray-500"> · {{ nombreCompania(loteActual.ciasCodigo) }}</span>
+          <span
+            class="text-sm text-gray-500"
+            [matTooltip]="loteActual.usuarioCarga?.descripcion ?? ''"
+          > · por {{ usuarioTexto(loteActual.usuarioCarga) }}</span>
+
+          @if (loteActual.fechaValidacion) {
+            <div class="text-xs text-gray-500 mt-1">
+              Validado el {{ loteActual.fechaValidacion | date: "short" }} ·
+              <span [matTooltip]="loteActual.usuarioValidacion?.descripcion ?? ''">
+                por {{ usuarioTexto(loteActual.usuarioValidacion) }}
+              </span>
+            </div>
+          }
+
+          @if (loteActual.fechaEnvio) {
+            <div class="text-xs text-gray-500 mt-1">
+              Enviado el {{ loteActual.fechaEnvio | date: "short" }} ·
+              <span [matTooltip]="loteActual.usuarioEnvio?.descripcion ?? ''">
+                por {{ usuarioTexto(loteActual.usuarioEnvio) }}
+              </span>
+            </div>
+          }
+
+          @if (loteActual.fechaEliminacion) {
+            <div class="text-xs text-gray-500 mt-1">
+              Eliminado el {{ loteActual.fechaEliminacion | date: "short" }} ·
+              <span [matTooltip]="loteActual.usuarioEliminacion?.descripcion ?? ''">
+                por {{ usuarioTexto(loteActual.usuarioEliminacion) }}
+              </span>
+            </div>
+          }
+
+          @if (loteActual.loteOrigenId) {
+            <div class="mt-1">
+              <a
+                (click)="irADetalleLote(loteActual.loteOrigenId)"
+                class="text-sm text-primary cursor-pointer hover:underline"
+              >
+                ↳ Corrige al lote #{{ loteActual.loteOrigenId }}
+              </a>
+            </div>
+          }
+        </div>
+
+        <span
+          class="px-3 py-1 rounded-full text-sm font-semibold"
+          [ngClass]="estadoClase(loteActual.estadoLote)"
+          [matTooltip]="tooltipEliminado(loteActual, (loteActual.fechaEliminacion | date: 'short') ?? null)"
+        >
+          {{ estadoLabel(loteActual.estadoLote) }}
+        </span>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+        <div class="border border-border rounded-md p-3 text-center">
+          <p class="text-2xl font-semibold mb-0">{{ loteActual.totalFilas }}</p>
+          <p class="text-xs text-gray-500 mb-0">Filas totales</p>
+        </div>
+
+        @if (loteActual.totalFilasOk != null) {
+          <div class="border border-border rounded-md p-3 text-center">
+            <p class="text-2xl font-semibold mb-0 text-success">{{ loteActual.totalFilasOk }}</p>
+            <p class="text-xs text-gray-500 mb-0">Válidas</p>
+          </div>
+        }
+
+        @if (loteActual.totalFilasError != null) {
+          <div class="border border-border rounded-md p-3 text-center">
+            <p class="text-2xl font-semibold mb-0 text-error">{{ loteActual.totalFilasError }}</p>
+            <p class="text-xs text-gray-500 mb-0">Con error</p>
+          </div>
+        }
+
+        @if (loteActual.totalFilasOmitidas != null) {
+          <div class="border border-border rounded-md p-3 text-center">
+            <p class="text-2xl font-semibold mb-0">{{ loteActual.totalFilasOmitidas }}</p>
+            <p class="text-xs text-gray-500 mb-0">Omitidas</p>
+          </div>
+        }
+
+        @if (loteActual.totalFilasEnviadas != null) {
+          <div class="border border-border rounded-md p-3 text-center">
+            <p class="text-2xl font-semibold mb-0 text-success">{{ loteActual.totalFilasEnviadas }}</p>
+            <p class="text-xs text-gray-500 mb-0">Enviadas</p>
+          </div>
+        }
+
+        @if (loteActual.totalFilasEnvioFallido != null) {
+          <div class="border border-border rounded-md p-3 text-center">
+            <p class="text-2xl font-semibold mb-0 text-error">{{ loteActual.totalFilasEnvioFallido }}</p>
+            <p class="text-xs text-gray-500 mb-0">Envío fallido</p>
+          </div>
+        }
+      </div>
+
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div class="flex flex-wrap items-center gap-2">
+          <button mat-icon-button (click)="actualizar()" matTooltip="Actualizar">
+            <mat-icon>refresh</mat-icon>
+          </button>
+
+          @if (puedeValidar()) {
+            <button mat-flat-button color="primary" (click)="validar()">
+              <mat-icon class="mr-2">fact_check</mat-icon>
+              Validar
+            </button>
+          }
+
+          @if (puedeEnviar()) {
+            <button mat-flat-button color="primary" (click)="enviar()">
+              <mat-icon class="mr-2">send</mat-icon>
+              Enviar avisos
+            </button>
+          }
+
+          @if (puedeCorregir()) {
+            <button
+              mat-stroked-button
+              (click)="abrirDialogoCorreccion()"
+              [disabled]="loteEnProceso()"
+              [matTooltip]="loteEnProceso() ? 'No disponible mientras el lote está en proceso' : ''"
+            >
+              <mat-icon class="mr-2">file_upload</mat-icon>
+              Cargar corrección
+            </button>
+          }
+
+          @if (puedeEliminar()) {
+            <button
+              mat-stroked-button
+              color="warn"
+              (click)="eliminarLote()"
+              [disabled]="loteEnProceso()"
+              [matTooltip]="loteEnProceso() ? 'No disponible mientras el lote está en proceso' : ''"
+            >
+              <mat-icon class="mr-2">delete</mat-icon>
+              Eliminar lote
+            </button>
+          }
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <button mat-stroked-button (click)="descargarLog()">
+            <mat-icon class="mr-2">description</mat-icon>
+            Descargar detalle del proceso
+          </button>
+
+          <button mat-stroked-button (click)="descargarResumen()">
+            <mat-icon class="mr-2">summarize</mat-icon>
+            Descargar resumen
+          </button>
+        </div>
+      </div>
+
+      @if (correcciones().length > 0) {
+        <div class="mt-4 pt-4 border-t border-border">
+          <p class="text-sm font-semibold text-gray-500 mb-2">Correcciones de este lote</p>
+          <div class="flex flex-col gap-2">
+            @for (correccion of correcciones(); track correccion.loteId) {
+              <a
+                (click)="irADetalleLote(correccion.loteId)"
+                class="flex items-center justify-between gap-2 border border-border rounded-md px-3 py-2 cursor-pointer hover:bg-gray-50"
+              >
+                <span class="text-sm">
+                  Lote #{{ correccion.loteId }} — {{ correccion.fechaCarga | date: "short" }}
+                </span>
+                <span
+                  class="px-2 py-0.5 rounded-full text-xs font-semibold"
+                  [ngClass]="estadoClase(correccion.estadoLote)"
+                  [matTooltip]="tooltipEliminado(correccion, (correccion.fechaEliminacion | date: 'short') ?? null)"
+                >
+                  {{ estadoLabel(correccion.estadoLote) }}
+                </span>
+              </a>
+            }
+          </div>
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
+}
+
+<mat-card class="cardWithShadow">
+  <mat-card-content>
+    <div class="grid grid-cols-12 gap-4 items-center mb-4">
+      <div class="lg:col-span-6 col-span-12">
+        <mat-form-field appearance="outline" class="w-full hide-hint">
+          <mat-label>Filtrar por estado</mat-label>
+          <mat-select
+            [value]="filtroEstadoDetalle()"
+            (selectionChange)="onFiltroEstadoDetalleChange($event.value)"
+          >
+            <mat-option [value]="null">Todos los estados</mat-option>
+            @for (estado of estadosDetalleDisponibles; track estado) {
+              <mat-option [value]="estado">{{ detalleEstadoLabel(estado) }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div class="relative overflow-auto max-h-[70vh]">
+      <table mat-table [dataSource]="detalles()" multiTemplateDataRows class="min-w-full">
+        <ng-container matColumnDef="expand">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let d" class="whitespace-nowrap">
+            <button mat-icon-button (click)="toggleExpandido(d)" matTooltip="Ver datos originales de la planilla">
+              <mat-icon>{{ expandedDetalle() === d ? "expand_less" : "expand_more" }}</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="fila">
+          <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Fila</th>
+          <td mat-cell *matCellDef="let d" class="whitespace-nowrap">{{ d.nroFila }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="poliza">
+          <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Póliza</th>
+          <td mat-cell *matCellDef="let d" class="whitespace-nowrap">{{ d.nroPolizaRaw }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="cuotas">
+          <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Cuotas</th>
+          <td mat-cell *matCellDef="let d" class="whitespace-nowrap">{{ d.nroCuotas ?? "-" }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="vencimiento">
+          <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Vencimiento</th>
+          <td mat-cell *matCellDef="let d" class="whitespace-nowrap">
+            {{ d.fechaVenctoCuota ? (d.fechaVenctoCuota | date: "shortDate") : "-" }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="prima">
+          <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Prima impaga</th>
+          <td mat-cell *matCellDef="let d" class="whitespace-nowrap">
+            {{ d.primaImpaga != null ? (d.primaImpaga | number: "1.0-2") : "-" }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="correo">
+          <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Correo resuelto</th>
+          <td mat-cell *matCellDef="let d" class="whitespace-nowrap">
+            <div class="flex items-center justify-between gap-2">
+              <span>{{ d.correoResuelto ?? "-" }}</span>
+              @if (iconoCorreo(d); as icono) {
+                <i-tabler
+                  [name]="icono"
+                  class="size-4 shrink-0"
+                  [ngClass]="origenCorreoClase(d.origenCorreo)"
+                  [matTooltip]="origenCorreoTooltip(d.origenCorreo)"
+                ></i-tabler>
+              }
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="estado">
+          <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Estado</th>
+          <td mat-cell *matCellDef="let d" class="whitespace-nowrap">
+            <span
+              class="px-3 py-1 rounded-full text-xs font-semibold"
+              [ngClass]="detalleEstadoClase(d.estado)"
+              [matTooltip]="d.registroError ?? ''"
+            >
+              {{ detalleEstadoLabel(d.estado) }}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="accion">
+          <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Acción</th>
+          <td mat-cell *matCellDef="let d" class="action-link whitespace-nowrap">
+            <a
+              (click)="eliminarDetalle(d)"
+              class="me-2.5"
+              [class.cursor-pointer]="!loteEnProceso()"
+              [class.opacity-40]="loteEnProceso()"
+              [class.pointer-events-none]="loteEnProceso()"
+            >
+              <i-tabler
+                name="trash"
+                class="size-5! text-red-600"
+                [matTooltip]="loteEnProceso() ? 'No disponible mientras el lote está en proceso' : 'Eliminar registro'"
+              ></i-tabler>
+            </a>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="expandedDetail">
+          <td mat-cell *matCellDef="let d" [attr.colspan]="displayedColumns.length" class="bg-gray-50 p-4">
+            <p class="text-xs font-semibold text-gray-500 mb-2">Datos originales de la planilla</p>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+              <div><span class="text-gray-500">Póliza:</span> {{ d.nroPolizaRaw ?? "-" }}</div>
+              <div><span class="text-gray-500">Endoso:</span> {{ d.nroEndosoRaw ?? "-" }}</div>
+              <div><span class="text-gray-500">Nro. Cuota:</span> {{ d.nroCuotasRaw ?? "-" }}</div>
+              <div><span class="text-gray-500">Fecha Vcto. Cuota:</span> {{ d.fechaVenctoCuotaRaw ?? "-" }}</div>
+              <div><span class="text-gray-500">Rut Contratante:</span> {{ d.rutContratanteRaw ?? "-" }}</div>
+              <div><span class="text-gray-500">Mail:</span> {{ d.correoPlanillaRaw ?? "-" }}</div>
+              <div><span class="text-gray-500">Prima:</span> {{ d.primaImpagaRaw ?? "-" }}</div>
+              <div><span class="text-gray-500">Ramo:</span> {{ d.codigoRamoRaw ?? "-" }}</div>
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns" class="interactive-row"></tr>
+        <tr
+          mat-row
+          *matRowDef="let row; columns: ['expandedDetail']"
+          [class.hidden]="expandedDetalle() !== row"
+        ></tr>
+
+        <tr *matNoDataRow>
+          <td [attr.colspan]="displayedColumns.length" class="text-center text-sm text-gray-500 py-6">
+            No se encontraron coincidencias.
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <mat-paginator
+      [pageSize]="pageSize()"
+      [length]="totalElements()"
+      [pageIndex]="pageIndex()"
+      [pageSizeOptions]="[5, 10, 50, 100, 200]"
+      showFirstLastButtons
+      (page)="showMore($event)"
+    ></mat-paginator>
+  </mat-card-content>
+</mat-card>

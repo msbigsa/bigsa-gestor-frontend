@@ -53,6 +53,26 @@ export const navItems: NavItem[] = [
       },
     ],
   },
+  {
+    navCap: 'Cargas Masivas',
+  },
+  {
+    displayName: 'Avisos de Cobranza',
+    iconName: 'solar:letter-line-duotone',
+    route: '/menu-level',
+    children: [
+      {
+        displayName: 'Cargar Planilla',
+        iconName: 'solar:upload-line-duotone',
+        route: '/inicio/avisos-cobranza/cargar-lote',
+      },
+      {
+        displayName: 'Listado de Lotes',
+        iconName: 'solar:list-line-duotone',
+        route: '/inicio/avisos-cobranza/listar-lotes',
+      },
+    ],
+  },
   /*{
     displayName: 'Disabled',
     iconName: 'solar:bookmark-circle-line-duotone',

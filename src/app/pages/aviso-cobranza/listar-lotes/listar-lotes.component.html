@@ -1,0 +1,181 @@
+<mat-card class="cardWithShadow">
+  <mat-card-content>
+    <div class="grid grid-cols-12 gap-4 items-center">
+      <div class="lg:col-span-3 col-span-12">
+        <mat-form-field appearance="outline" class="w-full hide-hint">
+          <mat-label>Filtrar por estado</mat-label>
+          <mat-select
+            [value]="filtroEstado()"
+            (selectionChange)="onFiltroEstadoChange($event.value)"
+          >
+            <mat-option [value]="null">Todos los estados</mat-option>
+            @for (estado of estadosDisponibles; track estado) {
+              <mat-option [value]="estado">{{ estadoLabel(estado) }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="lg:col-span-3 col-span-12">
+        <mat-form-field appearance="outline" class="w-full hide-hint">
+          <mat-label>Filtrar por compañía</mat-label>
+          <mat-select
+            [value]="filtroCompania()"
+            (selectionChange)="onFiltroCompaniaChange($event.value)"
+          >
+            <mat-option [value]="null">Todas las compañías</mat-option>
+            @for (compania of companias(); track compania.ciasCodigo) {
+              <mat-option [value]="compania.ciasCodigo">{{ compania.ciasCodigo }} - {{ compania.ciasNombre }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="lg:col-span-2 col-span-12">
+        <mat-checkbox
+          [checked]="mostrarEliminados()"
+          (change)="onMostrarEliminadosChange($event.checked)"
+        >
+          Mostrar eliminados
+        </mat-checkbox>
+      </div>
+
+      <div class="lg:col-span-4 col-span-12 flex items-center justify-end gap-2">
+        <button mat-icon-button (click)="cargarLotes()" matTooltip="Actualizar listado">
+          <mat-icon>refresh</mat-icon>
+        </button>
+
+        <button mat-flat-button color="primary" (click)="irACargarLote()">
+          <mat-icon class="mr-2">add</mat-icon>
+          Cargar nueva planilla
+        </button>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+<mat-card class="cardWithShadow">
+  <mat-card-content>
+    <div class="relative overflow-auto max-h-[70vh]">
+      <table mat-table [dataSource]="lotes()" class="min-w-full">
+        <ng-container matColumnDef="#">
+          <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">#</th>
+          <td mat-cell *matCellDef="let lote" class="whitespace-nowrap">{{ lote.loteId }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="archivo">
+          <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Archivo</th>
+          <td mat-cell *matCellDef="let lote" class="whitespace-nowrap">
+            <div [class.pl-4]="lote.loteOrigenId">
+              <p class="mb-0">{{ lote.nombreArchivoOrigen }}</p>
+              @if (lote.loteOrigenId) {
+                <a
+                  (click)="irADetalleLote(lote.loteOrigenId)"
+                  class="text-xs text-primary cursor-pointer hover:underline"
+                >
+                  ↳ Corrige al lote #{{ lote.loteOrigenId }}
+                </a>
+              }
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="compania">
+          <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Compañía</th>
+          <td mat-cell *matCellDef="let lote" class="whitespace-nowrap">{{ nombreCompania(lote.ciasCodigo) }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="fecha">
+          <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Fecha de carga</th>
+          <td mat-cell *matCellDef="let lote" class="text-sm whitespace-nowrap">
+            <span [matTooltip]="getFechaCompleta(lote.fechaCarga)">
+              {{ lote.fechaCarga | date: "short" }}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="usuario">
+          <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Usuario</th>
+          <td
+            mat-cell
+            *matCellDef="let lote"
+            class="whitespace-nowrap"
+            [matTooltip]="lote.usuarioCarga?.descripcion ?? ''"
+          >
+            {{ usuarioTexto(lote.usuarioCarga) }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="estado">
+          <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Estado</th>
+          <td mat-cell *matCellDef="let lote" class="whitespace-nowrap">
+            <span
+              class="px-3 py-1 rounded-full text-xs font-semibold"
+              [ngClass]="estadoClase(lote.estadoLote)"
+              [matTooltip]="tooltipEliminado(lote, (lote.fechaEliminacion | date: 'short') ?? null)"
+            >
+              {{ estadoLabel(lote.estadoLote) }}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="totalFilas">
+          <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Filas</th>
+          <td mat-cell *matCellDef="let lote" class="whitespace-nowrap">{{ lote.totalFilas }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="accion">
+          <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Acción</th>
+          <td mat-cell *matCellDef="let lote" class="action-link whitespace-nowrap">
+            <a (click)="verDetalle(lote)" class="me-2.5 cursor-pointer">
+              <i-tabler name="eye" class="size-5! text-primary" matTooltip="Ver detalle"></i-tabler>
+            </a>
+            @if (puedeValidar(lote)) {
+              <a (click)="validar(lote)" class="me-2.5 cursor-pointer">
+                <i-tabler name="clipboard-check" class="size-5! text-warning" matTooltip="Validar lote"></i-tabler>
+              </a>
+            }
+            @if (puedeEnviar(lote)) {
+              <a (click)="enviar(lote)" class="me-2.5 cursor-pointer">
+                <i-tabler name="send" class="size-5! text-success" matTooltip="Enviar avisos"></i-tabler>
+              </a>
+            }
+            @if (puedeEliminar(lote)) {
+              <a
+                (click)="eliminar(lote)"
+                class="me-2.5"
+                [class.cursor-pointer]="!enProceso(lote)"
+                [class.opacity-40]="enProceso(lote)"
+                [class.pointer-events-none]="enProceso(lote)"
+              >
+                <i-tabler
+                  name="trash"
+                  class="size-5! text-red-600"
+                  [matTooltip]="enProceso(lote) ? 'No disponible mientras el lote está en proceso' : 'Eliminar lote'"
+                ></i-tabler>
+              </a>
+            }
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns" class="interactive-row"></tr>
+
+        <tr *matNoDataRow>
+          <td [attr.colspan]="displayedColumns.length" class="text-center text-sm text-gray-500 py-6">
+            No se encontraron coincidencias.
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <mat-paginator
+      [pageSize]="pageSize()"
+      [length]="totalElements()"
+      [pageIndex]="pageIndex()"
+      [pageSizeOptions]="[5, 10, 50, 100, 200]"
+      showFirstLastButtons
+      (page)="showMore($event)"
+    ></mat-paginator>
+  </mat-card-content>
+</mat-card>

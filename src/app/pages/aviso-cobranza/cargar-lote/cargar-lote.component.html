@@ -1,0 +1,159 @@
+<mat-card class="cardWithShadow">
+  <mat-card-header class="p-4!">
+    <mat-card-title class="mb-0 text-xl font-semibold">
+      Cargar planilla de avisos de cobranza
+    </mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content class="border-t border-border p-6!">
+    <div class="grid grid-cols-12 gap-6">
+
+      <div class="col-span-12">
+        <mat-label class="font-medium mb-2 block">Compañía</mat-label>
+        <mat-form-field appearance="outline" class="w-full">
+          <input
+            matInput
+            placeholder="Busque una compañía..."
+            [formControl]="ciaControl"
+            [matAutocomplete]="autoCia"
+            (focus)="seleccionarTexto($event)"
+          />
+          @if (ciaSeleccionada()) {
+            <button mat-icon-button matSuffix type="button" (click)="limpiarCia()" matTooltip="Limpiar selección">
+              <mat-icon>close</mat-icon>
+            </button>
+          }
+          <mat-autocomplete #autoCia="matAutocomplete" [displayWith]="displayCia" (optionSelected)="onCiaSeleccionada($event)">
+            @for (cia of ciasFiltradas | async; track cia.ciasCodigo) {
+              <mat-option [value]="cia">{{ cia.ciasCodigo }} - {{ cia.ciasNombre }}</mat-option>
+            }
+          </mat-autocomplete>
+        </mat-form-field>
+      </div>
+
+      <div class="col-span-12 lg:col-span-6">
+        <mat-label class="font-medium mb-2 block">Plantilla para el cliente</mat-label>
+        <mat-form-field appearance="outline" class="w-full">
+          <input
+            matInput
+            placeholder="Busque una plantilla..."
+            [formControl]="plantillaClienteControl"
+            [matAutocomplete]="autoPlantillaCliente"
+            (focus)="seleccionarTexto($event)"
+          />
+          @if (plantillaClienteSeleccionada()) {
+            <button mat-icon-button matSuffix type="button" (click)="limpiarPlantillaCliente()" matTooltip="Limpiar selección">
+              <mat-icon>close</mat-icon>
+            </button>
+          }
+          <mat-autocomplete #autoPlantillaCliente="matAutocomplete" [displayWith]="displayPlantilla" (optionSelected)="onPlantillaClienteSeleccionada($event)">
+            @for (plantilla of plantillasClienteFiltradas | async; track plantilla.formCodigo) {
+              <mat-option [value]="plantilla">{{ plantilla.formNombre }}</mat-option>
+            }
+          </mat-autocomplete>
+        </mat-form-field>
+      </div>
+
+      <div class="col-span-12 lg:col-span-6">
+        <mat-label class="font-medium mb-2 block">Plantilla para el ejecutivo</mat-label>
+        <mat-form-field appearance="outline" class="w-full">
+          <input
+            matInput
+            placeholder="Busque una plantilla..."
+            [formControl]="plantillaEjecutivoControl"
+            [matAutocomplete]="autoPlantillaEjecutivo"
+            (focus)="seleccionarTexto($event)"
+          />
+          @if (plantillaEjecutivoSeleccionada()) {
+            <button mat-icon-button matSuffix type="button" (click)="limpiarPlantillaEjecutivo()" matTooltip="Limpiar selección">
+              <mat-icon>close</mat-icon>
+            </button>
+          }
+          <mat-autocomplete #autoPlantillaEjecutivo="matAutocomplete" [displayWith]="displayPlantilla" (optionSelected)="onPlantillaEjecutivoSeleccionada($event)">
+            @for (plantilla of plantillasEjecutivoFiltradas | async; track plantilla.formCodigo) {
+              <mat-option [value]="plantilla">{{ plantilla.formNombre }}</mat-option>
+            }
+          </mat-autocomplete>
+        </mat-form-field>
+      </div>
+
+      <div class="col-span-12 flex flex-wrap gap-6">
+        <mat-checkbox [checked]="copiaCobrador()" (change)="copiaCobrador.set($event.checked)">
+          Copiar al cobrador del documento
+        </mat-checkbox>
+
+        <mat-checkbox [checked]="copiaEjecutivo()" (change)="copiaEjecutivo.set($event.checked)">
+          Copiar al ejecutivo del documento
+        </mat-checkbox>
+      </div>
+
+      <div class="col-span-12">
+        <mat-checkbox [checked]="excluirDescuentoPlanilla()" (change)="excluirDescuentoPlanilla.set($event.checked)">
+          Excluir forma de pago "Descuento por Planilla"
+        </mat-checkbox>
+      </div>
+
+      <div class="col-span-12">
+        <div class="flex items-center justify-between mb-2">
+          <mat-label class="font-medium block">
+            Cobradores incluidos ({{ cobradoresSeleccionados().size }} de {{ cobradores().length }})
+          </mat-label>
+
+          <div class="flex gap-2">
+            <button mat-button type="button" (click)="marcarTodosCobradores(true)">Marcar todos</button>
+            <button mat-button type="button" (click)="marcarTodosCobradores(false)">Desmarcar todos</button>
+          </div>
+        </div>
+
+        <mat-form-field appearance="outline" class="w-full hide-hint">
+          <input
+            matInput
+            placeholder="Filtrar cobradores por nombre..."
+            (input)="onFiltroCobradorInput($event)"
+          />
+        </mat-form-field>
+
+        <div class="border border-border rounded-md p-3 max-h-64 overflow-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+          @for (cobrador of cobradoresFiltrados(); track cobrador.persCodigo) {
+            <mat-checkbox
+              [checked]="cobradoresSeleccionados().has(cobrador.persCodigo)"
+              (change)="toggleCobrador(cobrador.persCodigo, $event.checked)"
+            >
+              {{ cobrador.persRazonSocial }}
+            </mat-checkbox>
+          } @empty {
+            <span class="text-sm text-gray-500">No hay cobradores para el filtro ingresado.</span>
+          }
+        </div>
+      </div>
+
+      <div class="col-span-12">
+        <mat-label class="font-medium mb-2 block">Archivo (planilla CSV separada por ";", o Excel .xlsx)</mat-label>
+
+        <app-file-dropzone
+          [title]="'Suba la planilla de cobranza'"
+          [subtitle]="'Arrastre el archivo aquí o haga clic para seleccionarlo. Se aceptan archivos CSV o Excel (.xlsx).'"
+          [accept]="'.csv,.xlsx'"
+          [maxSize]="100 * 1024 * 1024"
+          (fileSelected)="onArchivoSeleccionado($event)"
+          (fileRemoved)="onArchivoRemovido()"
+        ></app-file-dropzone>
+      </div>
+
+      <div class="col-span-12 flex justify-center mt-2">
+        <button
+          mat-flat-button
+          color="primary"
+          type="button"
+          class="px-6 py-5"
+          [disabled]="!puedeEnviar()"
+          (click)="enviar()"
+        >
+          <mat-icon class="mr-2">upload</mat-icon>
+          Cargar planilla
+        </button>
+      </div>
+
+    </div>
+  </mat-card-content>
+</mat-card>

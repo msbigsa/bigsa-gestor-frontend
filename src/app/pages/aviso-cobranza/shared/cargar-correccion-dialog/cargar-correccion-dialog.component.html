@@ -1,0 +1,27 @@
+<div class="flex items-center gap-3 border-b border-border pb-4 mb-4">
+  <mat-icon class="text-primary">file_upload</mat-icon>
+  <span class="text-lg font-semibold">Cargar corrección del lote #{{ data.loteOrigenId }}</span>
+</div>
+
+<mat-dialog-content>
+  <p class="mb-4 text-sm">
+    Se reutilizará la misma configuración del lote original ("{{ data.nombreArchivoOrigen }}") — compañía, plantillas y
+    cobradores incluidos. Solo necesitas subir el archivo corregido.
+  </p>
+
+  <app-file-dropzone
+    [title]="'Suba la planilla corregida'"
+    [subtitle]="'Arrastre el archivo aquí o haga clic para seleccionarlo. Se aceptan archivos CSV o Excel (.xlsx).'"
+    [accept]="'.csv,.xlsx'"
+    [maxSize]="100 * 1024 * 1024"
+    (fileSelected)="onArchivoSeleccionado($event)"
+    (fileRemoved)="onArchivoRemovido()"
+  ></app-file-dropzone>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button [disabled]="cargando()" (click)="cancelar()">Cancelar</button>
+  <button mat-flat-button color="primary" [disabled]="!puedeSubir()" (click)="subir()">
+    Subir corrección
+  </button>
+</mat-dialog-actions>

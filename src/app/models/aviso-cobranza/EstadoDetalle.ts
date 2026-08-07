@@ -1,0 +1,8 @@
+export enum EstadoDetalle {
+  PENDIENTE = 'PENDIENTE',
+  OK = 'OK',
+  ERROR = 'ERROR',
+  OMITIDO = 'OMITIDO',
+  ENVIADO = 'ENVIADO',
+  ENVIO_FALLIDO = 'ENVIO_FALLIDO',
+}
