@@ -30,7 +30,7 @@ import {
   origenCorreoIcono,
   origenCorreoTooltip,
   usuarioTexto,
-  tooltipEliminado,
+  tooltipEstadoLote,
 } from '../shared/estados-aviso-cobranza.util';
 import {
   CargarCorreccionDialogComponent,
@@ -89,7 +89,7 @@ export class DetalleLoteComponent implements OnInit {
   readonly origenCorreoTooltip = origenCorreoTooltip;
   readonly origenCorreoIcono = origenCorreoIcono;
   readonly origenCorreoClase = origenCorreoClase;
-  readonly tooltipEliminado = tooltipEliminado;
+  readonly tooltipEstadoLote = tooltipEstadoLote;
   readonly usuarioTexto = usuarioTexto;
 
   constructor() {

@@ -62,7 +62,7 @@
         <span
           class="px-3 py-1 rounded-full text-sm font-semibold"
           [ngClass]="estadoClase(loteActual.estadoLote)"
-          [matTooltip]="tooltipEliminado(loteActual, (loteActual.fechaEliminacion | date: 'short') ?? null)"
+          [matTooltip]="tooltipEstadoLote(loteActual)"
         >
           {{ estadoLabel(loteActual.estadoLote) }}
         </span>
@@ -184,7 +184,7 @@
                 <span
                   class="px-2 py-0.5 rounded-full text-xs font-semibold"
                   [ngClass]="estadoClase(correccion.estadoLote)"
-                  [matTooltip]="tooltipEliminado(correccion, (correccion.fechaEliminacion | date: 'short') ?? null)"
+                  [matTooltip]="tooltipEstadoLote(correccion)"
                 >
                   {{ estadoLabel(correccion.estadoLote) }}
                 </span>

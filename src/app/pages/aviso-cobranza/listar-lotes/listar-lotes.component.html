@@ -112,7 +112,7 @@
             <span
               class="px-3 py-1 rounded-full text-xs font-semibold"
               [ngClass]="estadoClase(lote.estadoLote)"
-              [matTooltip]="tooltipEliminado(lote, (lote.fechaEliminacion | date: 'short') ?? null)"
+              [matTooltip]="tooltipEstadoLote(lote)"
             >
               {{ estadoLabel(lote.estadoLote) }}
             </span>

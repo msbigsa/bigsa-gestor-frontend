@@ -101,14 +101,31 @@ export function usuarioTexto(usuario: UsuarioAvisoCobranza | undefined): string 
   return usuario.nombre ? `${usuario.codigo} - ${usuario.nombre}` : usuario.codigo;
 }
 
-// La fecha llega ya formateada (pipe "date" del template) porque este archivo no tiene inyeccion de Angular.
-export function tooltipEliminado(lote: LoteCargaResponse, fechaFormateada: string | null): string {
-  if (lote.estadoLote !== EstadoLote.ELIMINADO) {
-    return '';
+function usuarioOTexto(usuario: UsuarioAvisoCobranza | undefined): string {
+  return usuario ? usuarioTexto(usuario) : 'usuario desconocido';
+}
+
+// Formato propio (sin DatePipe, este archivo no tiene inyeccion de Angular) pero equivalente al "short" usado en el resto del modulo.
+function formatearFecha(fecha: string | undefined): string {
+  return fecha ? new Date(fecha).toLocaleString('es-CL', { dateStyle: 'short', timeStyle: 'short' }) : '-';
+}
+
+// Info de auditoria (fecha + usuario) para el hover del badge de estado -- prioriza el evento
+// mas reciente relevante al estado actual (eliminado > enviado > validado); vacio si no hay nada aun.
+export function tooltipEstadoLote(lote: LoteCargaResponse): string {
+  if (lote.estadoLote === EstadoLote.ELIMINADO && lote.fechaEliminacion) {
+    return `Eliminado el ${formatearFecha(lote.fechaEliminacion)} por ${usuarioOTexto(lote.usuarioEliminacion)}`;
   }
 
-  const usuario = lote.usuarioEliminacion ? usuarioTexto(lote.usuarioEliminacion) : 'usuario desconocido';
-  return `Eliminado el ${fechaFormateada ?? '-'} por ${usuario}`;
+  if (lote.fechaEnvio) {
+    return `Enviado el ${formatearFecha(lote.fechaEnvio)} por ${usuarioOTexto(lote.usuarioEnvio)}`;
+  }
+
+  if (lote.fechaValidacion) {
+    return `Validado el ${formatearFecha(lote.fechaValidacion)} por ${usuarioOTexto(lote.usuarioValidacion)}`;
+  }
+
+  return '';
 }
 
 // totalFilasOk es historico (no se decrementa al enviar), asi que lo pendiente real de enviar
