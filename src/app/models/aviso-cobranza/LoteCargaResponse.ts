@@ -21,6 +21,7 @@ export interface LoteCargaResponse {
   totalFilasEnvioFallido?: number;
   fechaEnvio?: string;
   usuarioEnvio?: UsuarioAvisoCobranza;
+  mensajeErrorEnvio?: string;
 
   fechaEliminacion?: string;
   usuarioEliminacion?: UsuarioAvisoCobranza;

@@ -12,6 +12,7 @@ const ESTADO_LOTE_LABEL: Record<EstadoLote, string> = {
   [EstadoLote.ERROR_VALIDACION]: 'Error de validación',
   [EstadoLote.ENVIANDO]: 'Enviando...',
   [EstadoLote.ENVIADO]: 'Enviado',
+  [EstadoLote.ENVIADO_CON_ERRORES]: 'Enviado con errores',
   [EstadoLote.ERROR_ENVIO]: 'Error de envío',
   [EstadoLote.ELIMINADO]: 'Eliminado',
 };
@@ -24,6 +25,7 @@ const ESTADO_LOTE_CLASE: Record<EstadoLote, string> = {
   [EstadoLote.ERROR_VALIDACION]: 'bg-light-error text-error',
   [EstadoLote.ENVIANDO]: 'bg-light-warning text-warning',
   [EstadoLote.ENVIADO]: 'bg-light-success text-success',
+  [EstadoLote.ENVIADO_CON_ERRORES]: 'bg-light-warning text-warning',
   [EstadoLote.ERROR_ENVIO]: 'bg-light-error text-error',
   [EstadoLote.ELIMINADO]: 'bg-light text-dark',
 };
@@ -111,10 +113,14 @@ function formatearFecha(fecha: string | undefined): string {
 }
 
 // Info de auditoria (fecha + usuario) para el hover del badge de estado -- prioriza el evento
-// mas reciente relevante al estado actual (eliminado > enviado > validado); vacio si no hay nada aun.
+// mas reciente relevante al estado actual (eliminado > error de envio > enviado > validado); vacio si no hay nada aun.
 export function tooltipEstadoLote(lote: LoteCargaResponse): string {
   if (lote.estadoLote === EstadoLote.ELIMINADO && lote.fechaEliminacion) {
     return `Eliminado el ${formatearFecha(lote.fechaEliminacion)} por ${usuarioOTexto(lote.usuarioEliminacion)}`;
+  }
+
+  if (tieneErrorEnvio(lote)) {
+    return `Error al enviar: ${lote.mensajeErrorEnvio}`;
   }
 
   if (lote.fechaEnvio) {
@@ -128,8 +134,14 @@ export function tooltipEstadoLote(lote: LoteCargaResponse): string {
   return '';
 }
 
-// totalFilasOk es historico (no se decrementa al enviar), asi que lo pendiente real de enviar
-// es OK menos lo que ya se intento enviar (enviadas + fallidas).
+// Para mostrar el motivo de forma visible (no solo en el hover) y evitar el error silencioso.
+export function tieneErrorEnvio(lote: LoteCargaResponse): boolean {
+  return lote.estadoLote === EstadoLote.ERROR_ENVIO && !!lote.mensajeErrorEnvio;
+}
+
+// totalFilasOk es historico (no se decrementa al enviar). Las filas en ENVIO_FALLIDO no se restan:
+// el backend las vuelve a OK automaticamente en cada (re)envio (iniciarEnvio -> reiniciarFilasEnvioFallido),
+// asi que siguen siendo "pendientes" -- solo lo enviado con exito ya no cuenta.
 export function filasPendientesDeEnviar(lote: LoteCargaResponse): number {
-  return (lote.totalFilasOk ?? 0) - (lote.totalFilasEnviadas ?? 0) - (lote.totalFilasEnvioFallido ?? 0);
+  return (lote.totalFilasOk ?? 0) - (lote.totalFilasEnviadas ?? 0);
 }

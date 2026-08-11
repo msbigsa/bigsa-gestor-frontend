@@ -1,6 +1,7 @@
 import {
   Component,
   ElementRef,
+  inject,
   input,
   output,
   ViewChild,
@@ -8,6 +9,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-file-dropzone',
@@ -16,7 +18,9 @@ import { MatButtonModule } from '@angular/material/button';
   styleUrls: ['./file-dropzone.component.scss'],
 })
 export class FileDropzoneComponent {
-  
+
+  private readonly toastr = inject(ToastrService);
+
   title = input<string>('Seleccione un archivo');
   subtitle = input<string>('Arrastre el archivo aquí o haga clic para seleccionarlo');
   accept = input<string>('*');
@@ -30,8 +34,6 @@ export class FileDropzoneComponent {
   file?: File;
 
   dragging = false;
-
-  error = '';
 
   openFileDialog(): void {
     this.fileInput.nativeElement.click();
@@ -80,10 +82,14 @@ export class FileDropzoneComponent {
   }
 
   private processFile(file: File): void {
-    this.error = '';
+    if (file.size === 0) {
+      this.toastr.error('El archivo está vacío.', 'Error');
+
+      return;
+    }
 
     if (file.size > this.maxSize()) {
-      this.error = 'El archivo supera el tamaño permitido.';
+      this.toastr.error('El archivo supera el tamaño permitido.', 'Error');
 
       return;
     }
@@ -97,7 +103,7 @@ export class FileDropzoneComponent {
         .map((x) => x.trim())
         .includes(extension)
     ) {
-      this.error = 'Tipo de archivo no permitido.';
+      this.toastr.error('Tipo de archivo no permitido.', 'Error');
 
       return;
     }

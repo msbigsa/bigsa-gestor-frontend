@@ -31,6 +31,7 @@ import {
   origenCorreoTooltip,
   usuarioTexto,
   tooltipEstadoLote,
+  tieneErrorEnvio,
 } from '../shared/estados-aviso-cobranza.util';
 import {
   CargarCorreccionDialogComponent,
@@ -90,6 +91,7 @@ export class DetalleLoteComponent implements OnInit {
   readonly origenCorreoIcono = origenCorreoIcono;
   readonly origenCorreoClase = origenCorreoClase;
   readonly tooltipEstadoLote = tooltipEstadoLote;
+  readonly tieneErrorEnvio = tieneErrorEnvio;
   readonly usuarioTexto = usuarioTexto;
 
   constructor() {
@@ -189,6 +191,7 @@ export class DetalleLoteComponent implements OnInit {
     return !!lote
       && (lote.estadoLote === EstadoLote.VALIDADO_OK
         || lote.estadoLote === EstadoLote.VALIDADO_CON_ERRORES
+        || lote.estadoLote === EstadoLote.ENVIADO_CON_ERRORES
         || lote.estadoLote === EstadoLote.ERROR_ENVIO)
       && filasPendientesDeEnviar(lote) > 0;
   }

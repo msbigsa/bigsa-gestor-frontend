@@ -16,7 +16,7 @@ import { AvisoCobranzaCompaniaService } from 'src/app/services/aviso-cobranza/av
 import { LoteCargaResponse } from 'src/app/models/aviso-cobranza/LoteCargaResponse';
 import { CompaniaDisponible } from 'src/app/models/aviso-cobranza/CompaniaDisponible';
 import { EstadoLote } from 'src/app/models/aviso-cobranza/EstadoLote';
-import { estadoLoteClase, estadoLoteLabel, filasPendientesDeEnviar, usuarioTexto, tooltipEstadoLote } from '../shared/estados-aviso-cobranza.util';
+import { estadoLoteClase, estadoLoteLabel, filasPendientesDeEnviar, usuarioTexto, tooltipEstadoLote, tieneErrorEnvio } from '../shared/estados-aviso-cobranza.util';
 
 @Component({
   selector: 'app-listar-lotes',
@@ -198,6 +198,7 @@ export class ListarLotesComponent implements OnInit {
   puedeEnviar(lote: LoteCargaResponse): boolean {
     return (lote.estadoLote === EstadoLote.VALIDADO_OK
       || lote.estadoLote === EstadoLote.VALIDADO_CON_ERRORES
+      || lote.estadoLote === EstadoLote.ENVIADO_CON_ERRORES
       || lote.estadoLote === EstadoLote.ERROR_ENVIO)
       && filasPendientesDeEnviar(lote) > 0;
   }
@@ -285,5 +286,6 @@ export class ListarLotesComponent implements OnInit {
   readonly estadoLabel = estadoLoteLabel;
   readonly estadoClase = estadoLoteClase;
   readonly tooltipEstadoLote = tooltipEstadoLote;
+  readonly tieneErrorEnvio = tieneErrorEnvio;
   readonly usuarioTexto = usuarioTexto;
 }
