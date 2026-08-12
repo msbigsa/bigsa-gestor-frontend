@@ -6,7 +6,7 @@
 
     <div class="dialog-header-text">
       <h2 mat-dialog-title>Previsualización Documento</h2>
-      <span class="version-chip">Versión {{ version }}</span>
+      <span class="version-chip">Versión {{ version() }}</span>
     </div>
 
   </div>
@@ -26,7 +26,7 @@
 
   <iframe
     class="preview-frame"
-    [class.loaded]="loaded"
+    [class.loaded]="loaded()"
     title="Previsualización del documento"
     sandbox="allow-same-origin"
     [srcdoc]="htmlSrcdoc"

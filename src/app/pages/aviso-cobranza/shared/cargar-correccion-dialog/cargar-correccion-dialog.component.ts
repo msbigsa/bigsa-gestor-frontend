@@ -1,4 +1,4 @@
-import { Component, Inject, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject, computed, inject, signal } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { MaterialModule } from 'src/app/material.module';
@@ -15,6 +15,7 @@ export interface CargarCorreccionDialogData {
   selector: 'app-cargar-correccion-dialog',
   imports: [MaterialModule, FileDropzoneComponent],
   templateUrl: './cargar-correccion-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CargarCorreccionDialogComponent {
 

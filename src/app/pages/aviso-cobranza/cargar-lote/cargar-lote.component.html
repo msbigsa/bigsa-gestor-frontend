@@ -24,7 +24,7 @@
             </button>
           }
           <mat-autocomplete #autoCia="matAutocomplete" [displayWith]="displayCia" (optionSelected)="onCiaSeleccionada($event)">
-            @for (cia of ciasFiltradas | async; track cia.ciasCodigo) {
+            @for (cia of ciasFiltradas(); track cia.ciasCodigo) {
               <mat-option [value]="cia">{{ cia.ciasCodigo }} - {{ cia.ciasNombre }}</mat-option>
             }
           </mat-autocomplete>
@@ -47,7 +47,7 @@
             </button>
           }
           <mat-autocomplete #autoPlantillaCliente="matAutocomplete" [displayWith]="displayPlantilla" (optionSelected)="onPlantillaClienteSeleccionada($event)">
-            @for (plantilla of plantillasClienteFiltradas | async; track plantilla.formCodigo) {
+            @for (plantilla of plantillasClienteFiltradas(); track plantilla.formCodigo) {
               <mat-option [value]="plantilla">{{ plantilla.formNombre }}</mat-option>
             }
           </mat-autocomplete>
@@ -70,7 +70,7 @@
             </button>
           }
           <mat-autocomplete #autoPlantillaEjecutivo="matAutocomplete" [displayWith]="displayPlantilla" (optionSelected)="onPlantillaEjecutivoSeleccionada($event)">
-            @for (plantilla of plantillasEjecutivoFiltradas | async; track plantilla.formCodigo) {
+            @for (plantilla of plantillasEjecutivoFiltradas(); track plantilla.formCodigo) {
               <mat-option [value]="plantilla">{{ plantilla.formNombre }}</mat-option>
             }
           </mat-autocomplete>

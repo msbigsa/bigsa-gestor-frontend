@@ -1,5 +1,5 @@
-import { Component, DestroyRef, OnInit, computed, effect, inject, input, signal, untracked } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, effect, inject, input, signal, untracked } from '@angular/core';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { CommonModule, DatePipe } from '@angular/common';
 import { HttpResponse } from '@angular/common/http';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
@@ -43,6 +43,7 @@ import {
   imports: [CommonModule, MaterialModule, MatPaginatorModule, TablerIconsModule],
   providers: [DatePipe],
   templateUrl: './detalle-lote.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DetalleLoteComponent implements OnInit {
 
@@ -65,7 +66,7 @@ export class DetalleLoteComponent implements OnInit {
   readonly lote = signal<LoteCargaResponse | null>(null);
   readonly correcciones = signal<LoteCargaResponse[]>([]);
 
-  readonly companias = signal<CompaniaDisponible[]>([]);
+  readonly companias = toSignal(this.companiaService.listarDisponibles(), { initialValue: [] as CompaniaDisponible[] });
   readonly nombreCompaniaPorCodigo = computed(() =>
     new Map(this.companias().map(c => [c.ciasCodigo, c.ciasNombre]))
   );
@@ -109,8 +110,6 @@ export class DetalleLoteComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.companiaService.listarDisponibles().subscribe(data => this.companias.set(data));
-
     interval(DetalleLoteComponent.INTERVALO_POLLING_MS)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {

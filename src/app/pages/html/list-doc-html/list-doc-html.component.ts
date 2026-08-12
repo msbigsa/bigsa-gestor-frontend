@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
@@ -32,6 +32,7 @@ import { ConfirmDialogResult } from 'src/app/shared/components/confirm-dialog/co
   providers: [DatePipe],
   templateUrl: './list-doc-html.component.html',
   styleUrl: './list-doc-html.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ListDocHtmlComponent implements OnInit {
 
@@ -77,6 +78,7 @@ export class ListDocHtmlComponent implements OnInit {
     this.cargarDocumentos();
   }
 
+  // Se evaluo toSignal() para esta carga, pero no cubre el refetch al cambiar pageIndex/filtro; se descarta por ahora.
   cargarDocumentos(): void {
     this.htmlDocumentoService.listarDocumentosPaginado(this.pageIndex(), this.pageSize(), this.filtro()).subscribe((data) => {
         

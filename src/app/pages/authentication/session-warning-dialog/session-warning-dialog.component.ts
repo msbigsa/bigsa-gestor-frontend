@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   OnInit,
@@ -28,6 +29,7 @@ import type { SessionDialogResult } from '../session-dialog-result';
   ],
   templateUrl: './session-warning-dialog.component.html',
   styleUrl: './session-warning-dialog.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SessionWarningDialogComponent implements OnInit {
 

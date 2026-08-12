@@ -1,9 +1,11 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   ElementRef,
   inject,
   input,
   output,
+  signal,
   ViewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -16,6 +18,7 @@ import { ToastrService } from 'ngx-toastr';
   imports: [CommonModule, MatIconModule, MatButtonModule],
   templateUrl: './file-dropzone.component.html',
   styleUrls: ['./file-dropzone.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FileDropzoneComponent {
 
@@ -31,9 +34,9 @@ export class FileDropzoneComponent {
   @ViewChild('fileInput')
   fileInput!: ElementRef<HTMLInputElement>;
 
-  file?: File;
+  readonly file = signal<File | undefined>(undefined);
 
-  dragging = false;
+  readonly dragging = signal(false);
 
   openFileDialog(): void {
     this.fileInput.nativeElement.click();
@@ -52,19 +55,19 @@ export class FileDropzoneComponent {
   onDragOver(event: DragEvent): void {
     event.preventDefault();
 
-    this.dragging = true;
+    this.dragging.set(true);
   }
 
   onDragLeave(event: DragEvent): void {
     event.preventDefault();
 
-    this.dragging = false;
+    this.dragging.set(false);
   }
 
   onDrop(event: DragEvent): void {
     event.preventDefault();
 
-    this.dragging = false;
+    this.dragging.set(false);
 
     if (!event.dataTransfer?.files.length) {
       return;
@@ -74,7 +77,7 @@ export class FileDropzoneComponent {
   }
 
   removeFile(): void {
-    this.file = undefined;
+    this.file.set(undefined);
 
     this.fileInput.nativeElement.value = '';
 
@@ -108,16 +111,18 @@ export class FileDropzoneComponent {
       return;
     }
 
-    this.file = file;
+    this.file.set(file);
 
     this.fileSelected.emit(file);
   }
 
   get fileSize(): string {
-    if (!this.file) {
+    const file = this.file();
+
+    if (!file) {
       return '';
     }
 
-    return (this.file.size / 1024 / 1024).toFixed(2) + ' MB';
+    return (file.size / 1024 / 1024).toFixed(2) + ' MB';
   }
 }

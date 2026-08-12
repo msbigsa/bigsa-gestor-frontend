@@ -1,6 +1,7 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import {
   AfterViewInit,
+  ChangeDetectionStrategy,
   Component,
   Input,
   ViewChild,
@@ -20,6 +21,7 @@ import { ArchivoDocResultado } from 'src/app/models/ArchivoDocResultado';
   providers: [DatePipe],
   templateUrl: './html-versiones-table.component.html',
   styleUrl: './html-versiones-table.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HtmlVersionesTableComponent implements AfterViewInit {
 

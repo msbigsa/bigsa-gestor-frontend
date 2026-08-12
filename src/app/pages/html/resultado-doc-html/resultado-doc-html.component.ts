@@ -1,10 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { ToastrService } from 'ngx-toastr';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { MaterialModule } from 'src/app/material.module';
 import { ArchivoDoc } from 'src/app/models/ArchivoDoc';
@@ -29,8 +28,9 @@ import { ConfirmDialogResult } from 'src/app/shared/components/confirm-dialog/co
   ],
   templateUrl: './resultado-doc-html.component.html',
   styleUrl: './resultado-doc-html.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ResultadoDocHtmlComponent implements OnInit {
+export class ResultadoDocHtmlComponent {
 
   readonly documento = signal<ArchivoDoc | null>(null);
 
@@ -40,39 +40,34 @@ export class ResultadoDocHtmlComponent implements OnInit {
     () => this.resultadosHtml().length === 1
   );
 
-  id = 0;
+  // Reactivo via withComponentInputBinding -- alias porque el resto del componente usa `id` como numero.
+  readonly idParam = input.required<string>({ alias: 'id' });
+  readonly id = computed(() => Number(this.idParam()));
 
   private readonly htmlDocumentoService = inject(HtmlDocumentoService);
   private readonly htmlDocumentoResultadoService = inject(HtmlDocumentoResultadoService);
   private readonly toastr = inject(ToastrService);
   private readonly router = inject(Router);
-  private readonly route = inject(ActivatedRoute);
   private readonly dialog = inject(MatDialog);
-  private readonly destroyRef = inject(DestroyRef);
 
-  ngOnInit(): void {
-    this.route.paramMap
-      .pipe(
-        takeUntilDestroyed(this.destroyRef)
-      )
-      .subscribe(params => {
-        const id = Number(params.get('id'));
+  constructor() {
+    effect(() => {
+      const id = this.id();
 
+      untracked(() => {
         if (id) {
-
           this.documento.set(null);
           this.resultadosHtml.set([]);
-
-          this.id = id;
           this.cargarDocumento();
         }
       });
+    });
   }
 
   cargarDocumento(): void {
     forkJoin({
-      documento: this.htmlDocumentoService.obtener(this.id),
-      htmls: this.htmlDocumentoService.listarHtmlResultado(this.id)
+      documento: this.htmlDocumentoService.obtener(this.id()),
+      htmls: this.htmlDocumentoService.listarHtmlResultado(this.id())
     })
       .subscribe({
         next: ({ documento, htmls }) => {
@@ -199,7 +194,7 @@ export class ResultadoDocHtmlComponent implements OnInit {
 
   nuevaVersion(generaNuevaVersion: boolean) {
     if (generaNuevaVersion) {
-      this.router.navigate(['/inicio/html/actualizar-doc-html', this.id]);
+      this.router.navigate(['/inicio/html/actualizar-doc-html', this.id()]);
     }
   }
 

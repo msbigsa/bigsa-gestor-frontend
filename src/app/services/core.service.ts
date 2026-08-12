@@ -11,6 +11,8 @@ export class CoreService {
     theme: this.getSavedTheme(),
   });
 
+  readonly options = this.optionsSignal.asReadonly();
+
   getOptions() {
     return this.optionsSignal();
   }

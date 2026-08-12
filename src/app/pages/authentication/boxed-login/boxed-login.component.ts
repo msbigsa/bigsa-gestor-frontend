@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { CoreService } from 'src/app/services/core.service';
 import {
   FormGroup,
@@ -26,6 +26,7 @@ import { SessionMonitorService } from 'src/app/services/session-monitor.service'
     BrandingComponent,
   ],
   templateUrl: './boxed-login.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppBoxedLoginComponent {
   options = this.settings.getOptions();
@@ -33,7 +34,7 @@ export class AppBoxedLoginComponent {
   username: string = '';
   password: string = '';
 
-  loading = false;
+  readonly loading = signal(false);
 
   private readonly loginService = inject(LoginService);
   private readonly router = inject(Router);
@@ -52,11 +53,11 @@ export class AppBoxedLoginComponent {
 
   submit(): void {
 
-    if (this.form.invalid || this.loading) {
+    if (this.form.invalid || this.loading()) {
       return;
     }
 
-    this.loading = true;
+    this.loading.set(true);
     this.form.disable();
 
     const username = this.form.get('uname')?.value ?? '';
@@ -66,7 +67,7 @@ export class AppBoxedLoginComponent {
       .login(username, password)
       .pipe(
         finalize(() => {
-          this.loading = false;
+          this.loading.set(false);
           this.form.enable();
         })
       )

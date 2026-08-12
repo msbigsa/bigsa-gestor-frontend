@@ -1,4 +1,4 @@
-import { Component, inject, Inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, Inject, signal } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MaterialModule } from 'src/app/material.module';
@@ -10,13 +10,14 @@ import { HtmlDocumentoResultadoService } from 'src/app/services/htmlDocumentoRes
     MaterialModule
   ],
   templateUrl: './html-preview-dialog.component.html',
-  styleUrl: './html-preview-dialog.component.scss'
+  styleUrl: './html-preview-dialog.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HtmlPreviewDialogComponent {
 
-  version: number = 0;
+  readonly version = signal(0);
 
-  loaded = false;
+  readonly loaded = signal(false);
 
   htmlSrcdoc: SafeHtml;
 
@@ -32,7 +33,7 @@ export class HtmlPreviewDialogComponent {
       version: number;
     }
   ) {
-    this.version = data.version;
+    this.version.set(data.version);
     this.htmlSrcdoc = this.sanitizer.bypassSecurityTrustHtml(data.html);
   }
 
@@ -57,7 +58,7 @@ export class HtmlPreviewDialogComponent {
       doc.head.appendChild(style);
     }
 
-    this.loaded = true;
+    this.loaded.set(true);
   }
 
   cerrar(): void {

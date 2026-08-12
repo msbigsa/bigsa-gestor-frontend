@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CoreService } from 'src/app/services/core.service';
 import { FormGroup, FormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -8,7 +8,8 @@ import { BrandingComponent } from '../../../layouts/full/vertical/sidebar/brandi
 @Component({
     selector: 'app-side-register',
     imports: [RouterModule, MaterialModule, FormsModule, ReactiveFormsModule, BrandingComponent],
-    templateUrl: './side-register.component.html'
+    templateUrl: './side-register.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppSideRegisterComponent {
   options = this.settings.getOptions();

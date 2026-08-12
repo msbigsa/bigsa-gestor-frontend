@@ -66,9 +66,9 @@
             mat-flat-button
             color="primary"
             class="w-full flex items-center justify-center"
-            [disabled]="!form.valid || loading"
+            [disabled]="!form.valid || loading()"
           >
-            @if (!loading) {
+            @if (!loading()) {
               Ingresar
             } @else {
               <mat-spinner diameter="20"></mat-spinner>

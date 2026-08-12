@@ -1,5 +1,5 @@
-import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { CommonModule, DatePipe } from '@angular/common';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
@@ -23,6 +23,7 @@ import { estadoLoteClase, estadoLoteLabel, filasPendientesDeEnviar, usuarioTexto
   imports: [CommonModule, MaterialModule, MatPaginatorModule, TablerIconsModule],
   providers: [DatePipe],
   templateUrl: './listar-lotes.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ListarLotesComponent implements OnInit {
 
@@ -46,7 +47,7 @@ export class ListarLotesComponent implements OnInit {
   readonly filtroCompania = signal<number | null>(null);
   readonly mostrarEliminados = signal(false);
 
-  readonly companias = signal<CompaniaDisponible[]>([]);
+  readonly companias = toSignal(this.companiaService.listarDisponibles(), { initialValue: [] as CompaniaDisponible[] });
   readonly nombreCompaniaPorCodigo = computed(() =>
     new Map(this.companias().map(c => [c.ciasCodigo, c.ciasNombre]))
   );
@@ -59,7 +60,6 @@ export class ListarLotesComponent implements OnInit {
   ngOnInit(): void {
     this.leerFiltrosDesdeUrl();
     this.cargarLotes();
-    this.companiaService.listarDisponibles().subscribe(data => this.companias.set(data));
 
     interval(ListarLotesComponent.INTERVALO_POLLING_MS)
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -118,6 +118,7 @@ export class ListarLotesComponent implements OnInit {
     return this.lotes().some(lote => ListarLotesComponent.ESTADOS_EN_PROCESO.includes(lote.estadoLote));
   }
 
+  // Se evaluo toSignal() para esta carga, pero no cubre el refetch al cambiar pageIndex/filtros; se descarta por ahora.
   cargarLotes(silencioso = false): void {
     this.loteService.listarLotes(
       this.pageIndex(),

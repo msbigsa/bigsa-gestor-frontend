@@ -1,11 +1,10 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
-import { Observable, combineLatest, finalize, map, startWith } from 'rxjs';
+import { combineLatest, finalize, map, startWith } from 'rxjs';
 
 import { MaterialModule } from 'src/app/material.module';
 import { FileDropzoneComponent } from 'src/app/shared/components/file-dropzone/file-dropzone.component';
@@ -25,15 +24,15 @@ import { LoteCargaConfirmacion } from 'src/app/models/aviso-cobranza/LoteCargaCo
 @Component({
   selector: 'app-cargar-lote',
   imports: [
-    CommonModule,
     MaterialModule,
     ReactiveFormsModule,
     FileDropzoneComponent,
   ],
   templateUrl: './cargar-lote.component.html',
   styleUrl: './cargar-lote.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CargarLoteComponent implements OnInit {
+export class CargarLoteComponent {
 
   private readonly loteService = inject(AvisoCobranzaLoteService);
   private readonly cobradorService = inject(AvisoCobranzaCobradorService);
@@ -42,38 +41,47 @@ export class CargarLoteComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
 
-  readonly companias = signal<CompaniaDisponible[]>([]);
-  readonly plantillas = signal<FormatoDisponible[]>([]);
-  readonly cobradores = signal<CobradorDisponible[]>([]);
+  readonly companias = toSignal(this.companiaService.listarDisponibles(), { initialValue: [] as CompaniaDisponible[] });
+  readonly plantillas = toSignal(this.plantillaService.listarDisponibles(), { initialValue: [] as FormatoDisponible[] });
+  readonly cobradores = toSignal(this.cobradorService.listarDisponibles(), { initialValue: [] as CobradorDisponible[] });
 
   // Compañía
   readonly ciaControl = new FormControl<string | CompaniaDisponible>('', { nonNullable: true });
   readonly ciaSeleccionada = signal<CompaniaDisponible | null>(null);
-  readonly ciasFiltradas: Observable<CompaniaDisponible[]> = combineLatest([
-    toObservable(this.companias),
-    this.ciaControl.valueChanges.pipe(startWith('')),
-  ]).pipe(
-    map(([companias, valor]) => this.filtrar(companias, this.textoCia, valor)),
+  readonly ciasFiltradas = toSignal(
+    combineLatest([
+      toObservable(this.companias),
+      this.ciaControl.valueChanges.pipe(startWith('')),
+    ]).pipe(
+      map(([companias, valor]) => this.filtrar(companias, this.textoCia, valor)),
+    ),
+    { initialValue: [] as CompaniaDisponible[] },
   );
 
   // Plantilla de cliente
   readonly plantillaClienteControl = new FormControl<string | FormatoDisponible>('', { nonNullable: true });
   readonly plantillaClienteSeleccionada = signal<FormatoDisponible | null>(null);
-  readonly plantillasClienteFiltradas: Observable<FormatoDisponible[]> = combineLatest([
-    toObservable(this.plantillas),
-    this.plantillaClienteControl.valueChanges.pipe(startWith('')),
-  ]).pipe(
-    map(([plantillas, valor]) => this.filtrar(plantillas, p => p.formNombre, valor)),
+  readonly plantillasClienteFiltradas = toSignal(
+    combineLatest([
+      toObservable(this.plantillas),
+      this.plantillaClienteControl.valueChanges.pipe(startWith('')),
+    ]).pipe(
+      map(([plantillas, valor]) => this.filtrar(plantillas, p => p.formNombre, valor)),
+    ),
+    { initialValue: [] as FormatoDisponible[] },
   );
 
   // Plantilla de ejecutivo
   readonly plantillaEjecutivoControl = new FormControl<string | FormatoDisponible>('', { nonNullable: true });
   readonly plantillaEjecutivoSeleccionada = signal<FormatoDisponible | null>(null);
-  readonly plantillasEjecutivoFiltradas: Observable<FormatoDisponible[]> = combineLatest([
-    toObservable(this.plantillas),
-    this.plantillaEjecutivoControl.valueChanges.pipe(startWith('')),
-  ]).pipe(
-    map(([plantillas, valor]) => this.filtrar(plantillas, p => p.formNombre, valor)),
+  readonly plantillasEjecutivoFiltradas = toSignal(
+    combineLatest([
+      toObservable(this.plantillas),
+      this.plantillaEjecutivoControl.valueChanges.pipe(startWith('')),
+    ]).pipe(
+      map(([plantillas, valor]) => this.filtrar(plantillas, p => p.formNombre, valor)),
+    ),
+    { initialValue: [] as FormatoDisponible[] },
   );
 
   // Todos marcados por defecto
@@ -106,12 +114,15 @@ export class CargarLoteComponent implements OnInit {
     !this.cargando()
   );
 
-  ngOnInit(): void {
-    this.companiaService.listarDisponibles().subscribe(data => this.companias.set(data));
-    this.plantillaService.listarDisponibles().subscribe(data => this.plantillas.set(data));
-    this.cobradorService.listarDisponibles().subscribe(data => {
-      this.cobradores.set(data);
-      this.cobradoresSeleccionados.set(new Set(data.map(c => c.persCodigo)));
+  constructor() {
+    effect(() => {
+      const cobradores = this.cobradores();
+
+      untracked(() => {
+        if (cobradores.length) {
+          this.cobradoresSeleccionados.set(new Set(cobradores.map(c => c.persCodigo)));
+        }
+      });
     });
   }
 

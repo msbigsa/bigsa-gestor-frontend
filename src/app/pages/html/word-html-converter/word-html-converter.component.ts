@@ -1,7 +1,7 @@
-import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators, } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { MaterialModule } from 'src/app/material.module';
 import { ArchivoDoc } from 'src/app/models/ArchivoDoc';
@@ -22,40 +22,38 @@ import { DocumentoResumenComponent } from '../shared/components/documento-resume
   ],
   templateUrl: './word-html-converter.component.html',
   styleUrl: './word-html-converter.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class WordHtmlConverterComponent implements OnInit {
+export class WordHtmlConverterComponent {
 
-  archivo!: File;
-  
-   readonly htmlDoc = signal<HtmlDoc | null>(null);
-  subido: boolean = false;
-  esActualizacion: boolean = false;
+  readonly archivo = signal<File | null>(null);
 
-  id = 0;  
+  readonly htmlDoc = signal<HtmlDoc | null>(null);
+  readonly subido = signal(false);
+
+  // Reactivo via withComponentInputBinding -- alias porque el resto del componente usa `id` como numero.
+  readonly idParam = input<string>(undefined, { alias: 'id' });
+  readonly id = computed(() => Number(this.idParam() ?? 0));
+  readonly esActualizacion = computed(() => this.id() > 0);
+
   readonly documento = signal<ArchivoDoc | null>(null);
 
   private readonly htmlService = inject(HtmlService);
   private readonly htmlDocumentoService = inject(HtmlDocumentoService);
   private readonly toastr = inject(ToastrService);
   private readonly router = inject(Router);
-  private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
 
-  ngOnInit(): void {
-    this.route.paramMap
-      .pipe(
-        takeUntilDestroyed(this.destroyRef)
-      )
-      .subscribe(params => {
-        const id = Number(params.get('id'));
+  constructor() {
+    effect(() => {
+      const id = this.id();
 
+      untracked(() => {
         if (id) {
-          this.id = id;
           this.cargarDocumento();
-          this.esActualizacion = this.id > 0;
         }
-      })
-      ;
+      });
+    });
   }
 
   form = new FormGroup({
@@ -71,7 +69,7 @@ export class WordHtmlConverterComponent implements OnInit {
 
     this.documento.set(null);
 
-    this.htmlDocumentoService.obtener(this.id).subscribe((data) => {
+    this.htmlDocumentoService.obtener(this.id()).subscribe((data) => {
       this.documento.set(data);
 
       this.form.patchValue({
@@ -83,7 +81,7 @@ export class WordHtmlConverterComponent implements OnInit {
   }
 
   onFileSelected(file: File) {
-    this.archivo = file;
+    this.archivo.set(file);
 
     this.form.patchValue({
       archivo: file,
@@ -94,7 +92,7 @@ export class WordHtmlConverterComponent implements OnInit {
   }
 
   onFileRemoved() {
-    this.archivo = undefined!;
+    this.archivo.set(null);
 
     this.form.patchValue({
       archivo: null,
@@ -119,8 +117,8 @@ export class WordHtmlConverterComponent implements OnInit {
 
     const formData = this.crearFormData();    
 
-    const request$ = this.esActualizacion
-      ? this.htmlService.actualizaDocToHtml(formData, this.id)
+    const request$ = this.esActualizacion()
+      ? this.htmlService.actualizaDocToHtml(formData, this.id())
       : this.htmlService.docToHtml(formData);
 
     request$
@@ -129,18 +127,18 @@ export class WordHtmlConverterComponent implements OnInit {
         this.htmlDoc.set(data);
 
         this.toastr.success(
-          this.esActualizacion
+          this.esActualizacion()
             ? 'HTML actualizado correctamente'
             : 'HTML generado correctamente',
           'Exitoso'
         );
 
-        if (this.esActualizacion) {
+        if (this.esActualizacion()) {
           this.cargarDocumento();
         }
 
         this.form.disable();
-        this.subido = true;
+        this.subido.set(true);
       });
   }
 
@@ -163,11 +161,11 @@ export class WordHtmlConverterComponent implements OnInit {
     this.form.markAsPristine();
     this.form.markAsUntouched();
 
-    this.subido = false;
+    this.subido.set(false);
     this.htmlDoc.set(null);
   }
 
   volver() {
-     this.router.navigate(['/inicio/html/resultado-doc-html', this.id]);
+     this.router.navigate(['/inicio/html/resultado-doc-html', this.id()]);
   }
 }

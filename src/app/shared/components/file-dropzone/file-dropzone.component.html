@@ -8,13 +8,13 @@
 
 <div
   class="dropzone"
-  [class.dragging]="dragging"
+  [class.dragging]="dragging()"
   (click)="openFileDialog()"
   (dragover)="onDragOver($event)"
   (dragleave)="onDragLeave($event)"
   (drop)="onDrop($event)"
 >
-  @if (!file) {
+  @if (!file()) {
     <div class="empty">
       <mat-icon class="icon"> upload_file </mat-icon>
 
@@ -34,7 +34,7 @@
 
         <div>
           <div class="name">
-            {{ file.name }}
+            {{ file()!.name }}
           </div>
 
           <div class="size">

@@ -1,4 +1,4 @@
-@if (esActualizacion) {
+@if (esActualizacion()) {
   <button mat-button color="primary" (click)="volver()" class="mb-4">
     <mat-icon>arrow_back</mat-icon>
     Volver
@@ -33,7 +33,7 @@
         }
       </mat-form-field>
 
-      @if (subido) {
+      @if (subido()) {
         <div class="flex gap-4 mt-4">
           <button
             mat-flat-button
@@ -46,7 +46,7 @@
             Ver documento generado
           </button>
 
-          @if (!esActualizacion) {
+          @if (!esActualizacion()) {
             <button
               mat-flat-button
               color="primary"

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { MaterialModule } from 'src/app/material.module';
 import { ArchivoDoc } from 'src/app/models/ArchivoDoc';
@@ -9,6 +9,7 @@ import { ArchivoDoc } from 'src/app/models/ArchivoDoc';
   imports: [CommonModule, MaterialModule, TablerIconsModule],
   templateUrl: './documento-resumen.component.html',
   styleUrl: './documento-resumen.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DocumentoResumenComponent {
 
