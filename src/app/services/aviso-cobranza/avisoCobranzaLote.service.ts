@@ -90,9 +90,12 @@ export class AvisoCobranzaLoteService {
     return this.http.post<void>(`${this.url}/${loteId}/enviar`, null);
   }
 
-  // Borrado en cascada: tambien elimina los lotes de correccion asociados (loteOrigenId).
-  eliminarLote(loteId: number): Observable<void> {
-    return this.http.delete<void>(`${this.url}/${loteId}`);
+  // hijosAEliminar: ids de correcciones a eliminar tambien; el resto queda standalone.
+  eliminarLote(loteId: number, hijosAEliminar: number[] = []): Observable<void> {
+    let parametros = new HttpParams();
+    hijosAEliminar.forEach(id => parametros = parametros.append('hijosAEliminar', id));
+
+    return this.http.delete<void>(`${this.url}/${loteId}`, { params: parametros });
   }
 
   eliminarDetalle(loteId: number, detalleId: number): Observable<void> {

@@ -6,7 +6,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { ToastrService } from 'ngx-toastr';
-import { interval } from 'rxjs';
+import { interval, of } from 'rxjs';
 
 import { MaterialModule } from 'src/app/material.module';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
@@ -17,6 +17,10 @@ import { LoteCargaResponse } from 'src/app/models/aviso-cobranza/LoteCargaRespon
 import { CompaniaDisponible } from 'src/app/models/aviso-cobranza/CompaniaDisponible';
 import { EstadoLote } from 'src/app/models/aviso-cobranza/EstadoLote';
 import { estadoLoteClase, estadoLoteLabel, filasPendientesDeEnviar, usuarioTexto, tooltipEstadoLote, tieneErrorEnvio } from '../shared/estados-aviso-cobranza.util';
+import {
+  EliminarLoteDialogComponent,
+  EliminarLoteDialogData,
+} from '../shared/eliminar-lote-dialog/eliminar-lote-dialog.component';
 
 @Component({
   selector: 'app-listar-lotes',
@@ -246,7 +250,7 @@ export class ListarLotesComponent implements OnInit {
       disableClose: true,
       data: {
         title: 'Eliminar lote',
-        message: `¿Está seguro que desea eliminar el lote #${lote.loteId} ("${lote.nombreArchivoOrigen}")? Esta acción también eliminará sus lotes de corrección asociados (si tiene) y no se puede deshacer.`,
+        message: `¿Está seguro que desea eliminar el lote #${lote.loteId} ("${lote.nombreArchivoOrigen}")? Esta acción no se puede deshacer.`,
         confirmText: 'Eliminar',
         cancelText: 'Cancelar',
         type: 'danger',
@@ -258,15 +262,45 @@ export class ListarLotesComponent implements OnInit {
         return;
       }
 
-      this.loteService.eliminarLote(lote.loteId).subscribe(() => {
-        this.toastr.success('Lote eliminado correctamente', 'Exitoso');
+      // Un hijo no puede tener hijos propios (sin correcciones anidadas).
+      const hijos$ = lote.loteOrigenId ? of([]) : this.loteService.listarCorrecciones(lote.loteId);
 
-        if (this.lotes().length === 1 && this.pageIndex() > 0) {
-          this.pageIndex.update(v => v - 1);
+      hijos$.subscribe(hijos => {
+        const eliminables = hijos.filter(h => h.estadoLote !== EstadoLote.ELIMINADO);
+
+        if (eliminables.length > 0) {
+          this.abrirDialogoHijos(lote, eliminables);
+        } else {
+          this.confirmarEliminacion(lote.loteId, []);
         }
-
-        this.cargarLotes();
       });
+    });
+  }
+
+  // Abre el checklist de hijos; cancelar aborta toda la eliminacion, no solo omite hijos.
+  private abrirDialogoHijos(lote: LoteCargaResponse, hijos: LoteCargaResponse[]): void {
+    const dialogRef = this.dialog.open(EliminarLoteDialogComponent, {
+      width: '480px',
+      disableClose: true,
+      data: { lote, hijos } satisfies EliminarLoteDialogData,
+    });
+
+    dialogRef.afterClosed().subscribe((hijosAEliminar?: number[]) => {
+      if (hijosAEliminar) {
+        this.confirmarEliminacion(lote.loteId, hijosAEliminar);
+      }
+    });
+  }
+
+  private confirmarEliminacion(loteId: number, hijosAEliminar: number[]): void {
+    this.loteService.eliminarLote(loteId, hijosAEliminar).subscribe(() => {
+      this.toastr.success('Lote eliminado correctamente', 'Exitoso');
+
+      if (this.lotes().length === 1 && this.pageIndex() > 0) {
+        this.pageIndex.update(v => v - 1);
+      }
+
+      this.cargarLotes();
     });
   }
 

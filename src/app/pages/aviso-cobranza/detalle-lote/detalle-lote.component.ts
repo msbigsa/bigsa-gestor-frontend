@@ -37,6 +37,10 @@ import {
   CargarCorreccionDialogComponent,
   CargarCorreccionDialogData,
 } from '../shared/cargar-correccion-dialog/cargar-correccion-dialog.component';
+import {
+  EliminarLoteDialogComponent,
+  EliminarLoteDialogData,
+} from '../shared/eliminar-lote-dialog/eliminar-lote-dialog.component';
 
 @Component({
   selector: 'app-detalle-lote',
@@ -65,6 +69,10 @@ export class DetalleLoteComponent implements OnInit {
 
   readonly lote = signal<LoteCargaResponse | null>(null);
   readonly correcciones = signal<LoteCargaResponse[]>([]);
+  // Excluye correcciones ya eliminadas.
+  readonly correccionesEliminables = computed(() =>
+    this.correcciones().filter(c => c.estadoLote !== EstadoLote.ELIMINADO)
+  );
 
   readonly companias = toSignal(this.companiaService.listarDisponibles(), { initialValue: [] as CompaniaDisponible[] });
   readonly nombreCompaniaPorCodigo = computed(() =>
@@ -252,7 +260,7 @@ export class DetalleLoteComponent implements OnInit {
       disableClose: true,
       data: {
         title: 'Eliminar lote',
-        message: `¿Está seguro que desea eliminar el lote #${lote.loteId} ("${lote.nombreArchivoOrigen}")? Esta acción también eliminará sus lotes de corrección asociados (si tiene) y no se puede deshacer.`,
+        message: `¿Está seguro que desea eliminar el lote #${lote.loteId} ("${lote.nombreArchivoOrigen}")? Esta acción no se puede deshacer.`,
         confirmText: 'Eliminar',
         cancelText: 'Cancelar',
         type: 'danger',
@@ -264,10 +272,34 @@ export class DetalleLoteComponent implements OnInit {
         return;
       }
 
-      this.loteService.eliminarLote(this.loteId()).subscribe(() => {
-        this.toastr.success('Lote eliminado correctamente', 'Exitoso');
-        this.volver();
-      });
+      const hijos = this.correccionesEliminables();
+      if (hijos.length > 0) {
+        this.abrirDialogoHijos(lote, hijos);
+      } else {
+        this.confirmarEliminacion([]);
+      }
+    });
+  }
+
+  // Abre el checklist de hijos; cancelar aborta toda la eliminacion, no solo omite hijos.
+  private abrirDialogoHijos(lote: LoteCargaResponse, hijos: LoteCargaResponse[]): void {
+    const dialogRef = this.dialog.open(EliminarLoteDialogComponent, {
+      width: '480px',
+      disableClose: true,
+      data: { lote, hijos } satisfies EliminarLoteDialogData,
+    });
+
+    dialogRef.afterClosed().subscribe((hijosAEliminar?: number[]) => {
+      if (hijosAEliminar) {
+        this.confirmarEliminacion(hijosAEliminar);
+      }
+    });
+  }
+
+  private confirmarEliminacion(hijosAEliminar: number[]): void {
+    this.loteService.eliminarLote(this.loteId(), hijosAEliminar).subscribe(() => {
+      this.toastr.success('Lote eliminado correctamente', 'Exitoso');
+      this.volver();
     });
   }
 
