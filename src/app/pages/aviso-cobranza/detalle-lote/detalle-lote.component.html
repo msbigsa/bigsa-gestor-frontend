@@ -119,9 +119,11 @@
 
       <div class="flex flex-wrap items-center justify-between gap-2">
         <div class="flex flex-wrap items-center gap-2">
-          <button mat-icon-button (click)="actualizar()" matTooltip="Actualizar">
-            <mat-icon>refresh</mat-icon>
-          </button>
+          @if (!loteEliminado()) {
+            <button mat-icon-button (click)="actualizar()" matTooltip="Actualizar">
+              <mat-icon>refresh</mat-icon>
+            </button>
+          }
 
           @if (puedeValidar()) {
             <button mat-flat-button color="primary" (click)="validar()">
@@ -163,17 +165,19 @@
           }
         </div>
 
-        <div class="flex flex-wrap items-center gap-2">
-          <button mat-stroked-button (click)="descargarLog()">
-            <mat-icon class="mr-2">description</mat-icon>
-            Descargar detalle del proceso
-          </button>
+        @if (puedeDescargar()) {
+          <div class="flex flex-wrap items-center gap-2">
+            <button mat-stroked-button (click)="descargarLog()">
+              <mat-icon class="mr-2">description</mat-icon>
+              Descargar detalle del proceso
+            </button>
 
-          <button mat-stroked-button (click)="descargarResumen()">
-            <mat-icon class="mr-2">summarize</mat-icon>
-            Descargar resumen
-          </button>
-        </div>
+            <button mat-stroked-button (click)="descargarResumen()">
+              <mat-icon class="mr-2">summarize</mat-icon>
+              Descargar resumen
+            </button>
+          </div>
+        }
       </div>
 
       @if (correcciones().length > 0) {
@@ -213,6 +217,14 @@
   </mat-card>
 }
 
+@if (loteEliminado()) {
+  <mat-card class="cardWithShadow">
+    <mat-card-content class="text-center text-sm text-gray-500 py-6">
+      <mat-icon class="align-middle mr-1">delete</mat-icon>
+      Este lote fue eliminado. No se conservan los registros asociados.
+    </mat-card-content>
+  </mat-card>
+} @else {
 <mat-card class="cardWithShadow">
   <mat-card-content>
     <div class="grid grid-cols-12 gap-4 items-center mb-4">
@@ -363,3 +375,4 @@
     ></mat-paginator>
   </mat-card-content>
 </mat-card>
+}

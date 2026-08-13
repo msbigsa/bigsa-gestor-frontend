@@ -203,13 +203,22 @@ export class DetalleLoteComponent implements OnInit {
       && filasPendientesDeEnviar(lote) > 0;
   }
 
+  loteEliminado(): boolean {
+    return this.lote()?.estadoLote === EstadoLote.ELIMINADO;
+  }
+
   puedeEliminar(): boolean {
-    return this.lote()?.estadoLote !== EstadoLote.ELIMINADO;
+    return !this.loteEliminado();
   }
 
   // No se admiten correcciones anidadas: solo lotes "raiz" (sin padre) pueden corregirse.
+  // Tampoco sobre un lote eliminado.
   puedeCorregir(): boolean {
-    return !this.lote()?.loteOrigenId;
+    return !this.loteEliminado() && !this.lote()?.loteOrigenId;
+  }
+
+  puedeDescargar(): boolean {
+    return !this.loteEliminado();
   }
 
   validar(): void {
