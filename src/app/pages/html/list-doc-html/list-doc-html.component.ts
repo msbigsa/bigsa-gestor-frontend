@@ -133,7 +133,7 @@ export class ListDocHtmlComponent implements OnInit {
   }
 
   editar(documento: ArchivoDoc): void {
-    this.router.navigate([`/inicio/html/resultado-doc-html/${documento.id}`]);
+    this.router.navigate([`/inicio/html/listar-doc-html/resultado-doc-html/${documento.id}`]);
   }
 
 }

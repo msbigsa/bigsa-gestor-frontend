@@ -149,7 +149,7 @@ export class WordHtmlConverterComponent {
     }
 
     this.router.navigate([
-      '/inicio/html/resultado-doc-html',
+      '/inicio/html/listar-doc-html/resultado-doc-html',
       this.htmlDoc()?.idDocumento
     ]);
   }
