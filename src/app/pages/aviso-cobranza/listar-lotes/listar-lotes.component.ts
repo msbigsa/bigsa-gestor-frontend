@@ -6,7 +6,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { ToastrService } from 'ngx-toastr';
-import { interval, of } from 'rxjs';
+import { EMPTY, interval, of } from 'rxjs';
+import { catchError, exhaustMap, filter } from 'rxjs/operators';
 
 import { MaterialModule } from 'src/app/material.module';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
@@ -66,11 +67,21 @@ export class ListarLotesComponent implements OnInit {
     this.cargarLotes();
 
     interval(ListarLotesComponent.INTERVALO_POLLING_MS)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => {
-        if (this.hayLotesEnProceso()) {
-          this.cargarLotes(true);
-        }
+      .pipe(
+        filter(() => this.hayLotesEnProceso()),
+        exhaustMap(() => this.loteService.listarLotes(
+          this.pageIndex(),
+          this.pageSize(),
+          this.filtroEstado() ?? undefined,
+          this.filtroCompania() ?? undefined,
+          true,
+          this.mostrarEliminados(),
+        ).pipe(catchError(() => EMPTY))),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(data => {
+        this.lotes.set(data.content);
+        this.totalElements.set(data.totalElements);
       });
   }
 

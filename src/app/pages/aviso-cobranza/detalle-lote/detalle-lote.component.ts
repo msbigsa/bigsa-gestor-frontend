@@ -7,7 +7,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { ToastrService } from 'ngx-toastr';
-import { interval } from 'rxjs';
+import { EMPTY, interval } from 'rxjs';
+import { catchError, exhaustMap, filter } from 'rxjs/operators';
 
 import { MaterialModule } from 'src/app/material.module';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
@@ -119,12 +120,24 @@ export class DetalleLoteComponent implements OnInit {
 
   ngOnInit(): void {
     interval(DetalleLoteComponent.INTERVALO_POLLING_MS)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => {
-        if (this.loteEnProceso()) {
-          this.cargarLote(true);
-          this.cargarDetalles(true);
-        }
+      .pipe(
+        filter(() => this.loteEnProceso()),
+        exhaustMap(() => this.loteService.obtenerLote(this.loteId(), true).pipe(catchError(() => EMPTY))),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(data => this.lote.set(data));
+
+    interval(DetalleLoteComponent.INTERVALO_POLLING_MS)
+      .pipe(
+        filter(() => this.loteEnProceso()),
+        exhaustMap(() => this.loteService
+          .listarDetalles(this.loteId(), this.pageIndex(), this.pageSize(), this.filtroEstadoDetalle() ?? undefined, true)
+          .pipe(catchError(() => EMPTY))),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(data => {
+        this.detalles.set(data.content);
+        this.totalElements.set(data.totalElements);
       });
   }
 
