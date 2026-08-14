@@ -33,6 +33,8 @@ import {
   usuarioTexto,
   tooltipEstadoLote,
   tieneErrorEnvio,
+  motivosError,
+  tooltipRegistroError,
 } from '../shared/estados-aviso-cobranza.util';
 import {
   CargarCorreccionDialogComponent,
@@ -42,6 +44,10 @@ import {
   EliminarLoteDialogComponent,
   EliminarLoteDialogData,
 } from '../shared/eliminar-lote-dialog/eliminar-lote-dialog.component';
+import {
+  ErroresRegistroDialogComponent,
+  ErroresRegistroDialogData,
+} from '../shared/errores-registro-dialog/errores-registro-dialog.component';
 
 @Component({
   selector: 'app-detalle-lote',
@@ -103,6 +109,8 @@ export class DetalleLoteComponent implements OnInit {
   readonly tooltipEstadoLote = tooltipEstadoLote;
   readonly tieneErrorEnvio = tieneErrorEnvio;
   readonly usuarioTexto = usuarioTexto;
+  readonly motivosError = motivosError;
+  readonly tooltipRegistroError = tooltipRegistroError;
 
   constructor() {
     effect(() => {
@@ -185,6 +193,17 @@ export class DetalleLoteComponent implements OnInit {
 
   toggleExpandido(detalle: LoteDetalleResponse): void {
     this.expandedDetalle.set(this.expandedDetalle() === detalle ? null : detalle);
+  }
+
+  verErroresRegistro(detalle: LoteDetalleResponse): void {
+    this.dialog.open(ErroresRegistroDialogComponent, {
+      width: '440px',
+      data: {
+        nroFila: detalle.nroFila,
+        poliza: detalle.nroPolizaRaw,
+        motivos: this.motivosError(detalle.registroError),
+      } satisfies ErroresRegistroDialogData,
+    });
   }
 
   // Antes de validar, los datos "resueltos" (incluido el origen del correo) no existen todavía.
@@ -379,7 +398,7 @@ export class DetalleLoteComponent implements OnInit {
   }
 
   irADetalleLote(loteId: number): void {
-    this.router.navigate(['/inicio/avisos-cobranza/detalle-lote', loteId]);
+    this.router.navigate(['/inicio/avisos-cobranza/listar-lotes/detalle-lote', loteId]);
   }
 
   descargarLog(): void {

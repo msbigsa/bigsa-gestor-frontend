@@ -139,6 +139,31 @@ export function tieneErrorEnvio(lote: LoteCargaResponse): boolean {
   return lote.estadoLote === EstadoLote.ERROR_ENVIO && !!lote.mensajeErrorEnvio;
 }
 
+// Replica el split que hace el backend (LoteLogServiceImpl.dividirMotivos) para poder listar los motivos por separado.
+export function motivosError(registroError: string | undefined): string[] {
+  if (!registroError) {
+    return [];
+  }
+
+  return registroError.split(';').map(motivo => motivo.trim()).filter(motivo => motivo.length > 0);
+}
+
+// Texto corto para el hover del badge de estado: el motivo completo si es uno solo, o un resumen si son varios
+// (la lista completa se ve en el dialog que abre el click sobre el badge).
+export function tooltipRegistroError(registroError: string | undefined): string {
+  const motivos = motivosError(registroError);
+
+  if (motivos.length === 0) {
+    return '';
+  }
+
+  if (motivos.length === 1) {
+    return motivos[0];
+  }
+
+  return `${motivos.length} errores - clic para ver detalle`;
+}
+
 // totalFilasOk es historico (no se decrementa al enviar). Las filas en ENVIO_FALLIDO no se restan:
 // el backend las vuelve a OK automaticamente en cada (re)envio (iniciarEnvio -> reiniciarFilasEnvioFallido),
 // asi que siguen siendo "pendientes" -- solo lo enviado con exito ya no cuenta.

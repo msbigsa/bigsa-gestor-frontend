@@ -36,6 +36,12 @@ export const serverErrorInterceptor: HttpInterceptorFn = (req, next) => {
 
           case 400:
             errorMessage = 'Solicitud incorrecta';
+
+            // ms-bigsa-aviso-cobranza ya devuelve un mensaje de negocio legible en "mensaje"
+            if (error.url?.includes(environment.HOST_AVISO_COBRANZA) && error.error?.mensaje) {
+              errorMessage = error.error.mensaje;
+            }
+
             break;
 
           case 401:

@@ -190,11 +190,11 @@ export class ListarLotesComponent implements OnInit {
   }
 
   verDetalle(lote: LoteCargaResponse): void {
-    this.router.navigate(['/inicio/avisos-cobranza/detalle-lote', lote.loteId]);
+    this.router.navigate(['/inicio/avisos-cobranza/listar-lotes/detalle-lote', lote.loteId]);
   }
 
   irADetalleLote(loteId: number): void {
-    this.router.navigate(['/inicio/avisos-cobranza/detalle-lote', loteId]);
+    this.router.navigate(['/inicio/avisos-cobranza/listar-lotes/detalle-lote', loteId]);
   }
 
   puedeValidar(lote: LoteCargaResponse): boolean {

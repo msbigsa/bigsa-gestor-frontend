@@ -307,7 +307,9 @@
             <span
               class="px-3 py-1 rounded-full text-xs font-semibold"
               [ngClass]="detalleEstadoClase(d.estado)"
-              [matTooltip]="d.registroError ?? ''"
+              [matTooltip]="tooltipRegistroError(d.registroError)"
+              [class.cursor-pointer]="!!d.registroError"
+              (click)="d.registroError && verErroresRegistro(d)"
             >
               {{ detalleEstadoLabel(d.estado) }}
             </span>

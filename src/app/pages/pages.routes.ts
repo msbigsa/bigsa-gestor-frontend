@@ -70,7 +70,7 @@ export const PagesRoutes: Routes = [
     canActivate: [CertGuard]
   },
   {
-    path: 'avisos-cobranza/detalle-lote/:id',
+    path: 'avisos-cobranza/listar-lotes/detalle-lote/:id',
     component: DetalleLoteComponent,
     data: {
       title: 'Detalle de Lote de Avisos de Cobranza'
