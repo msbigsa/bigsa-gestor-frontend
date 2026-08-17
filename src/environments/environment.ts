@@ -4,6 +4,9 @@ export const environment = {
   HOST_HTML: 'http://localhost:8082/ms-bigsa-html-converter',
   HOST_AVISO_COBRANZA: 'http://localhost:8082/ms-bigsa-aviso-cobranza',
   HOST_NOTIFICA: 'http://localhost:8082/ms-bigsa-notifica',
+  // Apaga toda la funcionalidad de notificaciones (campanita, SSE, pagina de listado) sin tocar codigo,
+  // por si el backend de notificaciones da problemas.
+  NOTIFICACIONES_HABILITADAS: true,
   REINTENTS: 2,
   TOKEN_NAME: 'jwtToken',
   REFRESH_TOKEN_NAME: 'refreshToken',

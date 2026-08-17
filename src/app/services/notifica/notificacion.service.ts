@@ -18,6 +18,10 @@ export class NotificacionService {
 
   private eventSource?: EventSourcePolyfill;
 
+  // Un solo interruptor en environment.ts -- si el backend de notificaciones da problemas, se apaga
+  // aca sin tocar mas codigo. El header lo usa para ocultar la campanita.
+  readonly habilitado = environment.NOTIFICACIONES_HABILITADAS;
+
   readonly notificaciones = signal<Notificacion[]>([]);
 
   readonly cantidadNoLeidas = computed(() => this.notificaciones().length);
@@ -27,6 +31,10 @@ export class NotificacionService {
   start(): void {
 
     this.stop();
+
+    if (!this.habilitado) {
+      return;
+    }
 
     const token = sessionStorage.getItem(environment.TOKEN_NAME);
 

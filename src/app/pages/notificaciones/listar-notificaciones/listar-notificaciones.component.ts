@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@ang
 import { CommonModule, DatePipe } from '@angular/common';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
+import { Router } from '@angular/router';
 import { TablerIconsModule } from 'angular-tabler-icons';
 
 import { MaterialModule } from 'src/app/material.module';
@@ -22,6 +23,7 @@ export class ListarNotificacionesComponent implements OnInit {
   private readonly notificacionService = inject(NotificacionService);
   private readonly datePipe = inject(DatePipe);
   private readonly dialog = inject(MatDialog);
+  private readonly router = inject(Router);
 
   readonly notificaciones = signal<Notificacion[]>([]);
   readonly pageIndex = signal(0);
@@ -31,6 +33,11 @@ export class ListarNotificacionesComponent implements OnInit {
   readonly displayedColumns: string[] = ['estado', 'titulo', 'mensaje', 'fecha', 'acciones'];
 
   ngOnInit(): void {
+    if (!this.notificacionService.habilitado) {
+      this.router.navigate(['/inicio']);
+      return;
+    }
+
     this.cargar();
   }
 

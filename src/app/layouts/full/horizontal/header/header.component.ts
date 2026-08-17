@@ -12,6 +12,7 @@ import { AppSettings } from 'src/app/config';
 import { NgScrollbarModule } from 'ngx-scrollbar';
 import { LoginService } from 'src/app/services/login.service';
 import { NotificacionService } from 'src/app/services/notifica/notificacion.service';
+import { UserAvatarComponent } from 'src/app/shared/components/user-avatar/user-avatar.component';
 
 interface profiledd {
   id: number;
@@ -37,7 +38,7 @@ interface quicklinks {
 
 @Component({
   selector: 'app-horizontal-header',
-  imports: [RouterModule, TablerIconsModule, MaterialModule, BrandingComponent, NgScrollbarModule],
+  imports: [RouterModule, TablerIconsModule, MaterialModule, BrandingComponent, NgScrollbarModule, UserAvatarComponent],
   templateUrl: './header.component.html'
 })
 export class AppHorizontalHeaderComponent implements OnInit {
@@ -53,6 +54,7 @@ export class AppHorizontalHeaderComponent implements OnInit {
 
   readonly notificaciones = this.notificacionService.notificaciones;
   readonly cantidadNoLeidas = this.notificacionService.cantidadNoLeidas;
+  readonly notificacionesHabilitadas = this.notificacionService.habilitado;
 
   ngOnInit(): void {
     if (this.loginService.isLogged()) {
