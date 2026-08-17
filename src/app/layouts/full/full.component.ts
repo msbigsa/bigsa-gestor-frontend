@@ -22,6 +22,7 @@ import { AppBreadcrumbComponent } from './shared/breadcrumb/breadcrumb.component
 import { CustomizerComponent } from './shared/customizer/customizer.component';
 import { LoginService } from 'src/app/services/login.service';
 import { Usuario } from 'src/app/models/Usuario';
+import { UserAvatarComponent } from 'src/app/shared/components/user-avatar/user-avatar.component';
 
 const MOBILE_VIEW = 'screen and (max-width: 768px)';
 const TABLET_VIEW = 'screen and (min-width: 769px) and (max-width: 1024px)';
@@ -58,6 +59,7 @@ interface quicklinks {
         AppHorizontalSidebarComponent,
         AppBreadcrumbComponent,
         CustomizerComponent,
+        UserAvatarComponent,
     ],
     templateUrl: './full.component.html',
   

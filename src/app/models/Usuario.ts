@@ -5,5 +5,7 @@ export interface Usuario {
     nombre?: string;
     descripcion?: string;
     correo: string;
-    nivel: Nivel;   
+    nivel: Nivel;
+    // Data URI (data:image/...;base64,...) o URL absoluta -- si el backend no la manda, el avatar cae a iniciales.
+    imagen?: string;
 }

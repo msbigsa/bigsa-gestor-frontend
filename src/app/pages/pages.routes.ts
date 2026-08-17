@@ -8,6 +8,7 @@ import { CargarLoteComponent } from './aviso-cobranza/cargar-lote/cargar-lote.co
 import { ListarLotesComponent } from './aviso-cobranza/listar-lotes/listar-lotes.component';
 import { DetalleLoteComponent } from './aviso-cobranza/detalle-lote/detalle-lote.component';
 import { ListarNotificacionesComponent } from './notificaciones/listar-notificaciones/listar-notificaciones.component';
+import { MiPerfilComponent } from './perfil/mi-perfil/mi-perfil.component';
 
 export const PagesRoutes: Routes = [
   {
@@ -83,6 +84,14 @@ export const PagesRoutes: Routes = [
     component: ListarNotificacionesComponent,
     data: {
       title: 'Notificaciones'
+    },
+    canActivate: [CertGuard]
+  },
+  {
+    path: 'perfil',
+    component: MiPerfilComponent,
+    data: {
+      title: 'Mi Perfil'
     },
     canActivate: [CertGuard]
   },

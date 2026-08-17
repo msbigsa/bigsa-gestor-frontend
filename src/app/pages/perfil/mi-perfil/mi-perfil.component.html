@@ -1,0 +1,104 @@
+<mat-card class="cardWithShadow">
+
+  <mat-tab-group mat-stretch-tabs="false" animationDuration="0ms">
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <div class="flex items-center">
+          <mat-icon class="flex! items-center">
+            <i-tabler name="user-circle" class="size-5!"></i-tabler>
+          </mat-icon>
+          Cuenta
+        </div>
+      </ng-template>
+
+      <mat-card-content>
+        <div class="grid grid-cols-12 gap-6">
+          <div class="col-span-12">
+            <mat-card class="cardWithShadow mb-0!">
+              <mat-card-content>
+                <mat-card-title>Foto de perfil</mat-card-title>
+                <mat-card-subtitle class="text-sm">Cambia tu foto de perfil desde aquí</mat-card-subtitle>
+                <div class="text-center mt-8">
+                  <div class="flex justify-center">
+                    <app-user-avatar
+                      [nombre]="usuario()?.descripcion ?? ''"
+                      [imagen]="usuario()?.imagen"
+                      [size]="120"
+                    ></app-user-avatar>
+                  </div>
+
+                  <input
+                    #inputArchivo
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    class="hidden"
+                    (change)="onArchivoSeleccionado($event)"
+                  />
+
+                  <div class="mt-6">
+                    <button
+                      mat-flat-button
+                      color="primary"
+                      class="me-2"
+                      [disabled]="subiendo()"
+                      (click)="seleccionarArchivo()"
+                    >
+                      @if (subiendo()) {
+                        Subiendo...
+                      } @else {
+                        Cambiar foto
+                      }
+                    </button>
+                    <button
+                      mat-stroked-button
+                      color="warn"
+                      [disabled]="subiendo() || !usuario()?.imagen"
+                      (click)="eliminarFoto()"
+                    >
+                      Quitar foto
+                    </button>
+                  </div>
+                  <span class="text-sm mt-6 block">Formatos permitidos: JPG, PNG o WEBP. Tamaño máximo 2 MB</span>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+          <div class="col-span-12">
+            <mat-card class="cardWithShadow mb-0!">
+              <mat-card-content>
+                <mat-card-title>Datos personales</mat-card-title>
+                <mat-card-subtitle class="text-sm">Estos datos los administra tu empresa -- no se pueden editar aquí</mat-card-subtitle>
+                <div class="grid grid-cols-12 gap-5 mt-6">
+                  <div class="sm:col-span-6 col-span-12">
+                    <!-- input -->
+                    <mat-label class="text-sm font-semibold mb-2 block">Nombre</mat-label>
+                    <mat-form-field appearance="outline" class="w-full" color="primary">
+                      <input matInput type="text" [value]="usuario()?.descripcion | titlecase" readonly />
+                    </mat-form-field>
+                    <!-- input -->
+                    <mat-label class="text-sm font-semibold mb-2 block">Usuario</mat-label>
+                    <mat-form-field appearance="outline" class="w-full" color="primary">
+                      <input matInput type="text" [value]="usuario()?.nombre | lowercase" readonly />
+                    </mat-form-field>
+                  </div>
+                  <div class="sm:col-span-6 col-span-12">
+                    <!-- input -->
+                    <mat-label class="text-sm font-semibold mb-2 block">Correo</mat-label>
+                    <mat-form-field appearance="outline" class="w-full" color="primary">
+                      <input matInput type="email" [value]="usuario()?.correo | lowercase" readonly />
+                    </mat-form-field>
+                    <!-- input -->
+                    <mat-label class="text-sm font-semibold mb-2 block">Nivel</mat-label>
+                    <mat-form-field appearance="outline" class="w-full" color="primary">
+                      <input matInput type="text" [value]="usuario()?.nivel?.descripcion | titlecase" readonly />
+                    </mat-form-field>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-tab>
+  </mat-tab-group>
+</mat-card>

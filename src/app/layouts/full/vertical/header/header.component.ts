@@ -23,6 +23,7 @@ import { LoginService } from 'src/app/services/login.service';
 import { NotificacionService } from 'src/app/services/notifica/notificacion.service';
 import { Usuario } from 'src/app/models/Usuario';
 import { LowerCasePipe, TitleCasePipe } from '@angular/common';
+import { UserAvatarComponent } from 'src/app/shared/components/user-avatar/user-avatar.component';
 
 interface profiledd {
   id: number;
@@ -54,7 +55,8 @@ interface quicklinks {
     TablerIconsModule,
     MaterialModule,
     TitleCasePipe,
-    LowerCasePipe
+    LowerCasePipe,
+    UserAvatarComponent
   ],
   templateUrl: './header.component.html',
   encapsulation: ViewEncapsulation.None
@@ -67,6 +69,7 @@ export class HeaderComponent implements OnInit {
 
   readonly notificaciones = this.notificacionService.notificaciones;
   readonly cantidadNoLeidas = this.notificacionService.cantidadNoLeidas;
+  readonly notificacionesHabilitadas = this.notificacionService.habilitado;
 
   @Input() showToggle = true;
   @Input() toggleChecked = false;
@@ -170,27 +173,13 @@ export class HeaderComponent implements OnInit {
   }
 
   profiledd: profiledd[] = [
-    /*{
+    {
       id: 1,
       img: '/assets/images/svgs/icon-account.svg',
-      title: 'My Profile',
-      subtitle: 'Account Settings',
-      link: '/',
+      title: 'Mi Perfil',
+      subtitle: 'Foto e información de cuenta',
+      link: '/inicio/perfil',
     },
-    {
-      id: 2,
-      img: '/assets/images/svgs/icon-inbox.svg',
-      title: 'My Inbox',
-      subtitle: 'Messages & Email',
-      link: '/',
-    },
-    {
-      id: 3,
-      img: '/assets/images/svgs/icon-tasks.svg',
-      title: 'My Tasks',
-      subtitle: 'To-do and Daily Tasks',
-      link: '/',
-    },*/
   ];
 
   apps: apps[] = [

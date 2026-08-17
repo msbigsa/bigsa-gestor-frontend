@@ -96,6 +96,39 @@ export class LoginService {
     );
   }
 
+  actualizarFotoPerfil(archivo: File): Observable<Usuario> {
+
+    const token = sessionStorage.getItem(environment.TOKEN_NAME);
+
+    const formData = new FormData();
+    formData.append('archivo', archivo);
+
+    return this.http.post<Usuario>(`${environment.HOST_LOGIN}/profile/foto`, formData,
+      {
+        headers: new HttpHeaders({
+          Authorization: `Bearer ${token}`
+        })
+      }
+    ).pipe(
+      tap(usuario => this.profile.set(usuario))
+    );
+  }
+
+  eliminarFotoPerfil(): Observable<Usuario> {
+
+    const token = sessionStorage.getItem(environment.TOKEN_NAME);
+
+    return this.http.delete<Usuario>(`${environment.HOST_LOGIN}/profile/foto`,
+      {
+        headers: new HttpHeaders({
+          Authorization: `Bearer ${token}`
+        })
+      }
+    ).pipe(
+      tap(usuario => this.profile.set(usuario))
+    );
+  }
+
   login(username: string, password: string): Observable<LoginResponse> {
 
     const body: ILoginRequest = { username, password };
