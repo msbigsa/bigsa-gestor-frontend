@@ -23,6 +23,7 @@ import { SKIP_GLOBAL_LOADING } from '../interceptors/loading.token';
 import { Usuario } from '../models/Usuario';
 import { LoginResponse } from '../models/LoginResponse';
 import { SessionMonitorService } from './session-monitor.service';
+import { NotificacionService } from './notifica/notificacion.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 interface ILoginRequest {
@@ -44,6 +45,7 @@ export class LoginService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
   private readonly sessionMonitor = inject(SessionMonitorService);
+  private readonly notificacionService = inject(NotificacionService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly profile = signal<Usuario | null>(null);
@@ -63,6 +65,7 @@ export class LoginService {
               );
 
               this.sessionMonitor.start();
+              this.notificacionService.start();
             },
 
             error: () => {
@@ -110,6 +113,7 @@ export class LoginService {
   logout(): void {
 
     this.sessionMonitor.stop();
+    this.notificacionService.stop();
 
     sessionStorage.clear();
 

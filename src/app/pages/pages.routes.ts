@@ -7,6 +7,7 @@ import { ResultadoDocHtmlComponent } from './html/resultado-doc-html/resultado-d
 import { CargarLoteComponent } from './aviso-cobranza/cargar-lote/cargar-lote.component';
 import { ListarLotesComponent } from './aviso-cobranza/listar-lotes/listar-lotes.component';
 import { DetalleLoteComponent } from './aviso-cobranza/detalle-lote/detalle-lote.component';
+import { ListarNotificacionesComponent } from './notificaciones/listar-notificaciones/listar-notificaciones.component';
 
 export const PagesRoutes: Routes = [
   {
@@ -74,6 +75,14 @@ export const PagesRoutes: Routes = [
     component: DetalleLoteComponent,
     data: {
       title: 'Detalle de Lote de Avisos de Cobranza'
+    },
+    canActivate: [CertGuard]
+  },
+  {
+    path: 'notificaciones',
+    component: ListarNotificacionesComponent,
+    data: {
+      title: 'Notificaciones'
     },
     canActivate: [CertGuard]
   },

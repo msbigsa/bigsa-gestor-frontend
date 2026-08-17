@@ -114,35 +114,48 @@
     <!-- --------------------------------------------------------------- -->
     <!-- Notification Dropdown -->
     <!-- --------------------------------------------------------------- -->
-    <button mat-icon-button matBadge="5" [matMenuTriggerFor]="notificationmenu" aria-label="Notifications"
-      class="notification-badge">
+    <button mat-icon-button [matBadge]="cantidadNoLeidas() || null" [matMenuTriggerFor]="notificationmenu"
+      aria-label="Notifications" class="notification-badge">
       <i class="iconify" data-icon="solar:bell-line-duotone"></i>
     </button>
     <mat-menu #notificationmenu="matMenu" class="topbar-dd cardWithShadow">
       <div class="flex items-center px-6 py-4">
-        <h6 class="text-base font-semibold m-0 ">Notifications</h6>
+        <h6 class="text-base font-semibold m-0 ">Notificaciones</h6>
         <span class="ms-auto">
-          <span class="bg-primary text-white px-2 py-1 font-medium rounded-sm text-xs">5 new</span>
+          <span class="bg-primary text-white px-2 py-1 font-medium rounded-sm text-xs">{{ cantidadNoLeidas() }} nuevas</span>
         </span>
       </div>
 
-      @for(notification of notifications; track notification.title) {
-      <button mat-menu-item class="px-5! py-2!">
+      @for(notificacion of notificaciones(); track notificacion.id) {
+      <button mat-menu-item class="px-5! py-2!" (click)="marcarLeida(notificacion.id)">
         <div class="flex items-center">
-          <img [src]="notification.img" class="rounded-full" width="48" />
-          <div class="ms-4">
+          <span class="text-primary bg-light rounded-full size-10! flex items-center justify-center shrink-0">
+            <i class="iconify size-5!" data-icon="solar:bell-line-duotone"></i>
+          </span>
+          <div class="ms-4 text-start">
             <h5 class="text-sm font-semibold m-0 ">
-              {{ notification.title }}
+              {{ notificacion.titulo }}
             </h5>
-            <span>{{ notification.subtitle }}</span>
+            <span>{{ notificacion.mensaje }}</span>
           </div>
         </div>
       </button>
+      } @empty {
+      <div class="px-6 py-4 text-sm text-body">
+        No tienes notificaciones nuevas
+      </div>
       }
 
+      @if(notificaciones().length > 0) {
       <div class="py-3 px-6">
-        <button mat-stroked-button color="primary" class="w-full">
-          See all notifications
+        <button mat-stroked-button color="primary" class="w-full" (click)="marcarTodasLeidas()">
+          Marcar todas como leidas
+        </button>
+      </div>
+      }
+      <div class="py-3 px-6" [class.pt-0]="notificaciones().length > 0">
+        <button mat-stroked-button color="primary" class="w-full" (click)="verTodasNotificaciones()">
+          Ver todas las notificaciones
         </button>
       </div>
     </mat-menu>

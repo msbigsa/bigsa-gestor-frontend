@@ -1,22 +1,17 @@
-import { Component, Output, EventEmitter, Input } from '@angular/core';
+import { Component, Output, EventEmitter, Input, OnInit, inject } from '@angular/core';
 import { CoreService } from 'src/app/services/core.service';
 import { MatDialog } from '@angular/material/dialog';
 import { navItems } from '../../vertical/sidebar/sidebar-data';
 import { TranslateService } from '@ngx-translate/core';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { MaterialModule } from 'src/app/material.module';
 import { BrandingComponent } from '../../vertical/sidebar/branding.component';
 import { FormsModule } from '@angular/forms';
 import { AppSettings } from 'src/app/config';
 import { NgScrollbarModule } from 'ngx-scrollbar';
-
-interface notifications {
-  id: number;
-  img: string;
-  title: string;
-  subtitle: string;
-}
+import { LoginService } from 'src/app/services/login.service';
+import { NotificacionService } from 'src/app/services/notifica/notificacion.service';
 
 interface profiledd {
   id: number;
@@ -45,12 +40,37 @@ interface quicklinks {
   imports: [RouterModule, TablerIconsModule, MaterialModule, BrandingComponent, NgScrollbarModule],
   templateUrl: './header.component.html'
 })
-export class AppHorizontalHeaderComponent {
+export class AppHorizontalHeaderComponent implements OnInit {
   @Input() showToggle = true;
   @Input() toggleChecked = false;
   @Output() toggleMobileNav = new EventEmitter<void>();
   @Output() toggleMobileFilterNav = new EventEmitter<void>();
   @Output() toggleCollapsed = new EventEmitter<void>();
+
+  private readonly loginService = inject(LoginService);
+  private readonly router = inject(Router);
+  private readonly notificacionService = inject(NotificacionService);
+
+  readonly notificaciones = this.notificacionService.notificaciones;
+  readonly cantidadNoLeidas = this.notificacionService.cantidadNoLeidas;
+
+  ngOnInit(): void {
+    if (this.loginService.isLogged()) {
+      this.notificacionService.start();
+    }
+  }
+
+  marcarLeida(notificacionId: number): void {
+    this.notificacionService.marcarLeida(notificacionId);
+  }
+
+  marcarTodasLeidas(): void {
+    this.notificacionService.marcarTodasLeidas();
+  }
+
+  verTodasNotificaciones(): void {
+    this.router.navigate(['/inicio/notificaciones']);
+  }
 
   showFiller = false;
 
@@ -120,39 +140,6 @@ export class AppHorizontalHeaderComponent {
     this.translate.use(lang.code);
     this.selectedLanguage = lang;
   }
-
-  notifications: notifications[] = [
-    {
-      id: 1,
-      img: './assets/images/profile/user-1.jpg',
-      title: 'Roman Joined thes Team!',
-      subtitle: 'Congratulate him',
-    },
-    {
-      id: 2,
-      img: './assets/images/profile/user-2.jpg',
-      title: 'New message received',
-      subtitle: 'Salma sent you new message',
-    },
-    {
-      id: 3,
-      img: './assets/images/profile/user-3.jpg',
-      title: 'New Payment received',
-      subtitle: 'Check your earnings',
-    },
-    {
-      id: 4,
-      img: './assets/images/profile/user-4.jpg',
-      title: 'Jolly completed tasks',
-      subtitle: 'Assign her new tasks',
-    },
-    {
-      id: 5,
-      img: './assets/images/profile/user-5.jpg',
-      title: 'Roman Joined the Team!',
-      subtitle: 'Congratulate him',
-    },
-  ];
 
   profiledd: profiledd[] = [
     {

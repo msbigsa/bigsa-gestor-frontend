@@ -14,21 +14,15 @@ import { navItems } from '../sidebar/sidebar-data';
 import { TranslateService } from '@ngx-translate/core';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { MaterialModule } from 'src/app/material.module';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 import { FormsModule } from '@angular/forms';
 import { NgScrollbarModule } from 'ngx-scrollbar';
 import { AppSettings } from 'src/app/config';
 import { LoginService } from 'src/app/services/login.service';
+import { NotificacionService } from 'src/app/services/notifica/notificacion.service';
 import { Usuario } from 'src/app/models/Usuario';
 import { LowerCasePipe, TitleCasePipe } from '@angular/common';
-
-interface notifications {
-  id: number;
-  img: string;
-  title: string;
-  subtitle: string;
-}
 
 interface profiledd {
   id: number;
@@ -68,6 +62,11 @@ interface quicklinks {
 export class HeaderComponent implements OnInit {
 
   private loginService = inject(LoginService);
+  private readonly router = inject(Router);
+  private readonly notificacionService = inject(NotificacionService);
+
+  readonly notificaciones = this.notificacionService.notificaciones;
+  readonly cantidadNoLeidas = this.notificacionService.cantidadNoLeidas;
 
   @Input() showToggle = true;
   @Input() toggleChecked = false;
@@ -125,6 +124,24 @@ export class HeaderComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadProfile();
+
+    // Al recargar la pagina con sesion vigente el login ya paso, asi que el stream
+    // no arranco todavia -- si ya estaba conectado, start() lo reinicia sin problema.
+    if (this.loginService.isLogged()) {
+      this.notificacionService.start();
+    }
+  }
+
+  marcarLeida(notificacionId: number): void {
+    this.notificacionService.marcarLeida(notificacionId);
+  }
+
+  marcarTodasLeidas(): void {
+    this.notificacionService.marcarTodasLeidas();
+  }
+
+  verTodasNotificaciones(): void {
+    this.router.navigate(['/inicio/notificaciones']);
   }
 
   options = this.settings.getOptions();
@@ -151,39 +168,6 @@ export class HeaderComponent implements OnInit {
     this.translate.use(lang.code);
     this.selectedLanguage = lang;
   }
-
-  notifications: notifications[] = [
-   /* {
-      id: 1,
-      img: '/assets/images/profile/user-1.jpg',
-      title: 'Roman Joined thes Team!',
-      subtitle: 'Congratulate him',
-    },
-    {
-      id: 2,
-      img: '/assets/images/profile/user-2.jpg',
-      title: 'New message received',
-      subtitle: 'Salma sent you new message',
-    },
-    {
-      id: 3,
-      img: '/assets/images/profile/user-3.jpg',
-      title: 'New Payment received',
-      subtitle: 'Check your earnings',
-    },
-    {
-      id: 4,
-      img: '/assets/images/profile/user-4.jpg',
-      title: 'Jolly completed tasks',
-      subtitle: 'Assign her new tasks',
-    },
-    {
-      id: 5,
-      img: '/assets/images/profile/user-5.jpg',
-      title: 'Roman Joined the Team!',
-      subtitle: 'Congratulatse him',
-    },*/
-  ];
 
   profiledd: profiledd[] = [
     /*{
