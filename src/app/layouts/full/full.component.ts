@@ -6,8 +6,9 @@ import { CoreService } from 'src/app/services/core.service';
 import { AppSettings } from 'src/app/config';
 import { filter } from 'rxjs/operators';
 import { NavigationEnd, Router } from '@angular/router';
-import { navItems } from './vertical/sidebar/sidebar-data';
+import { NavItem } from './vertical/sidebar/nav-item/nav-item';
 import { NavService } from '../../services/nav.service';
+import { MenuService } from './vertical/sidebar/sidebar-data';
 import { AppNavItemComponent } from './vertical/sidebar/nav-item/nav-item.component';
 import { RouterModule } from '@angular/router';
 import { MaterialModule } from 'src/app/material.module';
@@ -65,9 +66,10 @@ interface quicklinks {
 })
 export class FullComponent implements OnInit {
 
-  navItems = navItems;
+  navItems = signal<NavItem[]>([]);
 
   private loginService = inject(LoginService);
+  private menuService = inject(MenuService);
   usuario = signal<Usuario | null>(null);
 
   @ViewChild('leftsidenav')
@@ -235,6 +237,10 @@ export class FullComponent implements OnInit {
 
   ngOnInit(): void {
     this.usuario = this.loginService.profile;
+
+    this.menuService.obtenerMenu().subscribe(categorias => {
+      this.navItems.set(this.menuService.construirNavItems(categorias));
+    });
   }
 
   ngOnDestroy() {

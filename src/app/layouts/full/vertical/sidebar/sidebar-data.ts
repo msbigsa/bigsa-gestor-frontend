@@ -1,104 +1,51 @@
+import { HttpClient } from '@angular/common/http';
+import { inject, Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { environment } from 'src/environments/environment';
+import { CategoriaMenu } from 'src/app/models/Menu';
 import { NavItem } from './nav-item/nav-item';
 
-export const navItems: NavItem[] = [
-  {
-    navCap: 'General',
-  },
-  {
-    displayName: 'Inicio',
-    iconName: 'solar:home-angle-line-duotone',
-    route: '/inicio',
-  },
-  /*{
-    displayName: 'Login',
-    iconName: 'solar:lock-keyhole-unlocked-outline',
-    route: '/authentication/login',
-  },
-  {
-    displayName: 'Register',
-    iconName: 'solar:shield-user-line-duotone',
-    route: '/authentication/register',
-  },*/
-  {
-    navCap: 'Gestión',
-  },
-  {
-    displayName: 'HTML',
-    iconName: 'solar:align-horizontal-center-line-duotone',
-    route: '/menu-level',
-    children: [
-      {
-        displayName: 'Convertir Word a HTML',
-        iconName: 'bi:filetype-docx',
-        route: '/inicio/html/conversor-doc-html',
-        /*children: [
-          {
-            displayName: 'Menu 1',
-            iconName: 'tabler:point',
-            route: '/menu-1',
-          },
+@Injectable({
+  providedIn: 'root',
+})
+export class MenuService {
 
-          {
-            displayName: 'Menu 2',
-            iconName: 'tabler:point',
-            route: '/menu-2',
-          },
-        ],*/
-      },
+  private readonly url = `${environment.HOST_LOGIN}/menu`;
 
+  private readonly http = inject(HttpClient);
+
+  obtenerMenu(): Observable<CategoriaMenu[]> {
+    return this.http.get<CategoriaMenu[]>(this.url);
+  }
+
+  construirNavItems(categorias: CategoriaMenu[]): NavItem[] {
+
+    const navItems: NavItem[] = [
+      { navCap: 'General' },
       {
-        displayName: 'HTML Generados',
-        iconName: 'streamline-ultimate:file-html',
-        route: 'inicio/html/listar-doc-html',
+        displayName: 'Inicio',
+        iconName: 'solar:home-angle-line-duotone',
+        route: '/inicio',
       },
-    ],
-  },
-  {
-    navCap: 'Cargas Masivas',
-  },
-  {
-    displayName: 'Avisos de Cobranza',
-    iconName: 'solar:letter-line-duotone',
-    route: '/menu-level',
-    children: [
-      {
-        displayName: 'Cargar Planilla',
-        iconName: 'solar:upload-line-duotone',
-        route: '/inicio/avisos-cobranza/cargar-lote',
-      },
-      {
-        displayName: 'Listado de Lotes',
-        iconName: 'solar:list-line-duotone',
-        route: '/inicio/avisos-cobranza/listar-lotes',
-      },
-    ],
-  },
-  /*{
-    displayName: 'Disabled',
-    iconName: 'solar:bookmark-circle-line-duotone',
-    route: '/disabled',
-    disabled: true,
-  },
-  {
-    displayName: 'Chip',
-    iconName: 'solar:branching-paths-up-line-duotone',
-    route: '/',
-    chip: true,
-    chipClass: 'bg-primary text-white',
-    chipContent: '9',
-  },
-  {
-    displayName: 'Outlined',
-    iconName: 'solar:add-square-line-duotone',
-    route: '/',
-    chip: true,
-    chipClass: 'bg-primary text-white',
-    chipContent: 'Outlined',
-  },
-  {
-    displayName: 'External Link',
-    iconName: 'solar:link-round-angle-bold-duotone',
-    route: 'https://www.google.com/',
-    external: true,
-  },*/
-];
+    ];
+
+    for (const categoria of categorias) {
+      navItems.push({ navCap: categoria.category });
+
+      for (const modulo of categoria.modulos) {
+        navItems.push({
+          displayName: modulo.displayName,
+          iconName: modulo.iconName,
+          route: modulo.route,
+          children: modulo.children.map(hijo => ({
+            displayName: hijo.displayName,
+            iconName: hijo.iconName,
+            route: hijo.route,
+          })),
+        });
+      }
+    }
+
+    return navItems;
+  }
+}

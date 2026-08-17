@@ -1,7 +1,8 @@
-import { Component, Output, EventEmitter, Input } from '@angular/core';
+import { Component, Output, EventEmitter, Input, Inject, OnInit } from '@angular/core';
 import { CoreService } from 'src/app/services/core.service';
-import { MatDialog } from '@angular/material/dialog';
-import { navItems } from '../../vertical/sidebar/sidebar-data';
+import { MatDialog, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MenuService } from '../../vertical/sidebar/sidebar-data';
+import { NavItem } from '../../vertical/sidebar/nav-item/nav-item';
 import { TranslateService } from '@ngx-translate/core';
 import { RouterModule } from '@angular/router';
 import { TablerIconsModule } from 'angular-tabler-icons';
@@ -45,7 +46,9 @@ interface quicklinks {
   imports: [RouterModule, TablerIconsModule, MaterialModule, BrandingComponent, NgScrollbarModule],
   templateUrl: './header.component.html'
 })
-export class AppHorizontalHeaderComponent {
+export class AppHorizontalHeaderComponent implements OnInit {
+  private navItems: NavItem[] = [];
+
   @Input() showToggle = true;
   @Input() toggleChecked = false;
   @Output() toggleMobileNav = new EventEmitter<void>();
@@ -91,15 +94,24 @@ export class AppHorizontalHeaderComponent {
     private settings: CoreService,
     private vsidenav: CoreService,
     public dialog: MatDialog,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private menuService: MenuService
   ) {
     translate.setDefaultLang('en');
   }
 
   options = this.settings.getOptions();
 
+  ngOnInit(): void {
+    this.menuService.obtenerMenu().subscribe(categorias => {
+      this.navItems = this.menuService.construirNavItems(categorias);
+    });
+  }
+
   openDialog() {
-    const dialogRef = this.dialog.open(AppHorizontalSearchDialogComponent);
+    const dialogRef = this.dialog.open(AppHorizontalSearchDialogComponent, {
+      data: this.navItems,
+    });
 
     dialogRef.afterClosed().subscribe((result) => {
       console.log(`Dialog result: ${result}`);
@@ -288,7 +300,9 @@ export class AppHorizontalHeaderComponent {
 })
 export class AppHorizontalSearchDialogComponent {
   searchText: string = '';
-  navItems = navItems;
+  navItemsData: NavItem[];
 
-  navItemsData = navItems.filter((navitem) => navitem.displayName);
+  constructor(@Inject(MAT_DIALOG_DATA) navItems: NavItem[]) {
+    this.navItemsData = navItems.filter((navitem) => navitem.displayName);
+  }
 }

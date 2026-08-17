@@ -3,14 +3,16 @@ import {
   Output,
   EventEmitter,
   Input,
+  Inject,
   ViewEncapsulation,
   inject,
   OnInit,
   signal,
 } from '@angular/core';
 import { CoreService } from 'src/app/services/core.service';
-import { MatDialog } from '@angular/material/dialog';
-import { navItems } from '../sidebar/sidebar-data';
+import { MatDialog, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MenuService } from '../sidebar/sidebar-data';
+import { NavItem } from '../sidebar/nav-item/nav-item';
 import { TranslateService } from '@ngx-translate/core';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { MaterialModule } from 'src/app/material.module';
@@ -68,6 +70,9 @@ interface quicklinks {
 export class HeaderComponent implements OnInit {
 
   private loginService = inject(LoginService);
+  private menuService = inject(MenuService);
+
+  private navItems: NavItem[] = [];
 
   @Input() showToggle = true;
   @Input() toggleChecked = false;
@@ -125,12 +130,18 @@ export class HeaderComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadProfile();
+
+    this.menuService.obtenerMenu().subscribe(categorias => {
+      this.navItems = this.menuService.construirNavItems(categorias);
+    });
   }
 
   options = this.settings.getOptions();
 
   openDialog() {
-    const dialogRef = this.dialog.open(AppSearchDialogComponent);
+    const dialogRef = this.dialog.open(AppSearchDialogComponent, {
+      data: this.navItems,
+    });
 
     dialogRef.afterClosed().subscribe((result) => {
       console.log(`Dialog result: ${result}`);
@@ -328,9 +339,9 @@ export class HeaderComponent implements OnInit {
 })
 export class AppSearchDialogComponent {
   searchText: string = '';
-  navItems = navItems;
+  navItemsData: NavItem[];
 
-  navItemsData = navItems.filter((navitem) => navitem.displayName);
-
-
+  constructor(@Inject(MAT_DIALOG_DATA) navItems: NavItem[]) {
+    this.navItemsData = navItems.filter((navitem) => navitem.displayName);
+  }
 }
