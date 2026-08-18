@@ -5,13 +5,7 @@ import { CoreService } from 'src/app/services/core.service';
   selector: 'app-branding',
   imports: [],
   template: `
-    <a href="/" class="logodark">
-      <!--img
-        src="./assets/images/logos/dark-logo.svg"
-        class="align-middle m-2 rtl:-scale-x-100"
-        alt="logo"
-      /-->
-      
+    <a href="/" class="logodark">     
       <img
         src="./assets/images/logos/bigsa-gestor-light.png"
         class="align-middle m-2 rtl:-scale-x-100"
@@ -21,16 +15,11 @@ import { CoreService } from 'src/app/services/core.service';
     </a>
 
     <a href="/" class="logolight">
-      <!--img
-        src="./assets/images/logos/light-logo.svg"
-        class="align-middle m-2 rtl:-scale-x-100"
-        alt="logo"
-      /-->
       <img
         src="./assets/images/logos/bigsa-gestor-dark.png"
         class="align-middle m-2 rtl:-scale-x-100"
         alt="logo"
-        style="width: 200px; height: auto;"
+        style="width: 200px; height: auto;" 
       />
     </a>
   `,
