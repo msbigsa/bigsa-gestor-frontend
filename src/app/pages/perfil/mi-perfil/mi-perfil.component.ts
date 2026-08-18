@@ -1,11 +1,14 @@
 import { ChangeDetectionStrategy, Component, ElementRef, ViewChild, inject, signal } from '@angular/core';
 import { CommonModule, LowerCasePipe, TitleCasePipe } from '@angular/common';
+import { MatDialog } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
 import { TablerIconsModule } from 'angular-tabler-icons';
 
 import { MaterialModule } from 'src/app/material.module';
 import { LoginService } from 'src/app/services/login.service';
 import { UserAvatarComponent } from 'src/app/shared/components/user-avatar/user-avatar.component';
+import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
+import { ConfirmDialogResult } from 'src/app/shared/components/confirm-dialog/confirm-dialog-result.enum';
 
 const TAMANO_MAXIMO_BYTES = 2 * 1024 * 1024;
 const TIPOS_PERMITIDOS = ['image/jpeg', 'image/png', 'image/webp'];
@@ -20,6 +23,7 @@ export class MiPerfilComponent {
 
   private readonly loginService = inject(LoginService);
   private readonly toastr = inject(ToastrService);
+  private readonly dialog = inject(MatDialog);
 
   @ViewChild('inputArchivo') inputArchivo!: ElementRef<HTMLInputElement>;
 
@@ -61,8 +65,26 @@ export class MiPerfilComponent {
   }
 
   eliminarFoto(): void {
-    this.loginService.eliminarFotoPerfil().subscribe(() => {
-      this.toastr.success('Foto de perfil eliminada', 'Exitoso');
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      disableClose: true,
+      data: {
+        title: 'Quitar foto de perfil',
+        message: '¿Está seguro que desea quitar su foto de perfil? Se mostrará el avatar por defecto.',
+        confirmText: 'Quitar',
+        cancelText: 'Cancelar',
+        type: 'danger',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe(resultado => {
+      if (resultado !== ConfirmDialogResult.CONFIRM) {
+        return;
+      }
+
+      this.loginService.eliminarFotoPerfil().subscribe(() => {
+        this.toastr.success('Foto de perfil eliminada', 'Exitoso');
+      });
     });
   }
 }
