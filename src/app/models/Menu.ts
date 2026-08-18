@@ -15,3 +15,7 @@ export interface CategoriaMenu {
     category: string;
     modulos: ModuloMenu[];
 }
+
+export interface AccesoMenu {
+    permitido: boolean;
+}

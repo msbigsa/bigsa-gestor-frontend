@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { CategoriaMenu } from 'src/app/models/Menu';
+import { AccesoMenu, CategoriaMenu } from 'src/app/models/Menu';
 import { NavItem } from './nav-item/nav-item';
 
 @Injectable({
@@ -16,6 +16,10 @@ export class MenuService {
 
   obtenerMenu(): Observable<CategoriaMenu[]> {
     return this.http.get<CategoriaMenu[]>(this.url);
+  }
+
+  validarAcceso(ruta: string): Observable<AccesoMenu> {
+    return this.http.get<AccesoMenu>(`${this.url}/validar`, { params: { ruta } });
   }
 
   construirNavItems(categorias: CategoriaMenu[]): NavItem[] {
