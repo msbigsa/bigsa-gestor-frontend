@@ -114,6 +114,7 @@ export const appConfig: ApplicationConfig = {
             new URL(environment.HOST_HTML).host,
             new URL(environment.HOST_AVISO_COBRANZA).host,
             new URL(environment.HOST_NOTIFICA).host,
+            new URL(environment.HOST_LOGIN).host,
           ],
           disallowedRoutes: [
             `${environment.HOST_LOGIN}/auth/login/forgot`,

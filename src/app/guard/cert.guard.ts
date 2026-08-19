@@ -2,16 +2,18 @@ import { inject } from "@angular/core";
 import { ActivatedRouteSnapshot, Router, RouterStateSnapshot } from "@angular/router";
 
 import { JwtHelperService } from '@auth0/angular-jwt';
-import { map } from "rxjs";
+import { catchError, map, of } from "rxjs";
 
 import { environment } from "src/environments/environment";
 import { LoginService } from "../services/login.service";
+import { MenuService } from "../layouts/full/vertical/sidebar/sidebar-data";
 
+const RUTA_INICIO = '/inicio';
 
 export const CertGuard = (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
     const router = inject(Router);
     const loginService = inject(LoginService);
-    //const menuService = inject(MenuService);
+    const menuService = inject(MenuService);
 
     //1) VERIFICAR SI EL USUARIO ESTA LOGUEADO
     const rpta = loginService.isLogged();
@@ -24,37 +26,29 @@ export const CertGuard = (route: ActivatedRouteSnapshot, state: RouterStateSnaps
     const token = sessionStorage.getItem(environment.TOKEN_NAME);
 
     if(token && !helper.isTokenExpired(token)){
-        //3) VERIFICAR SI TIENES EL ROL NECESARIO PARA ACCEDER A ESE COMPONENTE 'PAGINA'
-        //url -> /pages/patient
+
         const url = state.url;
-        //console.log(url);        
-        
-        const decodedToken = helper.decodeToken(token);     
 
-        const username = decodedToken.sub;
+        //3) INICIO SIEMPRE ES ACCESIBLE CON SOLO ESTAR LOGUEADO
+        if(url === RUTA_INICIO){
+            return true;
+        }
 
-        return true;
-
-       /* return menuService.getMenusByUser(username).pipe(map( (data: Menu[]) => {
-            //menuService.setMenuChange(data);
-
-            let count = 0;
-            for(let m of data){
-                                
-              if(url.startsWith(m.url || '')){
-                //console.log(m.url);                
-                count++;
-                break;
-              }
-            }
-
-            if(count > 0){
-                return true;
-            }else{
-                router.navigate(['/auth/access']);
+        //4) VERIFICAR SI TIENE PERMISO ASIGNADO PARA ESTA PANTALLA
+        return menuService.validarAcceso(url).pipe(
+            map(acceso => {
+                if(acceso.permitido){
+                    return true;
+                }
+                router.navigate(['/prohibido']);
                 return false;
-            }
-        }));*/
+            }),
+            // fail-closed: si la validacion falla o el servicio no responde, se bloquea la navegacion
+            catchError(() => {
+                router.navigate(['/noEncontrado']);
+                return of(false);
+            })
+        );
 
     }else{
         loginService.logout();
