@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { inject, Injectable, signal } from '@angular/core';
+import { Observable, tap } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { AccesoMenu, CategoriaMenu } from 'src/app/models/Menu';
 import { NavItem } from './nav-item/nav-item';
@@ -14,12 +14,48 @@ export class MenuService {
 
   private readonly http = inject(HttpClient);
 
+  // Rutas del último menú cargado (ver obtenerMenu/tap más abajo). Permite a la UI
+  // preguntar "¿tengo acceso a esta ruta?" sin volver a golpear la BD (validarAcceso),
+  // p.ej. para ocultar botones/atajos que apuntan a pantallas sin permiso.
+  private readonly rutasPermitidas = signal<ReadonlySet<string>>(new Set());
+
   obtenerMenu(): Observable<CategoriaMenu[]> {
-    return this.http.get<CategoriaMenu[]>(this.url);
+    return this.http.get<CategoriaMenu[]>(this.url).pipe(
+      tap(categorias => this.rutasPermitidas.set(this.extraerRutas(categorias)))
+    );
   }
 
   validarAcceso(ruta: string): Observable<AccesoMenu> {
     return this.http.get<AccesoMenu>(`${this.url}/validar`, { params: { ruta } });
+  }
+
+  /**
+   * Indica si el menú ya cargado incluye la ruta dada. No consulta la BD: se basa en
+   * el resultado del último obtenerMenu(), por lo que hasta que ese menú cargue
+   * (normalmente al iniciar el layout) retorna false.
+   */
+  tieneAcceso(ruta: string): boolean {
+    return this.rutasPermitidas().has(this.normalizarRuta(ruta));
+  }
+
+  private extraerRutas(categorias: CategoriaMenu[]): ReadonlySet<string> {
+    const rutas = new Set<string>();
+
+    for (const categoria of categorias) {
+      for (const modulo of categoria.modulos) {
+        rutas.add(this.normalizarRuta(modulo.route));
+
+        for (const hijo of modulo.children) {
+          rutas.add(this.normalizarRuta(hijo.route));
+        }
+      }
+    }
+
+    return rutas;
+  }
+
+  private normalizarRuta(ruta: string): string {
+    return ruta.startsWith('/') ? ruta : `/${ruta}`;
   }
 
   construirNavItems(categorias: CategoriaMenu[]): NavItem[] {

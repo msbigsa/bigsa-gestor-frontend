@@ -3,9 +3,10 @@ import type { StepOptions } from 'shepherd.js';
 /**
  * Pasos del tour guiado para el listado de documentos HTML.
  * Los selectores [data-tour="..."] se marcan en list-doc-html.component.html.
- * El paso de "Acción" solo se incluye si existen registros en la tabla.
+ * El paso de "Generar HTML" solo se incluye si el usuario tiene acceso a esa pantalla
+ * (ver MenuService.tieneAcceso), y el de "Acción" solo si existen registros en la tabla.
  */
-export function buildListDocHtmlTourSteps(hayRegistros: boolean): StepOptions[] {
+export function buildListDocHtmlTourSteps(hayRegistros: boolean, puedeGenerarHtml: boolean): StepOptions[] {
   const pasos: StepOptions[] = [
     {
       id: 'doc-filtro',
@@ -13,13 +14,16 @@ export function buildListDocHtmlTourSteps(hayRegistros: boolean): StepOptions[] 
       text: 'Filtre los documentos por nombre, documento o usuario.',
       attachTo: { element: '[data-tour="doc-filtro"]', on: 'bottom' },
     },
-    {
+  ];
+
+  if (puedeGenerarHtml) {
+    pasos.push({
       id: 'doc-generar',
       title: 'Generar HTML',
       text: 'Presione este botón para subir un nuevo documento Word y convertirlo a HTML.',
       attachTo: { element: '[data-tour="doc-generar"]', on: 'bottom' },
-    },
-  ];
+    });
+  }
 
   if (hayRegistros) {
     pasos.push({

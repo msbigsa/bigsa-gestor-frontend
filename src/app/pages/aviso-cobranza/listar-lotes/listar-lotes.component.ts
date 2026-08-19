@@ -22,6 +22,9 @@ import {
   EliminarLoteDialogComponent,
   EliminarLoteDialogData,
 } from '../shared/eliminar-lote-dialog/eliminar-lote-dialog.component';
+import { MenuService } from 'src/app/layouts/full/vertical/sidebar/sidebar-data';
+
+const RUTA_CARGAR_LOTE = '/inicio/avisos-cobranza/cargar-lote';
 
 @Component({
   selector: 'app-listar-lotes',
@@ -40,6 +43,7 @@ export class ListarLotesComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly toastr = inject(ToastrService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly menuService = inject(MenuService);
 
   private static readonly INTERVALO_POLLING_MS = 5000;
   private static readonly ESTADOS_EN_PROCESO: EstadoLote[] = [EstadoLote.VALIDANDO, EstadoLote.ENVIANDO];
@@ -186,7 +190,11 @@ export class ListarLotesComponent implements OnInit {
   }
 
   irACargarLote(): void {
-    this.router.navigate(['/inicio/avisos-cobranza/cargar-lote']);
+    this.router.navigate([RUTA_CARGAR_LOTE]);
+  }
+
+  puedeCargarLote(): boolean {
+    return this.menuService.tieneAcceso(RUTA_CARGAR_LOTE);
   }
 
   verDetalle(lote: LoteCargaResponse): void {

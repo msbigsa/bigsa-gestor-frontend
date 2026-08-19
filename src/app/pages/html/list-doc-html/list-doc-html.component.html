@@ -26,10 +26,12 @@
           <mat-icon>help_outline</mat-icon>
         </button>
 
-        <button mat-flat-button color="primary" data-tour="doc-generar" (click)="irAGenerarHtml()">
-          <mat-icon class="mr-2">add</mat-icon>
-          Generar HTML
-        </button>
+        @if (puedeGenerarHtml()) {
+          <button mat-flat-button color="primary" data-tour="doc-generar" (click)="irAGenerarHtml()">
+            <mat-icon class="mr-2">add</mat-icon>
+            Generar HTML
+          </button>
+        }
       </div>
     </div>
   </mat-card-content>

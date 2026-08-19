@@ -45,10 +45,12 @@
           <mat-icon>refresh</mat-icon>
         </button>
 
-        <button mat-flat-button color="primary" (click)="irACargarLote()">
-          <mat-icon class="mr-2">add</mat-icon>
-          Cargar nueva planilla
-        </button>
+        @if (puedeCargarLote()) {
+          <button mat-flat-button color="primary" (click)="irACargarLote()">
+            <mat-icon class="mr-2">add</mat-icon>
+            Cargar nueva planilla
+          </button>
+        }
       </div>
     </div>
   </mat-card-content>

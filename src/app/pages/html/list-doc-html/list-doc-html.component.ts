@@ -18,6 +18,9 @@ import { debounceTime, distinctUntilChanged, filter } from 'rxjs';
 import { ConfirmDialogResult } from 'src/app/shared/components/confirm-dialog/confirm-dialog-result.enum';
 import { TourService } from 'src/app/shared/tour/tour.service';
 import { buildListDocHtmlTourSteps } from '../html-tour.steps';
+import { MenuService } from 'src/app/layouts/full/vertical/sidebar/sidebar-data';
+
+const RUTA_GENERAR_HTML = '/inicio/html/conversor-doc-html';
 
 @Component({
   selector: 'app-list-doc-html',
@@ -44,6 +47,7 @@ export class ListDocHtmlComponent implements OnInit {
   private readonly datePipe = inject(DatePipe);
   private readonly router = inject(Router);
   private readonly tourService = inject(TourService);
+  private readonly menuService = inject(MenuService);
 
   readonly documentos = signal<ArchivoDoc[]>([]);
   readonly pageIndex = signal(0);
@@ -99,11 +103,15 @@ export class ListDocHtmlComponent implements OnInit {
   }
 
   irAGenerarHtml(): void {
-    this.router.navigate(['/inicio/html/conversor-doc-html']);
+    this.router.navigate([RUTA_GENERAR_HTML]);
+  }
+
+  puedeGenerarHtml(): boolean {
+    return this.menuService.tieneAcceso(RUTA_GENERAR_HTML);
   }
 
   iniciarTour(): void {
-    this.tourService.start(buildListDocHtmlTourSteps(this.documentos().length > 0));
+    this.tourService.start(buildListDocHtmlTourSteps(this.documentos().length > 0, this.puedeGenerarHtml()));
   }
 
   getFechaCompleta(fecha: Date | string): string {
