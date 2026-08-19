@@ -201,7 +201,7 @@ export class ResultadoDocHtmlComponent {
 
   nuevaVersion(generaNuevaVersion: boolean) {
     if (generaNuevaVersion) {
-      this.router.navigate(['/inicio/html/conversor-doc-html/actualizar-doc-html', this.id()]);
+      this.router.navigate(['/inicio/html/listar-doc-html/resultado-doc-html/actualizar-doc-html', this.id()]);
     }
   }
 
