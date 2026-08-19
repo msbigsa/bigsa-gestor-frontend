@@ -69,6 +69,7 @@ interface quicklinks {
 export class FullComponent implements OnInit {
 
   navItems = signal<NavItem[]>([]);
+  administracion = signal<NavItem | null>(null);
 
   private loginService = inject(LoginService);
   private menuService = inject(MenuService);
@@ -242,6 +243,7 @@ export class FullComponent implements OnInit {
 
     this.menuService.obtenerMenu().subscribe(categorias => {
       this.navItems.set(this.menuService.construirNavItems(categorias));
+      this.administracion.set(this.menuService.obtenerAdministracion(categorias));
     });
   }
 

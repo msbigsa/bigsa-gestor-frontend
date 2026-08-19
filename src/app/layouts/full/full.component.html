@@ -25,17 +25,24 @@
             }
           </mat-nav-list>
         </ng-scrollbar>
-        <div class="p-6 mt-auto profile-bar">
-          <div class="bg-light-secondary flex items-center rounded-sm p-4">
-            <app-user-avatar [nombre]="usuario()?.nombre ?? ''" [imagen]="usuario()?.imagen" [size]="40"></app-user-avatar>
-            <div class="ms-4 leading-5">
-              <h4 class="font-semibold leading-5">{{ usuario()?.nombre| lowercase  }}</h4>
-              <span class="text-xs leading-5">{{ usuario()?.nivel?.descripcion| titlecase  }}</span>
-            </div>
-            <div class="ms-auto">
-              <a mat-icon-button (click)="logout()" class="flex justify-center">
-                <i class="iconify text-lg flex!" data-icon="solar:power-linear"></i>
-              </a>
+        <div class="mt-auto">
+          @if (administracion(); as adminItem) {
+            <mat-nav-list class="sidebar-list">
+              <app-nav-item [item]="adminItem" class="top-parent"></app-nav-item>
+            </mat-nav-list>
+          }
+          <div class="px-6 pb-6 profile-bar" [class.pt-2]="administracion()" [class.pt-6]="!administracion()">
+            <div class="bg-light-secondary flex items-center rounded-sm p-4">
+              <app-user-avatar [nombre]="usuario()?.nombre ?? ''" [imagen]="usuario()?.imagen" [size]="40"></app-user-avatar>
+              <div class="ms-4 leading-5">
+                <h4 class="font-semibold leading-5">{{ usuario()?.nombre| lowercase  }}</h4>
+                <span class="text-xs leading-5">{{ usuario()?.nivel?.descripcion| titlecase  }}</span>
+              </div>
+              <div class="ms-auto">
+                <a mat-icon-button (click)="logout()" class="flex justify-center">
+                  <i class="iconify text-lg flex!" data-icon="solar:power-linear"></i>
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -58,17 +65,24 @@
           }
         </mat-nav-list>
       </ng-scrollbar>
-      <div class="p-6 mt-auto profile-bar">
-        <div class="bg-light-secondary flex items-center rounded-sm p-4">
-          <app-user-avatar [nombre]="usuario()?.descripcion ?? ''" [imagen]="usuario()?.imagen" [size]="40"></app-user-avatar>
-          <div class="ms-4 leading-5">
-            <h4 class="font-semibold leading-5">{{ usuario()?.descripcion | titlecase  }}</h4>
-            <span class="text-xs leading-5">{{ usuario()?.nivel?.descripcion| titlecase  }}</span>
-          </div>
-          <div class="ms-auto">
-            <a mat-icon-button [routerLink]="['/authentication/login']" class="flex justify-center">
-              <i class="iconify text-lg flex!" data-icon="solar:power-linear"></i>
-            </a>
+      <div class="mt-auto">
+        @if (administracion(); as adminItem) {
+          <mat-nav-list class="sidebar-list">
+            <app-nav-item [item]="adminItem" (notify)="sidenav.toggle()"></app-nav-item>
+          </mat-nav-list>
+        }
+        <div class="px-6 pb-6 profile-bar" [class.pt-2]="administracion()" [class.pt-6]="!administracion()">
+          <div class="bg-light-secondary flex items-center rounded-sm p-4">
+            <app-user-avatar [nombre]="usuario()?.descripcion ?? ''" [imagen]="usuario()?.imagen" [size]="40"></app-user-avatar>
+            <div class="ms-4 leading-5">
+              <h4 class="font-semibold leading-5">{{ usuario()?.descripcion | titlecase  }}</h4>
+              <span class="text-xs leading-5">{{ usuario()?.nivel?.descripcion| titlecase  }}</span>
+            </div>
+            <div class="ms-auto">
+              <a mat-icon-button [routerLink]="['/authentication/login']" class="flex justify-center">
+                <i class="iconify text-lg flex!" data-icon="solar:power-linear"></i>
+              </a>
+            </div>
           </div>
         </div>
       </div>

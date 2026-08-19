@@ -22,7 +22,14 @@ INSERT INTO GLO_MODULOS_GESTOR (DISPLAY_NAME, ICON_NAME, RUTA, CATEGORY, CHILDRE
     { "displayName": "Listado de Lotes",
       "iconName": "solar:list-line-duotone",
       "route": "/inicio/avisos-cobranza/listar-lotes"}
-  ]', 3);
+  ]', 3),
+
+(N'Administración', N'solar:shield-user-line-duotone', N'/menu-level', N'Sistema',
+  N'[
+    { "displayName": "Administración",
+      "iconName": "solar:shield-user-line-duotone",
+      "route": "/inicio/administracion"}
+  ]', NULL);
 
 -- Verificacion rapida de que el JSON insertado es valido.
 SELECT ID, DISPLAY_NAME, ISJSON(CHILDREN) AS children_es_json_valido FROM GLO_MODULOS_GESTOR;

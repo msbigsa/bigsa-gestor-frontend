@@ -7,6 +7,7 @@ import { ResultadoDocHtmlComponent } from './html/resultado-doc-html/resultado-d
 import { CargarLoteComponent } from './aviso-cobranza/cargar-lote/cargar-lote.component';
 import { ListarLotesComponent } from './aviso-cobranza/listar-lotes/listar-lotes.component';
 import { DetalleLoteComponent } from './aviso-cobranza/detalle-lote/detalle-lote.component';
+import { AdministracionComponent } from './administracion/administracion.component';
 import { ListarNotificacionesComponent } from './notificaciones/listar-notificaciones/listar-notificaciones.component';
 import { MiPerfilComponent } from './perfil/mi-perfil/mi-perfil.component';
 
@@ -92,6 +93,14 @@ export const PagesRoutes: Routes = [
     component: MiPerfilComponent,
     data: {
       title: 'Mi Perfil'
+    },
+    canActivate: [CertGuard]
+  },
+  {
+    path: 'administracion',
+    component: AdministracionComponent,
+    data: {
+      title: 'Administración'
     },
     canActivate: [CertGuard]
   },

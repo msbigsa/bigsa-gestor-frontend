@@ -90,6 +90,11 @@ export class AvisoCobranzaLoteService {
     return this.http.post<void>(`${this.url}/${loteId}/enviar`, null);
   }
 
+  // Uso administrativo: fuerza el estado sin pasar por las transiciones normales.
+  forzarEstado(loteId: number, estado: EstadoLote): Observable<void> {
+    return this.http.put<void>(`${this.url}/${loteId}/estado`, null, { params: { estado } });
+  }
+
   // hijosAEliminar: ids de correcciones a eliminar tambien; el resto queda standalone.
   eliminarLote(loteId: number, hijosAEliminar: number[] = []): Observable<void> {
     let parametros = new HttpParams();

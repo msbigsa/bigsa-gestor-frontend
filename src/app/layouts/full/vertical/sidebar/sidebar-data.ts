@@ -5,6 +5,9 @@ import { environment } from 'src/environments/environment';
 import { AccesoMenu, CategoriaMenu } from 'src/app/models/Menu';
 import { NavItem } from './nav-item/nav-item';
 
+// Se ancla aparte del listado normal de modulos (ver construirNavItems/obtenerAdministracion).
+const RUTA_ADMINISTRACION = '/inicio/administracion';
+
 @Injectable({
   providedIn: 'root',
 })
@@ -70,22 +73,57 @@ export class MenuService {
     ];
 
     for (const categoria of categorias) {
-      navItems.push({ navCap: categoria.category });
+      // Administracion no se mezcla con el resto - se ancla aparte.
+      // Se oculta categoria sin modulos o modulos invisibles.
+      const modulosVisibles: NavItem[] = [];
 
       for (const modulo of categoria.modulos) {
-        navItems.push({
+        const children = modulo.children.filter(hijo => !this.esRutaAdministracion(hijo.route));
+        if (children.length === 0) {
+          continue;
+        }
+
+        modulosVisibles.push({
           displayName: modulo.displayName,
           iconName: modulo.iconName,
           route: modulo.route,
-          children: modulo.children.map(hijo => ({
+          children: children.map(hijo => ({
             displayName: hijo.displayName,
             iconName: hijo.iconName,
             route: hijo.route,
           })),
         });
       }
+
+      if (modulosVisibles.length === 0) {
+        continue;
+      }
+
+      navItems.push({ navCap: categoria.category }, ...modulosVisibles);
     }
 
     return navItems;
+  }
+
+  /** Item de Administracion, si el usuario tiene el modulo, para anclarlo aparte del listado normal. */
+  obtenerAdministracion(categorias: CategoriaMenu[]): NavItem | null {
+    for (const categoria of categorias) {
+      for (const modulo of categoria.modulos) {
+        const hijo = modulo.children.find(h => this.esRutaAdministracion(h.route));
+        if (hijo) {
+          return {
+            displayName: hijo.displayName,
+            iconName: hijo.iconName,
+            route: hijo.route,
+          };
+        }
+      }
+    }
+
+    return null;
+  }
+
+  private esRutaAdministracion(ruta: string): boolean {
+    return this.normalizarRuta(ruta) === RUTA_ADMINISTRACION;
   }
 }

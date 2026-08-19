@@ -1,0 +1,30 @@
+<div class="dialog-header">
+  <div class="dialog-header-content">
+    <mat-icon class="dialog-header-icon">edit</mat-icon>
+    <span class="dialog-title">Forzar estado del lote #{{ data.lote.loteId }}</span>
+  </div>
+</div>
+
+<mat-dialog-content>
+  <p class="mb-3 text-sm">
+    Estado actual: <strong>{{ estadoLabel(data.lote.estadoLote) }}</strong>. Elige el nuevo estado a forzar
+    -- no se valida que la transición sea normalmente permitida.
+  </p>
+
+  <mat-form-field appearance="outline" class="w-full hide-hint">
+    <mat-label>Nuevo estado</mat-label>
+    <mat-select
+      [value]="estadoSeleccionado()"
+      (selectionChange)="estadoSeleccionado.set($event.value)"
+    >
+      @for (estado of estadosDisponibles; track estado) {
+        <mat-option [value]="estado">{{ estadoLabel(estado) }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancelar()">Cancelar</button>
+  <button mat-flat-button color="warn" [disabled]="!estadoSeleccionado()" (click)="confirmar()">Forzar estado</button>
+</mat-dialog-actions>

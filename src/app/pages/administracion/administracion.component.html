@@ -1,0 +1,21 @@
+<mat-card class="cardWithShadow">
+  <mat-card-content>
+    <mat-tab-group>
+      @for (tab of tabs; track tab.id) {
+        <mat-tab [label]="tab.label">
+          @if (tab.habilitado) {
+            @switch (tab.id) {
+              @case ('avisos-cobranza') {
+                <app-admin-lotes />
+              }
+            }
+          } @else {
+            <div class="text-center text-sm text-gray-500 py-12">
+              Próximamente.
+            </div>
+          }
+        </mat-tab>
+      }
+    </mat-tab-group>
+  </mat-card-content>
+</mat-card>
