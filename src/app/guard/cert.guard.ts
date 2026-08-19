@@ -8,7 +8,7 @@ import { environment } from "src/environments/environment";
 import { LoginService } from "../services/login.service";
 import { MenuService } from "../layouts/full/vertical/sidebar/sidebar-data";
 
-const RUTA_INICIO = '/inicio';
+const RUTAS_LIBRES = ['/inicio', '/inicio/perfil', '/inicio/notificaciones'];
 
 export const CertGuard = (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
     const router = inject(Router);
@@ -29,8 +29,8 @@ export const CertGuard = (route: ActivatedRouteSnapshot, state: RouterStateSnaps
 
         const url = state.url;
 
-        //3) INICIO SIEMPRE ES ACCESIBLE CON SOLO ESTAR LOGUEADO
-        if(url === RUTA_INICIO){
+        //3) RUTAS LIBRES: SIEMPRE ACCESIBLES CON SOLO ESTAR LOGUEADO, SIN VALIDAR CONTRA LA BD
+        if(RUTAS_LIBRES.includes(url)){
             return true;
         }
 
