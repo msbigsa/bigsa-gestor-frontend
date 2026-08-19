@@ -40,7 +40,7 @@ export const CertGuard = (route: ActivatedRouteSnapshot, state: RouterStateSnaps
                 if(acceso.permitido){
                     return true;
                 }
-                router.navigate(['/noEncontrado']);
+                router.navigate(['/prohibido']);
                 return false;
             }),
             // fail-closed: si la validacion falla o el servicio no responde, se bloquea la navegacion
