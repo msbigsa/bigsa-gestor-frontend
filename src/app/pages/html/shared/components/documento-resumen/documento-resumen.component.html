@@ -13,7 +13,7 @@
 
   @if (muestraBoton()) {
     <div class="flex justify-end">
-      <button mat-flat-button color="primary" type="button" (click)="nuevaVersion()">
+      <button mat-flat-button color="primary" type="button" data-tour="resultado-nueva-version" (click)="nuevaVersion()">
         <mat-icon>published_with_changes</mat-icon>
         Generar nueva versión
       </button>
@@ -21,7 +21,7 @@
   }
 </div>
 
-<div class="summary-card">
+<div class="summary-card" data-tour="resultado-resumen">
   <div class="summary-item">
     <div class="summary-icon primary">
       <mat-icon>person</mat-icon>

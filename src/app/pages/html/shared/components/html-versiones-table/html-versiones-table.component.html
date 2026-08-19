@@ -64,8 +64,9 @@
           </th>
           <td
             mat-cell
-            *matCellDef="let element"
+            *matCellDef="let element; let first = first"
             class="action-link whitespace-nowrap"
+            [attr.data-tour]="first ? 'resultado-accion' : null"
           >
             <a (click)="descargar(element)" class="me-2.5 cursor-pointer">
               <i-tabler

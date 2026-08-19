@@ -36,8 +36,9 @@
             "styles": [
               "src/globals.css",
               "src/styles.scss",
-              "src/assets/scss/style.scss",
-              "node_modules/ngx-toastr/toastr.css"
+              "node_modules/ngx-toastr/toastr.css",
+              "node_modules/shepherd.js/dist/css/shepherd.css",
+              "src/assets/scss/style.scss"
             ],
             "scripts": [],
             "browser": "src/main.ts"

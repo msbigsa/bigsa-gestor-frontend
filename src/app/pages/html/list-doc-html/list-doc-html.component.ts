@@ -16,6 +16,8 @@ import { HtmlDocumentoService } from 'src/app/services/htmlDocumento.service';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { debounceTime, distinctUntilChanged, filter } from 'rxjs';
 import { ConfirmDialogResult } from 'src/app/shared/components/confirm-dialog/confirm-dialog-result.enum';
+import { TourService } from 'src/app/shared/tour/tour.service';
+import { buildListDocHtmlTourSteps } from '../html-tour.steps';
 
 @Component({
   selector: 'app-list-doc-html',
@@ -41,6 +43,7 @@ export class ListDocHtmlComponent implements OnInit {
   private readonly dialog =  inject(MatDialog);
   private readonly datePipe = inject(DatePipe);
   private readonly router = inject(Router);
+  private readonly tourService = inject(TourService);
 
   readonly documentos = signal<ArchivoDoc[]>([]);
   readonly pageIndex = signal(0);
@@ -97,6 +100,10 @@ export class ListDocHtmlComponent implements OnInit {
 
   irAGenerarHtml(): void {
     this.router.navigate(['/inicio/html/conversor-doc-html']);
+  }
+
+  iniciarTour(): void {
+    this.tourService.start(buildListDocHtmlTourSteps(this.documentos().length > 0));
   }
 
   getFechaCompleta(fecha: Date | string): string {

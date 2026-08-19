@@ -1,0 +1,101 @@
+// Estilos del tour guiado (Shepherd.js) alineados a los tokens M3 del tema Modernize.
+// Los valores font-family/corner/elevation se tomaron de override-component/_button.scss
+// y de la tipografía real de la app (DM Sans), no de los defaults de Material/Roboto.
+
+.shepherd-element {
+  border-radius: var(--mat-sys-corner-medium);
+  box-shadow: var(--mat-sys-level3);
+  font-family: "DM Sans", sans-serif;
+  max-width: 22rem;
+}
+
+// El arrow es hijo directo de .shepherd-element y sobresale de su borde
+// (ver shepherd.css), así que el recorte de esquinas va en shepherd-content
+// -que sí abarca header/texto/footer sin resto- para no cortar la flecha
+// y evitar cualquier desfase de sub-píxel entre el radio del header y el
+// del contenedor.
+.shepherd-content {
+  border-radius: inherit;
+  overflow: hidden;
+}
+
+.shepherd-has-title .shepherd-content .shepherd-header {
+  background: var(--mat-sys-primary);
+  border-radius: var(--mat-sys-corner-medium) var(--mat-sys-corner-medium) 0 0;
+  padding: 0.75rem 1rem;
+}
+
+.shepherd-title {
+  font: var(--mat-sys-title-medium);
+  color: var(--mat-sys-on-primary);
+}
+
+.shepherd-cancel-icon {
+  color: var(--mat-sys-on-primary);
+  opacity: 0.85;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.shepherd-text {
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-surface);
+  background: var(--mat-sys-surface-container);
+  padding: 1rem;
+}
+
+.shepherd-footer {
+  background: var(--mat-sys-surface-container);
+  border-radius: 0 0 var(--mat-sys-corner-medium) var(--mat-sys-corner-medium);
+  padding: 0 1rem 1rem;
+  gap: 0.5rem;
+}
+
+// Replica el look de un mat-flat-button color="primary": mismo alto, radio,
+// tipografía y padding horizontal que _button.scss define para el resto de la app.
+.shepherd-button {
+  position: relative;
+  overflow: hidden;
+  height: 2.5rem;
+  padding: 0 15px;
+  margin: 0;
+  border: none;
+  border-radius: var(--mat-sys-corner-small);
+  font: var(--mat-sys-label-large);
+  letter-spacing: var(--mat-sys-label-large-tracking);
+  text-transform: none;
+  background: var(--mat-sys-primary);
+  color: var(--mat-sys-on-primary);
+  cursor: pointer;
+
+  &:not(:disabled):hover::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: currentColor;
+    opacity: var(--mat-sys-hover-state-layer-opacity);
+  }
+
+  &.shepherd-button-secondary {
+    background: transparent;
+    color: var(--mat-sys-primary);
+  }
+}
+
+.shepherd-arrow:before {
+  background: var(--mat-sys-surface-container);
+}
+
+.shepherd-has-title .shepherd-arrow:before {
+  background: var(--mat-sys-primary);
+}
+
+.shepherd-modal-overlay-container {
+  z-index: 1090;
+}
+
+.shepherd-element {
+  z-index: 1091;
+}

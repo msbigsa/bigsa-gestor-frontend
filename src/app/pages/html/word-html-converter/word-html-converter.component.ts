@@ -10,6 +10,8 @@ import { HtmlService } from 'src/app/services/html.service';
 import { HtmlDocumentoService } from 'src/app/services/htmlDocumento.service';
 import { FileDropzoneComponent } from 'src/app/shared/components/file-dropzone/file-dropzone.component';
 import { DocumentoResumenComponent } from '../shared/components/documento-resumen/documento-resumen.component';
+import { TourService } from 'src/app/shared/tour/tour.service';
+import { buildWordHtmlConverterTourSteps } from '../html-tour.steps';
 
 @Component({
   selector: 'app-word-html-converter',
@@ -43,6 +45,7 @@ export class WordHtmlConverterComponent {
   private readonly toastr = inject(ToastrService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly tourService = inject(TourService);
 
   constructor() {
     effect(() => {
@@ -166,6 +169,10 @@ export class WordHtmlConverterComponent {
   }
 
   volver() {
-     this.router.navigate(['/inicio/html/resultado-doc-html', this.id()]);
+     this.router.navigate(['/inicio/html/listar-doc-html/resultado-doc-html', this.id()]);
+  }
+
+  iniciarTour(): void {
+    this.tourService.start(buildWordHtmlConverterTourSteps(this.subido(), this.esActualizacion()));
   }
 }

@@ -1,7 +1,18 @@
-<button mat-button color="primary" (click)="volver()" class="mb-4">
-  <mat-icon>arrow_back</mat-icon>
-  Volver
-</button>
+<div class="flex items-center justify-between mb-4">
+  <button mat-button color="primary" (click)="volver()">
+    <mat-icon>arrow_back</mat-icon>
+    Volver
+  </button>
+
+  <button
+    mat-icon-button
+    type="button"
+    matTooltip="Ver tour guiado"
+    (click)="iniciarTour()"
+  >
+    <mat-icon>help_outline</mat-icon>
+  </button>
+</div>
 
 <!--@if (documento(); as doc) {-->
 

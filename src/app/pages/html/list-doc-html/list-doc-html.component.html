@@ -2,7 +2,7 @@
   <mat-card-content>
     <div class="grid grid-cols-12 justify-between">
       <div class="lg:col-span-6 col-span-12">
-        <mat-form-field appearance="outline" class="w-full hide-hint">
+        <mat-form-field appearance="outline" class="w-full hide-hint" data-tour="doc-filtro">
           <div class="flex flex-row items-center self-stretch gap-3">
             <i
               class="iconify size-5.5!"
@@ -16,8 +16,17 @@
           </div>
         </mat-form-field>
       </div>
-      <div class="lg:col-span-6 col-span-12 flex items-center justify-end">
-        <button mat-flat-button color="primary" (click)="irAGenerarHtml()">
+      <div class="lg:col-span-6 col-span-12 flex items-center justify-end gap-1">
+        <button
+          mat-icon-button
+          type="button"
+          matTooltip="Ver tour guiado"
+          (click)="iniciarTour()"
+        >
+          <mat-icon>help_outline</mat-icon>
+        </button>
+
+        <button mat-flat-button color="primary" data-tour="doc-generar" (click)="irAGenerarHtml()">
           <mat-icon class="mr-2">add</mat-icon>
           Generar HTML
         </button>
@@ -99,8 +108,9 @@
           </th>
           <td
             mat-cell
-            *matCellDef="let element"
+            *matCellDef="let element; let first = first"
             class="action-link whitespace-nowrap"
+            [attr.data-tour]="first ? 'doc-accion' : null"
           >
             <a (click)="editar(element)" class="me-2.5 cursor-pointer">
               <i-tabler

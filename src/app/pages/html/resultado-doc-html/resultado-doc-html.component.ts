@@ -16,6 +16,8 @@ import { HtmlVersionesTableComponent } from '../shared/components/html-versiones
 import { HtmlPreviewDialogComponent } from '../shared/components/html-preview-dialog/html-preview-dialog.component';
 import { forkJoin } from 'rxjs';
 import { ConfirmDialogResult } from 'src/app/shared/components/confirm-dialog/confirm-dialog-result.enum';
+import { TourService } from 'src/app/shared/tour/tour.service';
+import { buildResultadoDocHtmlTourSteps } from '../html-tour.steps';
 
 @Component({
   selector: 'app-resultado-doc-html',
@@ -49,6 +51,7 @@ export class ResultadoDocHtmlComponent {
   private readonly toastr = inject(ToastrService);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
+  private readonly tourService = inject(TourService);
 
   constructor() {
     effect(() => {
@@ -87,6 +90,10 @@ export class ResultadoDocHtmlComponent {
 
   volver(): void {
     this.router.navigate(['/inicio/html/listar-doc-html']);
+  }
+
+  iniciarTour(): void {
+    this.tourService.start(buildResultadoDocHtmlTourSteps(this.resultadosHtml().length > 0));
   }
 
   descargar(html: ArchivoDocResultado): void {

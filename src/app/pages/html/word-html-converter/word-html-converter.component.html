@@ -11,17 +11,33 @@
 }
 
 <mat-card class="cardWithShadow">
-  <mat-card-header class="p-4!">
-    <mat-card-title class="mb-0 text-xl font-semibold">
-      Ingrese un nuevo archivo
-    </mat-card-title>
+  <mat-card-header class="p-4! w-full">
+    <div class="flex items-center justify-between w-full">
+      <mat-card-title class="mb-0 text-xl font-semibold">
+        Ingrese un nuevo archivo
+      </mat-card-title>
+
+      <button
+        mat-icon-button
+        type="button"
+        matTooltip="Ver tour guiado"
+        (click)="iniciarTour()"
+      >
+        <mat-icon>help_outline</mat-icon>
+      </button>
+    </div>
   </mat-card-header>
 
   <mat-card-content class="border-t border-border p-6!">
     <form [formGroup]="form">
       <mat-label class="font-medium mb-2 block"> Nombre </mat-label>
 
-      <mat-form-field appearance="outline" class="w-full" color="primary">
+      <mat-form-field
+        appearance="outline"
+        class="w-full"
+        color="primary"
+        data-tour="conversor-nombre"
+      >
         <input matInput formControlName="nombre" />
 
         @if (f.nombre.hasError("required")) {
@@ -40,6 +56,7 @@
             color="primary"
             type="button"
             class="px-6 py-5"
+            data-tour="conversor-ver-documento"
             (click)="muestraDocumento()"
           >
             <mat-icon class="mr-2">article</mat-icon>
@@ -52,6 +69,7 @@
               color="primary"
               type="button"
               class="px-6 py-5"
+              data-tour="conversor-nuevo-html"
               (click)="generarNuevoHtml()"
             >
               <mat-icon class="mr-2">refresh</mat-icon>
@@ -63,6 +81,7 @@
         <mat-label class="font-medium mb-2 block mt-3"> Archivo </mat-label>
 
         <app-file-dropzone
+          data-tour="conversor-archivo"
           [title]="'Suba un documento Word'"
           [subtitle]="'Arrastre el archivo aquí o haga clic para seleccionarlo.'"
           [accept]="'.doc,.docx'"
@@ -84,6 +103,7 @@
             color="primary"
             type="button"
             class="px-6 py-5"
+            data-tour="conversor-generar"
             [disabled]="form.invalid"
             (click)="generar()"
           >
