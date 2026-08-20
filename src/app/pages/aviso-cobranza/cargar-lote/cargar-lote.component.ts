@@ -10,6 +10,8 @@ import { MaterialModule } from 'src/app/material.module';
 import { FileDropzoneComponent } from 'src/app/shared/components/file-dropzone/file-dropzone.component';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
 import { ConfirmDialogResult } from 'src/app/shared/components/confirm-dialog/confirm-dialog-result.enum';
+import { TourService } from 'src/app/shared/tour/tour.service';
+import { buildCargarLoteTourSteps } from '../aviso-cobranza-tour.steps';
 
 import { AvisoCobranzaLoteService } from 'src/app/services/aviso-cobranza/avisoCobranzaLote.service';
 import { AvisoCobranzaCobradorService } from 'src/app/services/aviso-cobranza/avisoCobranzaCobrador.service';
@@ -40,6 +42,7 @@ export class CargarLoteComponent {
   private readonly plantillaService = inject(AvisoCobranzaPlantillaService);
   private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
+  private readonly tourService = inject(TourService);
 
   readonly companias = toSignal(this.companiaService.listarDisponibles(), { initialValue: [] as CompaniaDisponible[] });
   readonly plantillas = toSignal(this.plantillaService.listarDisponibles(), { initialValue: [] as FormatoDisponible[] });
@@ -171,6 +174,10 @@ export class CargarLoteComponent {
   limpiarPlantillaEjecutivo(): void {
     this.plantillaEjecutivoControl.setValue('');
     this.plantillaEjecutivoSeleccionada.set(null);
+  }
+
+  iniciarTour(): void {
+    this.tourService.start(buildCargarLoteTourSteps());
   }
 
   onArchivoSeleccionado(file: File): void {

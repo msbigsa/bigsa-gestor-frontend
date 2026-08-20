@@ -48,6 +48,8 @@ import {
   ErroresRegistroDialogComponent,
   ErroresRegistroDialogData,
 } from '../shared/errores-registro-dialog/errores-registro-dialog.component';
+import { TourService } from 'src/app/shared/tour/tour.service';
+import { buildDetalleLoteTourSteps } from '../aviso-cobranza-tour.steps';
 
 @Component({
   selector: 'app-detalle-lote',
@@ -65,6 +67,7 @@ export class DetalleLoteComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly toastr = inject(ToastrService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly tourService = inject(TourService);
 
   private static readonly INTERVALO_POLLING_MS = 5000;
   private static readonly ESTADOS_EN_PROCESO: EstadoLote[] = [EstadoLote.VALIDANDO, EstadoLote.ENVIANDO];
@@ -217,6 +220,15 @@ export class DetalleLoteComponent implements OnInit {
 
   volver(): void {
     this.router.navigate(['/inicio/avisos-cobranza/listar-lotes']);
+  }
+
+  iniciarTour(): void {
+    this.tourService.start(buildDetalleLoteTourSteps(
+      this.puedeValidar() || this.puedeEnviar() || this.puedeCorregir() || this.puedeEliminar(),
+      this.puedeDescargar(),
+      !this.loteEliminado(),
+      this.detalles().length > 0,
+    ));
   }
 
   puedeValidar(): boolean {

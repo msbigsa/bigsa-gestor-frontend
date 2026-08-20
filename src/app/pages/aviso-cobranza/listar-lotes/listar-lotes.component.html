@@ -1,7 +1,7 @@
 <mat-card class="cardWithShadow">
   <mat-card-content>
     <div class="grid grid-cols-12 gap-4 items-center">
-      <div class="lg:col-span-3 col-span-12">
+      <div class="lg:col-span-3 col-span-12" data-tour="lote-filtro-estado">
         <mat-form-field appearance="outline" class="w-full hide-hint">
           <mat-label>Filtrar por estado</mat-label>
           <mat-select
@@ -16,7 +16,7 @@
         </mat-form-field>
       </div>
 
-      <div class="lg:col-span-3 col-span-12">
+      <div class="lg:col-span-3 col-span-12" data-tour="lote-filtro-compania">
         <mat-form-field appearance="outline" class="w-full hide-hint">
           <mat-label>Filtrar por compañía</mat-label>
           <mat-select
@@ -31,7 +31,7 @@
         </mat-form-field>
       </div>
 
-      <div class="lg:col-span-2 col-span-12">
+      <div class="lg:col-span-2 col-span-12" data-tour="lote-mostrar-eliminados">
         <mat-checkbox
           [checked]="mostrarEliminados()"
           (change)="onMostrarEliminadosChange($event.checked)"
@@ -41,12 +41,21 @@
       </div>
 
       <div class="lg:col-span-4 col-span-12 flex items-center justify-end gap-2">
+        <button
+          mat-icon-button
+          type="button"
+          matTooltip="Ver tour guiado"
+          (click)="iniciarTour()"
+        >
+          <mat-icon>help_outline</mat-icon>
+        </button>
+
         <button mat-icon-button (click)="cargarLotes()" matTooltip="Actualizar listado">
           <mat-icon>refresh</mat-icon>
         </button>
 
         @if (puedeCargarLote()) {
-          <button mat-flat-button color="primary" (click)="irACargarLote()">
+          <button mat-flat-button color="primary" data-tour="lote-cargar" (click)="irACargarLote()">
             <mat-icon class="mr-2">add</mat-icon>
             Cargar nueva planilla
           </button>
@@ -137,7 +146,12 @@
 
         <ng-container matColumnDef="accion">
           <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Acción</th>
-          <td mat-cell *matCellDef="let lote" class="action-link whitespace-nowrap">
+          <td
+            mat-cell
+            *matCellDef="let lote; let first = first"
+            class="action-link whitespace-nowrap"
+            [attr.data-tour]="first ? 'lote-accion' : null"
+          >
             <a (click)="verDetalle(lote)" class="me-2.5 cursor-pointer">
               <i-tabler name="eye" class="size-5! text-primary" matTooltip="Ver detalle"></i-tabler>
             </a>

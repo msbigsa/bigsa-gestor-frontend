@@ -1,14 +1,25 @@
 <mat-card class="cardWithShadow">
-  <mat-card-header class="p-4!">
-    <mat-card-title class="mb-0 text-xl font-semibold">
-      Cargar planilla de avisos de cobranza
-    </mat-card-title>
+  <mat-card-header class="p-4! w-full">
+    <div class="flex items-center justify-between w-full">
+      <mat-card-title class="mb-0 text-xl font-semibold">
+        Cargar planilla de avisos de cobranza
+      </mat-card-title>
+
+      <button
+        mat-icon-button
+        type="button"
+        matTooltip="Ver tour guiado"
+        (click)="iniciarTour()"
+      >
+        <mat-icon>help_outline</mat-icon>
+      </button>
+    </div>
   </mat-card-header>
 
   <mat-card-content class="border-t border-border p-6!">
     <div class="grid grid-cols-12 gap-6">
 
-      <div class="col-span-12">
+      <div class="col-span-12" data-tour="carga-compania">
         <mat-label class="font-medium mb-2 block">Compañía</mat-label>
         <mat-form-field appearance="outline" class="w-full">
           <input
@@ -31,7 +42,7 @@
         </mat-form-field>
       </div>
 
-      <div class="col-span-12 lg:col-span-6">
+      <div class="col-span-12 lg:col-span-6" data-tour="carga-plantilla-cliente">
         <mat-label class="font-medium mb-2 block">Plantilla para el cliente</mat-label>
         <mat-form-field appearance="outline" class="w-full">
           <input
@@ -54,7 +65,7 @@
         </mat-form-field>
       </div>
 
-      <div class="col-span-12 lg:col-span-6">
+      <div class="col-span-12 lg:col-span-6" data-tour="carga-plantilla-ejecutivo">
         <mat-label class="font-medium mb-2 block">Plantilla para el ejecutivo</mat-label>
         <mat-form-field appearance="outline" class="w-full">
           <input
@@ -77,23 +88,25 @@
         </mat-form-field>
       </div>
 
-      <div class="col-span-12 flex flex-wrap gap-6">
-        <mat-checkbox [checked]="copiaCobrador()" (change)="copiaCobrador.set($event.checked)">
-          Copiar al cobrador del documento
-        </mat-checkbox>
+      <div class="col-span-12" data-tour="carga-opciones">
+        <div class="flex flex-wrap gap-6">
+          <mat-checkbox [checked]="copiaCobrador()" (change)="copiaCobrador.set($event.checked)">
+            Copiar al cobrador del documento
+          </mat-checkbox>
 
-        <mat-checkbox [checked]="copiaEjecutivo()" (change)="copiaEjecutivo.set($event.checked)">
-          Copiar al ejecutivo del documento
-        </mat-checkbox>
+          <mat-checkbox [checked]="copiaEjecutivo()" (change)="copiaEjecutivo.set($event.checked)">
+            Copiar al ejecutivo del documento
+          </mat-checkbox>
+        </div>
+
+        <div class="mt-6">
+          <mat-checkbox [checked]="excluirDescuentoPlanilla()" (change)="excluirDescuentoPlanilla.set($event.checked)">
+            Excluir forma de pago "Descuento por Planilla"
+          </mat-checkbox>
+        </div>
       </div>
 
-      <div class="col-span-12">
-        <mat-checkbox [checked]="excluirDescuentoPlanilla()" (change)="excluirDescuentoPlanilla.set($event.checked)">
-          Excluir forma de pago "Descuento por Planilla"
-        </mat-checkbox>
-      </div>
-
-      <div class="col-span-12">
+      <div class="col-span-12" data-tour="carga-cobradores">
         <div class="flex items-center justify-between mb-2">
           <mat-label class="font-medium block">
             Cobradores incluidos ({{ cobradoresSeleccionados().size }} de {{ cobradores().length }})
@@ -127,7 +140,7 @@
         </div>
       </div>
 
-      <div class="col-span-12">
+      <div class="col-span-12" data-tour="carga-archivo">
         <mat-label class="font-medium mb-2 block">Archivo (planilla CSV separada por ";", o Excel .xlsx)</mat-label>
 
         <app-file-dropzone
@@ -146,6 +159,7 @@
           color="primary"
           type="button"
           class="px-6 py-5"
+          data-tour="carga-enviar"
           [disabled]="!puedeEnviar()"
           (click)="enviar()"
         >
