@@ -55,11 +55,11 @@
           <td mat-cell *matCellDef="let notificacion" class="action-link whitespace-nowrap">
             @if (!notificacion.leida) {
               <a (click)="marcarLeida(notificacion)" class="me-2.5 cursor-pointer">
-                <mat-icon class="icon-20 text-primary!" matTooltip="Marcar como leída">check</mat-icon>
+                <mat-icon class="text-primary!" matTooltip="Marcar como leída">check</mat-icon>
               </a>
             }
             <a (click)="eliminar(notificacion)" class="cursor-pointer">
-              <mat-icon class="icon-20 text-red-600!" matTooltip="Eliminar notificación">delete</mat-icon>
+              <mat-icon class="text-red-600!" matTooltip="Eliminar notificación">delete</mat-icon>
             </a>
           </td>
         </ng-container>
