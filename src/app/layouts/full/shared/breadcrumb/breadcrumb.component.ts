@@ -3,11 +3,11 @@ import { Title } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
 import { Router, NavigationEnd, ActivatedRoute, Data } from '@angular/router';
 import { filter, map, mergeMap } from 'rxjs/operators';
-import { TablerIconsModule } from 'angular-tabler-icons';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-breadcrumb',
-  imports: [RouterModule, TablerIconsModule],
+  imports: [RouterModule, MatIconModule],
   templateUrl: './breadcrumb.component.html',
   styleUrls: []
 })

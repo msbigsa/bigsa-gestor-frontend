@@ -129,11 +129,10 @@
                 {{ estadoLabel(lote.estadoLote) }}
               </span>
               @if (tieneErrorEnvio(lote)) {
-                <i-tabler
-                  name="alert-triangle"
-                  class="size-4! text-error shrink-0"
+                <mat-icon
+                  class="icon-16 text-error! shrink-0"
                   [matTooltip]="lote.mensajeErrorEnvio ?? ''"
-                ></i-tabler>
+                >warning</mat-icon>
               }
             </span>
           </td>
@@ -153,16 +152,16 @@
             [attr.data-tour]="first ? 'lote-accion' : null"
           >
             <a (click)="verDetalle(lote)" class="me-2.5 cursor-pointer">
-              <i-tabler name="eye" class="size-5! text-primary" matTooltip="Ver detalle"></i-tabler>
+              <mat-icon class="icon-20 text-primary!" matTooltip="Ver detalle">visibility</mat-icon>
             </a>
             @if (puedeValidar(lote)) {
               <a (click)="validar(lote)" class="me-2.5 cursor-pointer">
-                <i-tabler name="clipboard-check" class="size-5! text-warning" matTooltip="Validar lote"></i-tabler>
+                <mat-icon class="icon-20 text-warning!" matTooltip="Validar lote">fact_check</mat-icon>
               </a>
             }
             @if (puedeEnviar(lote)) {
               <a (click)="enviar(lote)" class="me-2.5 cursor-pointer">
-                <i-tabler name="send" class="size-5! text-success" matTooltip="Enviar avisos"></i-tabler>
+                <mat-icon class="icon-20 text-success!" matTooltip="Enviar avisos">send</mat-icon>
               </a>
             }
             @if (puedeEliminar(lote)) {
@@ -173,11 +172,10 @@
                 [class.opacity-40]="enProceso(lote)"
                 [class.pointer-events-none]="enProceso(lote)"
               >
-                <i-tabler
-                  name="trash"
-                  class="size-5! text-red-600"
+                <mat-icon
+                  class="icon-20 text-red-600!"
                   [matTooltip]="enProceso(lote) ? 'No disponible mientras el lote está en proceso' : 'Eliminar lote'"
-                ></i-tabler>
+                >delete</mat-icon>
               </a>
             }
           </td>

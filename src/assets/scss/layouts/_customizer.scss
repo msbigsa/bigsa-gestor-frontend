@@ -99,9 +99,8 @@ html .customizerNav {
     &.mat-button-toggle-checked {
       background-color: var(--mat-sys-primary-fixed-dim);
 
-      i-tabler.fill-icon {
+      mat-icon.fill-icon {
         color: var(--mat-sys-primary);
-        fill: var(--mat-sys-on-primary);
       }
     }
   }

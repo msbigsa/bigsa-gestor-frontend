@@ -2,7 +2,7 @@
 <a class="cursor-pointer menuLink" (click)="onItemSelected(item)" [ngClass]="{
     activeMenu: item.route ? router.isActive(item.route, true) : false
   }">
-  <span class="iconify routeIcon size-4.5!" [attr.data-icon]="item.iconName"></span>
+  <mat-icon class="routeIcon icon-18">{{ item.iconName }}</mat-icon>
   {{ item.displayName }}
   @if(item.children && item.children.length) {
   <span class="down-icon flex ms-auto">

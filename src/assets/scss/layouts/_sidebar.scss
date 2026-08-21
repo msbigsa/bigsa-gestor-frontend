@@ -173,7 +173,11 @@
         margin-left: 0 !important;
         width: 22px;
         height: 22px;
-        line-height: 0px;
+        font-size: 22px;
+        line-height: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         fill: transparent !important;
       }
 

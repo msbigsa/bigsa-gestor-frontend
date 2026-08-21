@@ -85,11 +85,11 @@
 
     @if(options.theme=='light'){
     <button mat-icon-button aria-label="lightdark" class="flex justify-center" (click)="setlightDark('dark')">
-      <i-tabler class="flex" [name]="'moon'"></i-tabler>
+      <mat-icon class="flex">dark_mode</mat-icon>
     </button>
     }@else{
     <button mat-icon-button aria-label="lightdark" class="flex justify-center" (click)="setlightDark('light')">
-      <i-tabler class="flex" [name]="'sun'"></i-tabler>
+      <mat-icon class="flex">light_mode</mat-icon>
     </button>
     }
 
@@ -117,7 +117,7 @@
     @if (notificacionesHabilitadas) {
     <button mat-icon-button [matBadge]="cantidadNoLeidas() || null" [matMenuTriggerFor]="notificationmenu"
       aria-label="Notifications" class="notification-badge">
-      <i class="iconify" data-icon="solar:bell-line-duotone"></i>
+      <mat-icon>notifications</mat-icon>
     </button>
     <mat-menu #notificationmenu="matMenu" class="topbar-dd cardWithShadow">
       <div class="flex items-center px-6 py-4">
@@ -131,7 +131,7 @@
       <button mat-menu-item class="px-5! py-2!" (click)="marcarLeida(notificacion.id)">
         <div class="flex items-center">
           <span class="text-primary bg-light rounded-full size-10! flex items-center justify-center shrink-0">
-            <i class="iconify size-5!" data-icon="solar:bell-line-duotone"></i>
+            <mat-icon class="icon-20">notifications</mat-icon>
           </span>
           <div class="ms-4 text-start">
             <h5 class="text-sm font-semibold m-0 ">
@@ -179,7 +179,7 @@
               <h6 class="text-sm font-semibold m-0">Mathew Anderson</h6>
               <span class="text-sm block mb-1 text-muted">Designer</span>
               <span class="flex items-center text-muted">
-                <i-tabler name="mail" class="size-3.5! me-1"></i-tabler>
+                <mat-icon class="icon-14 me-1">mail</mat-icon>
                 info&#64;modernize.com
               </span>
             </div>
@@ -204,7 +204,7 @@
         </div>
         <div class="py-3 px-6">
           <a [routerLink]="['/authentication/login']" mat-stroked-button color="primary" class="w-full">
-            <i-tabler name="logout" class="size-4.5! me-1"></i-tabler>
+            <mat-icon class="icon-18 me-1">logout</mat-icon>
             Salir
           </a>
         </div>

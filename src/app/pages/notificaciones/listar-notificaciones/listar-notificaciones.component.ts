@@ -3,7 +3,6 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import { TablerIconsModule } from 'angular-tabler-icons';
 
 import { MaterialModule } from 'src/app/material.module';
 import { NotificacionService } from 'src/app/services/notifica/notificacion.service';
@@ -13,7 +12,7 @@ import { ConfirmDialogResult } from 'src/app/shared/components/confirm-dialog/co
 
 @Component({
   selector: 'app-listar-notificaciones',
-  imports: [CommonModule, MaterialModule, MatPaginatorModule, TablerIconsModule],
+  imports: [CommonModule, MaterialModule, MatPaginatorModule],
   providers: [DatePipe],
   templateUrl: './listar-notificaciones.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

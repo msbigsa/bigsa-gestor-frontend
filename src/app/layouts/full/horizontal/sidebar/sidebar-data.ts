@@ -6,12 +6,12 @@ export const navItems: NavItem[] = [
   },
   {
     displayName: 'Starter',
-    iconName: 'solar:home-angle-linear',
+    iconName: 'home',
     route: '/starter',
   },
   {
     displayName: 'Login',
-    iconName: 'solar:lock-keyhole-unlocked-outline',
+    iconName: 'lock_open',
     route: '/authentication/login',
   },
   {
@@ -19,23 +19,23 @@ export const navItems: NavItem[] = [
   },
   {
     displayName: 'Menu Level',
-    iconName: 'solar:layers-linear',
+    iconName: 'layers',
     route: '/menu-level',
     children: [
       {
         displayName: 'Menu 1',
-        iconName: 'tabler:point',
+        iconName: 'fiber_manual_record',
         route: '/menu-1',
         children: [
           {
             displayName: 'Menu 1',
-            iconName: 'tabler:point',
+            iconName: 'fiber_manual_record',
             route: '/menu-1',
           },
 
           {
             displayName: 'Menu 2',
-            iconName: 'tabler:point',
+            iconName: 'fiber_manual_record',
             route: '/menu-2',
           },
         ],
@@ -43,14 +43,14 @@ export const navItems: NavItem[] = [
 
       {
         displayName: 'Menu 2',
-        iconName: 'tabler:point',
+        iconName: 'fiber_manual_record',
         route: '/menu-2',
       },
     ],
   },
   {
     displayName: 'Disabled',
-    iconName: 'solar:forbidden-circle-linear',
+    iconName: 'block',
     route: '/disabled',
     disabled: true,
   },

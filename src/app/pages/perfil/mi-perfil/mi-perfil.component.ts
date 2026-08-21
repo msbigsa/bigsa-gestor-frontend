@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, ElementRef, ViewChild, inject, sign
 import { CommonModule, LowerCasePipe, TitleCasePipe } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
-import { TablerIconsModule } from 'angular-tabler-icons';
 
 import { MaterialModule } from 'src/app/material.module';
 import { LoginService } from 'src/app/services/login.service';
@@ -15,7 +14,7 @@ const TIPOS_PERMITIDOS = ['image/jpeg', 'image/png', 'image/webp'];
 
 @Component({
   selector: 'app-mi-perfil',
-  imports: [CommonModule, MaterialModule, TitleCasePipe, LowerCasePipe, UserAvatarComponent, TablerIconsModule],
+  imports: [CommonModule, MaterialModule, TitleCasePipe, LowerCasePipe, UserAvatarComponent],
   templateUrl: './mi-perfil.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

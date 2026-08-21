@@ -7,7 +7,6 @@ import {
 } from '@angular/core';
 import { AppSettings } from 'src/app/config';
 import { CoreService } from 'src/app/services/core.service';
-import { TablerIconsModule } from 'angular-tabler-icons';
 import { MaterialModule } from 'src/app/material.module';
 import { FormsModule } from '@angular/forms';
 import { NgScrollbarModule } from 'ngx-scrollbar';
@@ -15,7 +14,6 @@ import { NgScrollbarModule } from 'ngx-scrollbar';
 @Component({
   selector: 'app-customizer',
   imports: [
-    TablerIconsModule,
     MaterialModule,
     FormsModule,
     NgScrollbarModule,

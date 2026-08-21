@@ -3,7 +3,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { PageEvent } from '@angular/material/paginator';
-import { TablerIconsModule } from 'angular-tabler-icons';
 import { ToastrService } from 'ngx-toastr';
 import { of } from 'rxjs';
 
@@ -26,7 +25,7 @@ import { ForzarEstadoDialogComponent } from './forzar-estado-dialog/forzar-estad
 // pero sin las restricciones normales (enProceso, puedeValidar/puedeEnviar, filtros en URL, polling).
 @Component({
   selector: 'app-admin-lotes',
-  imports: [CommonModule, MaterialModule, TablerIconsModule],
+  imports: [CommonModule, MaterialModule],
   templateUrl: './admin-lotes.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

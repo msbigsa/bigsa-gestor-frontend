@@ -212,11 +212,10 @@
                     {{ estadoLabel(correccion.estadoLote) }}
                   </span>
                   @if (tieneErrorEnvio(correccion)) {
-                    <i-tabler
-                      name="alert-triangle"
-                      class="size-4! text-error shrink-0"
+                    <mat-icon
+                      class="icon-16 text-error! shrink-0"
                       [matTooltip]="correccion.mensajeErrorEnvio ?? ''"
-                    ></i-tabler>
+                    >warning</mat-icon>
                   }
                 </span>
               </a>
@@ -306,12 +305,11 @@
             <div class="flex items-center justify-between gap-2">
               <span>{{ d.correoResuelto ?? "-" }}</span>
               @if (iconoCorreo(d); as icono) {
-                <i-tabler
-                  [name]="icono"
-                  class="size-4 shrink-0"
+                <mat-icon
+                  class="icon-16 shrink-0"
                   [ngClass]="origenCorreoClase(d.origenCorreo)"
                   [matTooltip]="origenCorreoTooltip(d.origenCorreo)"
-                ></i-tabler>
+                >{{ icono }}</mat-icon>
               }
             </div>
           </td>
@@ -347,11 +345,10 @@
               [class.opacity-40]="loteEnProceso()"
               [class.pointer-events-none]="loteEnProceso()"
             >
-              <i-tabler
-                name="trash"
-                class="size-5! text-red-600"
+              <mat-icon
+                class="icon-20 text-red-600!"
                 [matTooltip]="loteEnProceso() ? 'No disponible mientras el lote está en proceso' : 'Eliminar registro'"
-              ></i-tabler>
+              >delete</mat-icon>
             </a>
           </td>
         </ng-container>

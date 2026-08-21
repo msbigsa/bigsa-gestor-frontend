@@ -14,7 +14,6 @@ import { MatDialog, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MenuService } from '../sidebar/sidebar-data';
 import { NavItem } from '../sidebar/nav-item/nav-item';
 import { TranslateService } from '@ngx-translate/core';
-import { TablerIconsModule } from 'angular-tabler-icons';
 import { MaterialModule } from 'src/app/material.module';
 import { Router, RouterModule } from '@angular/router';
 
@@ -54,7 +53,6 @@ interface quicklinks {
   imports: [
     RouterModule,
     NgScrollbarModule,
-    TablerIconsModule,
     MaterialModule,
     TitleCasePipe,
     LowerCasePipe,
@@ -308,7 +306,7 @@ export class HeaderComponent implements OnInit {
 
 @Component({
   selector: 'search-dialog',
-  imports: [RouterModule, MaterialModule, TablerIconsModule, FormsModule],
+  imports: [RouterModule, MaterialModule, FormsModule],
   templateUrl: 'search-dialog.component.html'
 })
 export class AppSearchDialogComponent {

@@ -203,12 +203,41 @@ button:disabled {
   opacity: 0.45;
 }
 
-/* Íconos Tabler dentro de botones deshabilitados */
-button[disabled] i-tabler,
-button:disabled i-tabler {
+/* Íconos dentro de botones deshabilitados */
+button[disabled] mat-icon,
+button:disabled mat-icon {
   opacity: 0.45;
 }
 
 .mat-mdc-tooltip-surface {
   white-space: pre-line;
 }
+
+/* ------------------------------------------------------------------------
+   Escala de tamanos para mat-icon.
+
+   El sistema de iconos anterior (Iconify/Tabler, SVG) solo tenia una
+   dimension de tamano -- width/height -- asi que una sola clase (ej.
+   Tailwind "size-5") siempre alcanzaba para redimensionarlo. mat-icon es
+   texto con fuente de ligaduras, no una imagen, y tiene una segunda
+   dimension independiente -- font-size -- que un SVG nunca necesito. Por
+   eso hay que definir width, height Y font-size juntos para redimensionar
+   un mat-icon correctamente (asi lo documenta Angular Material); con una
+   sola propiedad la caja cambia de tamano pero el glyph se sigue
+   renderizando al font-size por defecto (24px), quedando recortado por el
+   overflow:hidden de mat-icon.
+
+   Repetir esas 3-4 propiedades sueltas en cada componente funciona, pero
+   depende de que cada persona se acuerde de hacerlo bien cada vez. Para
+   evitar eso quedo centralizado aca: una clase por tamano, unica fuente de
+   verdad -- el resto del proyecto solo usa el nombre (ej. class="icon-20"),
+   sin definir nada manualmente. Requieren !important porque tienen que
+   ganarle a .material-icons{font-size:24px} (misma especificidad, definida
+   despues en la cascada) -- eso ya lo trae cada clase de aca.
+   ------------------------------------------------------------------------ */
+.icon-8 { width: 8px !important; height: 8px !important; font-size: 8px !important; line-height: 8px !important; }
+.icon-14 { width: 14px !important; height: 14px !important; font-size: 14px !important; line-height: 14px !important; }
+.icon-16 { width: 16px !important; height: 16px !important; font-size: 16px !important; line-height: 16px !important; }
+.icon-18 { width: 18px !important; height: 18px !important; font-size: 18px !important; line-height: 18px !important; }
+.icon-20 { width: 20px !important; height: 20px !important; font-size: 20px !important; line-height: 20px !important; }
+.icon-22 { width: 22px !important; height: 22px !important; font-size: 22px !important; line-height: 22px !important; }

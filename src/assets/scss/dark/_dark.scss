@@ -27,9 +27,9 @@
   }
 
 
-  // fill
-  .customizer-button-group .mat-button-toggle-appearance-standard.mat-button-toggle-checked i-tabler.fill-icon {
-    fill: var(--mat-sys-primary-fixed-dim);
+  // color en modo oscuro
+  .customizer-button-group .mat-button-toggle-appearance-standard.mat-button-toggle-checked mat-icon.fill-icon {
+    color: var(--mat-sys-primary-fixed-dim);
   }
 
 }

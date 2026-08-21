@@ -10,14 +10,13 @@ import {
 } from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
-import { TablerIconsModule } from 'angular-tabler-icons';
 
 import { MaterialModule } from 'src/app/material.module';
 import { ArchivoDocResultado } from 'src/app/models/ArchivoDocResultado';
 
 @Component({
   selector: 'app-html-versiones-table',
-  imports: [CommonModule, MaterialModule, TablerIconsModule],
+  imports: [CommonModule, MaterialModule],
   providers: [DatePipe],
   templateUrl: './html-versiones-table.component.html',
   styleUrl: './html-versiones-table.component.scss',

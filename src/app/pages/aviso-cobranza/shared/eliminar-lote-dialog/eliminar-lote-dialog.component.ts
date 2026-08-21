@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, Inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { TablerIconsModule } from 'angular-tabler-icons';
 
 import { MaterialModule } from 'src/app/material.module';
 import { LoteCargaResponse } from 'src/app/models/aviso-cobranza/LoteCargaResponse';
@@ -15,7 +14,7 @@ export interface EliminarLoteDialogData {
 // Deja elegir que hijos cascadear; no ejecuta el DELETE, eso lo hace el caller.
 @Component({
   selector: 'app-eliminar-lote-dialog',
-  imports: [CommonModule, MaterialModule, TablerIconsModule],
+  imports: [CommonModule, MaterialModule],
   templateUrl: './eliminar-lote-dialog.component.html',
   styleUrl: './eliminar-lote-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

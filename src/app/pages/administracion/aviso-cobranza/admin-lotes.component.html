@@ -1,5 +1,5 @@
 <div class="flex items-start gap-2 bg-light-warning text-warning rounded-md p-3 mb-4 text-sm">
-  <i-tabler name="alert-triangle" class="size-4! shrink-0 mt-0.5"></i-tabler>
+  <mat-icon class="icon-16 shrink-0 mt-0.5">warning</mat-icon>
   <span>
     Estas acciones no respetan las validaciones normales del módulo (estado del lote, transiciones permitidas, etc.).
   </span>
@@ -74,10 +74,10 @@
           <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Acción</th>
           <td mat-cell *matCellDef="let lote" class="action-link whitespace-nowrap">
             <a (click)="forzarEstado(lote)" class="me-2.5 cursor-pointer">
-              <i-tabler name="edit" class="size-5! text-warning" matTooltip="Forzar estado"></i-tabler>
+              <mat-icon class="icon-20 text-warning!" matTooltip="Forzar estado">edit</mat-icon>
             </a>
             <a (click)="eliminar(lote)" class="cursor-pointer">
-              <i-tabler name="trash" class="size-5! text-red-600" matTooltip="Eliminar lote"></i-tabler>
+              <mat-icon class="icon-20 text-red-600!" matTooltip="Eliminar lote">delete</mat-icon>
             </a>
           </td>
         </ng-container>

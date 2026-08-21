@@ -5,7 +5,6 @@ import { MenuService } from '../../vertical/sidebar/sidebar-data';
 import { NavItem } from '../../vertical/sidebar/nav-item/nav-item';
 import { TranslateService } from '@ngx-translate/core';
 import { Router, RouterModule } from '@angular/router';
-import { TablerIconsModule } from 'angular-tabler-icons';
 import { MaterialModule } from 'src/app/material.module';
 import { BrandingComponent } from '../../vertical/sidebar/branding.component';
 import { FormsModule } from '@angular/forms';
@@ -39,7 +38,7 @@ interface quicklinks {
 
 @Component({
   selector: 'app-horizontal-header',
-  imports: [RouterModule, TablerIconsModule, MaterialModule, BrandingComponent, NgScrollbarModule, UserAvatarComponent],
+  imports: [RouterModule, MaterialModule, BrandingComponent, NgScrollbarModule, UserAvatarComponent],
   templateUrl: './header.component.html'
 })
 export class AppHorizontalHeaderComponent implements OnInit {
@@ -283,7 +282,7 @@ export class AppHorizontalHeaderComponent implements OnInit {
 
 @Component({
   selector: 'app-search-dialog',
-  imports: [RouterModule, MaterialModule, TablerIconsModule, FormsModule],
+  imports: [RouterModule, MaterialModule, FormsModule],
   templateUrl: 'search-dialog.component.html'
 })
 export class AppHorizontalSearchDialogComponent {

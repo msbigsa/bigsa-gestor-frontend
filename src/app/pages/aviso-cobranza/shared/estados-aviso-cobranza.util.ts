@@ -72,14 +72,14 @@ const ORIGEN_CORREO_TOOLTIP: Record<OrigenCorreo, string> = {
 
 const ORIGEN_CORREO_ICONO: Record<OrigenCorreo, string | null> = {
   [OrigenCorreo.PLANILLA]: null,
-  [OrigenCorreo.SISTEMA]: 'info-circle',
-  [OrigenCorreo.SIN_RESOLVER]: 'alert-triangle',
+  [OrigenCorreo.SISTEMA]: 'info',
+  [OrigenCorreo.SIN_RESOLVER]: 'warning',
 };
 
 const ORIGEN_CORREO_CLASE: Record<OrigenCorreo, string> = {
   [OrigenCorreo.PLANILLA]: '',
-  [OrigenCorreo.SISTEMA]: 'text-info',
-  [OrigenCorreo.SIN_RESOLVER]: 'text-warning',
+  [OrigenCorreo.SISTEMA]: 'text-info!',
+  [OrigenCorreo.SIN_RESOLVER]: 'text-warning!',
 };
 
 export function origenCorreoTooltip(origen: OrigenCorreo | undefined): string {

@@ -4,7 +4,6 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
-import { TablerIconsModule } from 'angular-tabler-icons';
 import { ToastrService } from 'ngx-toastr';
 import { EMPTY, interval, of } from 'rxjs';
 import { catchError, exhaustMap, filter } from 'rxjs/operators';
@@ -30,7 +29,7 @@ const RUTA_CARGAR_LOTE = '/inicio/avisos-cobranza/cargar-lote';
 
 @Component({
   selector: 'app-listar-lotes',
-  imports: [CommonModule, MaterialModule, MatPaginatorModule, TablerIconsModule],
+  imports: [CommonModule, MaterialModule, MatPaginatorModule],
   providers: [DatePipe],
   templateUrl: './listar-lotes.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

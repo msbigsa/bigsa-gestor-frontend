@@ -5,13 +5,12 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { NavService } from '../../../../../services/nav.service';
-import { TablerIconsModule } from 'angular-tabler-icons';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
     selector: 'app-horizontal-nav-item',
-    imports: [TablerIconsModule, CommonModule, MatIconModule],
+    imports: [CommonModule, MatIconModule],
     templateUrl: './nav-item.component.html'
 })
 export class AppHorizontalNavItemComponent implements OnInit {

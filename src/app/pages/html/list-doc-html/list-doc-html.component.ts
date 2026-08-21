@@ -5,7 +5,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatNativeDateModule } from '@angular/material/core';
 
 import { NgScrollbarModule } from 'ngx-scrollbar';
-import { TablerIconsModule } from 'angular-tabler-icons';
 
 import { MaterialModule } from 'src/app/material.module';
 import { ArchivoDoc } from 'src/app/models/ArchivoDoc';
@@ -29,7 +28,6 @@ const RUTA_GENERAR_HTML = '/inicio/html/conversor-doc-html';
     CommonModule,
     MaterialModule,
     MatPaginatorModule,
-    TablerIconsModule,
     MatNativeDateModule,
     NgScrollbarModule,
     ReactiveFormsModule

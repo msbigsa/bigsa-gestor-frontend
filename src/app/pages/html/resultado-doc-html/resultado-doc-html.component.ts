@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import { TablerIconsModule } from 'angular-tabler-icons';
 import { ToastrService } from 'ngx-toastr';
 
 import { MaterialModule } from 'src/app/material.module';
@@ -24,7 +23,6 @@ import { buildResultadoDocHtmlTourSteps } from '../html-tour.steps';
   imports: [
     CommonModule,
     MaterialModule,
-    TablerIconsModule,
     DocumentoResumenComponent,
     HtmlVersionesTableComponent
   ],

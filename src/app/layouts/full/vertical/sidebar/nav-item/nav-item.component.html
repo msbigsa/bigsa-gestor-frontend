@@ -10,7 +10,7 @@
     expanded: expanded, activemenu: isChildActive(item),
     disabled: item.disabled
   }" class="menu-list-item">
-  <span class="iconify routeIcon" matListItemIcon [attr.data-icon]="item.iconName"></span>
+  <mat-icon class="routeIcon" matListItemIcon>{{ item.iconName }}</mat-icon>
   <span class="hide-menu">{{ item.displayName | translate }}</span>
   <div class="flex items-center gap-1">
     @if(item.children && item.children.length) {
@@ -39,7 +39,7 @@
 
 @if(!item.navCap && item.external) {
 <mat-list-item onClick="window.open('//google.com')" class="menu-list-item" target="_blank">
-  <span class="iconify routeIcon" matListItemIcon [attr.data-icon]="item.iconName"></span>
+  <mat-icon class="routeIcon" matListItemIcon>{{ item.iconName }}</mat-icon>
   <span class="hide-menu">{{ item.displayName | translate }}</span>
 </mat-list-item>
 }

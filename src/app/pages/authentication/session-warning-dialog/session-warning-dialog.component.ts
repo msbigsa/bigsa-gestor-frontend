@@ -15,7 +15,6 @@ import {
 } from '@angular/material/dialog';
 
 import { MaterialModule } from 'src/app/material.module';
-import { TablerIconComponent } from 'angular-tabler-icons';
 
 import { SESSION_ACTIONS } from '../session-dialog-result';
 import type { SessionDialogResult } from '../session-dialog-result';
@@ -24,8 +23,7 @@ import type { SessionDialogResult } from '../session-dialog-result';
   selector: 'app-session-warning-dialog',
   imports: [
     CommonModule,
-    MaterialModule,
-    TablerIconComponent
+    MaterialModule
   ],
   templateUrl: './session-warning-dialog.component.html',
   styleUrl: './session-warning-dialog.component.scss',

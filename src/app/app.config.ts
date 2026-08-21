@@ -12,10 +12,6 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 
 
-// icons
-import { TablerIconsModule } from 'angular-tabler-icons';
-import * as TablerIcons from 'angular-tabler-icons/icons';
-
 // perfect scrollbar
 import { NgScrollbarModule } from 'ngx-scrollbar';
 //Import all material modules
@@ -97,7 +93,6 @@ export const appConfig: ApplicationConfig = {
       FormsModule,
       ReactiveFormsModule,
       MaterialModule,
-      TablerIconsModule.pick(TablerIcons),
       NgScrollbarModule,
       TranslateModule.forRoot({
         loader: {

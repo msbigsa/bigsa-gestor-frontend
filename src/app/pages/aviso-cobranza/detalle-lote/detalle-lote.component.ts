@@ -5,7 +5,6 @@ import { HttpResponse } from '@angular/common/http';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import { TablerIconsModule } from 'angular-tabler-icons';
 import { ToastrService } from 'ngx-toastr';
 import { EMPTY, interval } from 'rxjs';
 import { catchError, exhaustMap, filter } from 'rxjs/operators';
@@ -53,7 +52,7 @@ import { buildDetalleLoteTourSteps } from '../aviso-cobranza-tour.steps';
 
 @Component({
   selector: 'app-detalle-lote',
-  imports: [CommonModule, MaterialModule, MatPaginatorModule, TablerIconsModule],
+  imports: [CommonModule, MaterialModule, MatPaginatorModule],
   providers: [DatePipe],
   templateUrl: './detalle-lote.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

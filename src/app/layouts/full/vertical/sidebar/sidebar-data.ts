@@ -67,7 +67,7 @@ export class MenuService {
       { navCap: 'General' },
       {
         displayName: 'Inicio',
-        iconName: 'solar:home-angle-line-duotone',
+        iconName: 'home',
         route: '/inicio',
       },
     ];
