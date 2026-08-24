@@ -213,7 +213,7 @@
                   </span>
                   @if (tieneErrorEnvio(correccion)) {
                     <mat-icon
-                      class="icon-16 text-error! shrink-0"
+                      class="text-error! shrink-0"
                       [matTooltip]="correccion.mensajeErrorEnvio ?? ''"
                     >warning</mat-icon>
                   }
@@ -306,7 +306,7 @@
               <span>{{ d.correoResuelto ?? "-" }}</span>
               @if (iconoCorreo(d); as icono) {
                 <mat-icon
-                  class="icon-16 shrink-0"
+                  class="shrink-0"
                   [ngClass]="origenCorreoClase(d.origenCorreo)"
                   [matTooltip]="origenCorreoTooltip(d.origenCorreo)"
                 >{{ icono }}</mat-icon>
