@@ -5,6 +5,9 @@
         <mat-tab [label]="tab.label">
           @if (tab.habilitado) {
             @switch (tab.id) {
+              @case ('general') {
+                <app-general />
+              }
               @case ('avisos-cobranza') {
                 <app-admin-lotes />
               }

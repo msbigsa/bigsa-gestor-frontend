@@ -1,11 +1,13 @@
 import { HttpClient, HttpContext, HttpParams } from '@angular/common/http';
 import { computed, inject, Injectable, signal } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { EventSourcePolyfill } from 'event-source-polyfill';
 
 import { environment } from 'src/environments/environment';
 import { SKIP_GLOBAL_LOADING } from 'src/app/interceptors/loading.token';
 import { Notificacion } from '../../models/notifica/Notificacion';
+import { ConfigsUsuario } from '../../models/ConfigsUsuario';
+import { ConfigsService } from '../configs.service';
 
 @Injectable({
   providedIn: 'root',
@@ -15,16 +17,26 @@ export class NotificacionService {
   private readonly url = `${environment.HOST_NOTIFICA}/notificaciones`;
 
   private readonly http = inject(HttpClient);
+  private readonly configsService = inject(ConfigsService);
 
   private eventSource?: EventSourcePolyfill;
 
-  // Un solo interruptor en environment.ts -- si el backend de notificaciones da problemas, se apaga
-  // aca sin tocar mas codigo. El header lo usa para ocultar la campanita.
-  readonly habilitado = environment.NOTIFICACIONES_HABILITADAS;
+  // Config real (GESTOR_USA_NOTIFICACION en GLO_PARAMETRO, via ms-bigsa-auth) -- se carga
+  // en cargarConfigs() antes de cada start(). El header lo usa para ocultar la campanita.
+  readonly habilitado = signal(false);
 
   readonly notificaciones = signal<Notificacion[]>([]);
 
   readonly cantidadNoLeidas = computed(() => this.notificaciones().length);
+
+  // Trae el valor actual de la config desde el backend -- llamar antes de start() para
+  // que el gate use el dato vigente (puede haber sido cambiado desde el tab de Administracion).
+  cargarConfigs(): Observable<ConfigsUsuario> {
+
+    return this.configsService.obtenerConfigs().pipe(
+      tap(configs => this.habilitado.set(configs.usaNotificacion))
+    );
+  }
 
   // Se llama al iniciar sesion y cada vez que se refresca el token (ver LoginService),
   // para que el stream siempre viaje con un Bearer vigente.
@@ -32,7 +44,7 @@ export class NotificacionService {
 
     this.stop();
 
-    if (!this.habilitado) {
+    if (!this.habilitado()) {
       return;
     }
 

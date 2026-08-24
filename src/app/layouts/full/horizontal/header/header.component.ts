@@ -61,7 +61,9 @@ export class AppHorizontalHeaderComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.loginService.isLogged()) {
-      this.notificacionService.start();
+      this.notificacionService.cargarConfigs().subscribe(() => {
+        this.notificacionService.start();
+      });
     }
 
     this.menuService.obtenerMenu().subscribe(categorias => {

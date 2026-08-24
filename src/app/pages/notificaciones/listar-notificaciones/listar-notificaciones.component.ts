@@ -32,7 +32,7 @@ export class ListarNotificacionesComponent implements OnInit {
   readonly displayedColumns: string[] = ['estado', 'titulo', 'mensaje', 'fecha', 'acciones'];
 
   ngOnInit(): void {
-    if (!this.notificacionService.habilitado) {
+    if (!this.notificacionService.habilitado()) {
       this.router.navigate(['/inicio']);
       return;
     }

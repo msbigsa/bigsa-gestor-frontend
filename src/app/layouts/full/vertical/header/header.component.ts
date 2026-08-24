@@ -135,7 +135,9 @@ export class HeaderComponent implements OnInit {
     // Al recargar la pagina con sesion vigente el login ya paso, asi que el stream
     // no arranco todavia -- si ya estaba conectado, start() lo reinicia sin problema.
     if (this.loginService.isLogged()) {
-      this.notificacionService.start();
+      this.notificacionService.cargarConfigs().subscribe(() => {
+        this.notificacionService.start();
+      });
     }
   }
 

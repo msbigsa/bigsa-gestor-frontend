@@ -116,7 +116,7 @@
   <!-- --------------------------------------------------------------- -->
   <!-- Notification Dropdown -->
   <!-- --------------------------------------------------------------- -->
-  @if (notificacionesHabilitadas) {
+  @if (notificacionesHabilitadas()) {
   <button mat-icon-button [matBadge]="cantidadNoLeidas() || null" [matMenuTriggerFor]="notificationmenu"
     aria-label="Notifications" class="notification-badge">
     <mat-icon>notifications</mat-icon>
