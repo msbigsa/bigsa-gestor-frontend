@@ -21,8 +21,10 @@ import { AppHorizontalSidebarComponent } from './horizontal/sidebar/sidebar.comp
 import { AppBreadcrumbComponent } from './shared/breadcrumb/breadcrumb.component';
 import { CustomizerComponent } from './shared/customizer/customizer.component';
 import { LoginService } from 'src/app/services/login.service';
+import { TabLockService } from 'src/app/services/tab-lock.service';
 import { Usuario } from 'src/app/models/Usuario';
 import { UserAvatarComponent } from 'src/app/shared/components/user-avatar/user-avatar.component';
+import { TabBloqueadaComponent } from 'src/app/shared/components/tab-bloqueada/tab-bloqueada.component';
 
 const MOBILE_VIEW = 'screen and (max-width: 768px)';
 const TABLET_VIEW = 'screen and (min-width: 769px) and (max-width: 1024px)';
@@ -59,6 +61,7 @@ interface quicklinks {
         AppBreadcrumbComponent,
         CustomizerComponent,
         UserAvatarComponent,
+        TabBloqueadaComponent,
     ],
     templateUrl: './full.component.html',
   
@@ -71,6 +74,8 @@ export class FullComponent implements OnInit {
 
   private loginService = inject(LoginService);
   private menuService = inject(MenuService);
+  private readonly tabLock = inject(TabLockService);
+  readonly tabActiva = this.tabLock.tabActiva;
   usuario = signal<Usuario | null>(null);
 
   @ViewChild('leftsidenav')

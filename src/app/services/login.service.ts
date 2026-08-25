@@ -24,6 +24,7 @@ import { Usuario } from '../models/Usuario';
 import { LoginResponse } from '../models/LoginResponse';
 import { SessionMonitorService } from './session-monitor.service';
 import { NotificacionService } from './notifica/notificacion.service';
+import { TabLockService } from './tab-lock.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 interface ILoginRequest {
@@ -46,11 +47,18 @@ export class LoginService {
   private readonly router = inject(Router);
   private readonly sessionMonitor = inject(SessionMonitorService);
   private readonly notificacionService = inject(NotificacionService);
+  private readonly tabLock = inject(TabLockService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly profile = signal<Usuario | null>(null);
 
   constructor() {
+
+    // Cubre el caso "recargar la pagina con una sesion ya valida" -- guardarSesion() no se
+    // vuelve a llamar en un refresh porque el token ya esta en sessionStorage.
+    if (this.isLogged()) {
+      this.tabLock.acquire();
+    }
 
     this.sessionMonitor.refreshRequested
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -147,6 +155,7 @@ export class LoginService {
 
     this.sessionMonitor.stop();
     this.notificacionService.stop();
+    this.tabLock.release();
 
     sessionStorage.clear();
 
@@ -203,5 +212,7 @@ export class LoginService {
     sessionStorage.setItem(environment.TOKEN_NAME, response.jwtToken);
 
     sessionStorage.setItem(environment.REFRESH_TOKEN_NAME, response.refreshToken);
+
+    this.tabLock.acquire();
   }
 }

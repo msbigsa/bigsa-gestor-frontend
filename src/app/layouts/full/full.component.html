@@ -1,3 +1,4 @@
+@if (tabActiva()) {
 <span [dir]="options.dir!">
   <mat-sidenav-container class="mainWrapper" autosize autoFocus [ngClass]="{
       'sidebarNav-mini':
@@ -208,3 +209,6 @@
     </mat-sidenav>
   </mat-sidenav-container>
 </span>
+} @else {
+<app-tab-bloqueada />
+}
