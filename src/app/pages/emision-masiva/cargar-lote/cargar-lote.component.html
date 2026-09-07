@@ -1,14 +1,25 @@
 <mat-card class="cardWithShadow">
   <mat-card-header class="p-4! w-full">
-    <mat-card-title class="mb-0 text-xl font-semibold">
-      Cargar planilla de emisión masiva
-    </mat-card-title>
+    <div class="flex items-center justify-between w-full">
+      <mat-card-title class="mb-0 text-xl font-semibold">
+        Cargar planilla de emisión masiva
+      </mat-card-title>
+
+      <button
+        mat-icon-button
+        type="button"
+        matTooltip="Ver tour guiado"
+        (click)="iniciarTour()"
+      >
+        <mat-icon>help_outline</mat-icon>
+      </button>
+    </div>
   </mat-card-header>
 
   <mat-card-content class="border-t border-border p-6!">
     <div class="grid grid-cols-12 gap-6">
 
-      <div class="col-span-12 lg:col-span-6">
+      <div class="col-span-12 lg:col-span-6" data-tour="carga-opcion-busqueda">
         <mat-label class="font-medium mb-2 block">Opción de búsqueda</mat-label>
         <mat-form-field appearance="outline" class="w-full hide-hint">
           <mat-select
@@ -23,14 +34,14 @@
         </mat-form-field>
       </div>
 
-      <div class="col-span-12 lg:col-span-6 flex items-center">
+      <div class="col-span-12 lg:col-span-6 flex items-center" data-tour="carga-envia-correo">
         <mat-checkbox [checked]="enviaCorreo()" (change)="onEnviaCorreoChange($event.checked)">
           Enviar correo de confirmación
         </mat-checkbox>
       </div>
 
       @if (enviaCorreo()) {
-        <div class="col-span-12 lg:col-span-4">
+        <div class="col-span-12 lg:col-span-4" data-tour="carga-destinatario">
           <mat-label class="font-medium mb-2 block">Destinatario del correo</mat-label>
           <mat-form-field appearance="outline" class="w-full hide-hint">
             <mat-select
@@ -45,7 +56,7 @@
           </mat-form-field>
         </div>
 
-        <div class="col-span-12 lg:col-span-4">
+        <div class="col-span-12 lg:col-span-4" data-tour="carga-llave">
           <mat-label class="font-medium mb-2 block">Llave de búsqueda de documentos</mat-label>
           <mat-form-field appearance="outline" class="w-full hide-hint">
             <mat-select
@@ -60,7 +71,7 @@
           </mat-form-field>
         </div>
 
-        <div class="col-span-12 lg:col-span-4">
+        <div class="col-span-12 lg:col-span-4" data-tour="carga-plantilla">
           <mat-label class="font-medium mb-2 block">Plantilla de correo</mat-label>
           <mat-form-field appearance="outline" class="w-full">
             <input
@@ -84,7 +95,7 @@
         </div>
       }
 
-      <div class="col-span-12">
+      <div class="col-span-12" data-tour="carga-archivo">
         <mat-label class="font-medium mb-2 block">Archivo (planilla CSV separada por ";", o Excel .xlsx)</mat-label>
 
         <app-file-dropzone
@@ -103,6 +114,7 @@
           color="primary"
           type="button"
           class="px-6 py-5"
+          data-tour="carga-enviar"
           [disabled]="!puedeEnviar()"
           (click)="enviar()"
         >

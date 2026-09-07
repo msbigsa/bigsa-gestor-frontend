@@ -25,6 +25,8 @@ import {
   llavesBusquedaDisponibles,
   opcionBusquedaLabel,
 } from '../shared/estados-emision-masiva.util';
+import { TourService } from 'src/app/shared/tour/tour.service';
+import { buildCargarLoteTourSteps } from '../emision-masiva-tour.steps';
 
 @Component({
   selector: 'app-cargar-lote-emision',
@@ -42,6 +44,7 @@ export class CargarLoteEmisionComponent {
   private readonly formatoService = inject(EmisionMasivaFormatoService);
   private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
+  private readonly tourService = inject(TourService);
 
   readonly opcionesBusqueda = Object.values(OpcionBusqueda);
   readonly destinatarios = Object.values(CodDestinatario);
@@ -140,6 +143,10 @@ export class CargarLoteEmisionComponent {
 
   onArchivoRemovido(): void {
     this.archivo.set(null);
+  }
+
+  iniciarTour(): void {
+    this.tourService.start(buildCargarLoteTourSteps(this.enviaCorreo()));
   }
 
   readonly opcionLabel = opcionBusquedaLabel;

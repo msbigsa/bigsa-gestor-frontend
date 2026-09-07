@@ -49,6 +49,8 @@ import {
   EliminarLoteDialogData,
 } from '../shared/eliminar-lote-dialog/eliminar-lote-dialog.component';
 import { LoteEmisionConfirmacion } from 'src/app/models/emision-masiva/LoteEmisionConfirmacion';
+import { TourService } from 'src/app/shared/tour/tour.service';
+import { buildDetalleLoteTourSteps } from '../emision-masiva-tour.steps';
 
 @Component({
   selector: 'app-detalle-lote-emision',
@@ -66,6 +68,7 @@ export class DetalleLoteEmisionComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly toastr = inject(ToastrService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly tourService = inject(TourService);
 
   private static readonly INTERVALO_POLLING_MS = 5000;
   // Coincide con EstadoLoteEmision.INTERMEDIOS del backend.
@@ -244,6 +247,15 @@ export class DetalleLoteEmisionComponent implements OnInit {
 
   volver(): void {
     this.router.navigate(['/inicio/emision-masiva/listar-lotes']);
+  }
+
+  iniciarTour(): void {
+    this.tourService.start(buildDetalleLoteTourSteps(
+      this.puedeValidar() || this.puedeEmitir() || this.puedeCorregir() || this.puedeEliminar(),
+      !!this.lote()?.enviaCorreo && !this.loteEliminado(),
+      !this.loteEliminado(),
+      this.detalles().length > 0,
+    ));
   }
 
   puedeValidar(): boolean {

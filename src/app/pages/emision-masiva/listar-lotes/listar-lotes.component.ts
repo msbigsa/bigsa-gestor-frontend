@@ -20,6 +20,8 @@ import {
   EliminarLoteDialogData,
 } from '../shared/eliminar-lote-dialog/eliminar-lote-dialog.component';
 import { MenuService } from 'src/app/layouts/full/vertical/sidebar/sidebar-data';
+import { TourService } from 'src/app/shared/tour/tour.service';
+import { buildListarLotesTourSteps } from '../emision-masiva-tour.steps';
 
 const RUTA_CARGAR_LOTE = '/inicio/emision-masiva/cargar-lote';
 
@@ -40,6 +42,7 @@ export class ListarLotesEmisionComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly menuService = inject(MenuService);
+  private readonly tourService = inject(TourService);
 
   private static readonly INTERVALO_POLLING_MS = 5000;
   // Coincide con EstadoLoteEmision.INTERMEDIOS del backend.
@@ -176,6 +179,10 @@ export class ListarLotesEmisionComponent implements OnInit {
 
   puedeCargarLote(): boolean {
     return this.menuService.tieneAcceso(RUTA_CARGAR_LOTE);
+  }
+
+  iniciarTour(): void {
+    this.tourService.start(buildListarLotesTourSteps(this.lotes().length > 0, this.puedeCargarLote()));
   }
 
   verDetalle(lote: LoteEmisionResponse): void {
