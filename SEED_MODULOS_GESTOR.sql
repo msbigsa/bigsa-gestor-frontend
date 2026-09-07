@@ -1,66 +1,73 @@
 -- Datos de los modulos que arman el menu (GET /menu).
 -- Refleja el contenido actual de sidebar-data.ts.
 -- ICON_NAME usa nombres de ligatura de Angular Material (mat-icon), no Iconify/Tabler.
+--
+-- Idempotente via MERGE keyed por DISPLAY_NAME: correrlo las veces que sea necesario, tanto en una
+-- base nueva como para sincronizar cambios (icono/ruta/children) en una que ya tiene datos -- nunca
+-- duplica ni reinserta (ID se mantiene estable), asi que no rompe la FK de GLO_USUARIO_CARGAS.MODULO_ID.
+--
+-- IMPORTANTE si se corre por sqlcmd: usar el flag -f 65001 (UTF-8). Sin eso, sqlcmd lee mal los
+-- acentos (ej. "Emisión" -> "EmisiÃ³n"), el match por DISPLAY_NAME falla contra las filas ya
+-- existentes, y el MERGE termina insertando filas duplicadas con el nombre mal codificado en vez de
+-- actualizar las correctas. Probado: `sqlcmd ... -i SEED_MODULOS_GESTOR.sql` sin el flag duplica;
+-- con `-f 65001` es idempotente. SSMS/Azure Data Studio no tienen este problema (detectan la
+-- codificacion del archivo solos).
 
-INSERT INTO GLO_MODULOS_GESTOR (DISPLAY_NAME, ICON_NAME, RUTA, CATEGORY, CHILDREN, APLI_CODIGO) VALUES
-(N'HTML', N'code', N'/menu-level', N'Gestión',
-  N'[
-    { "displayName": "Convertir Word a HTML",
-      "iconName": "description",
-      "route": "/inicio/html/conversor-doc-html"},
+MERGE GLO_MODULOS_GESTOR AS destino
+USING (VALUES
+  (N'HTML', N'code', N'/menu-level', N'Gestión',
+    N'[
+      { "displayName": "Convertir Word a HTML",
+        "iconName": "description",
+        "route": "/inicio/html/conversor-doc-html"},
 
-    { "displayName": "HTML Generados",
-      "iconName": "html",
-      "route": "/inicio/html/listar-doc-html"}
-  ]', NULL),
+      { "displayName": "HTML Generados",
+        "iconName": "html",
+        "route": "/inicio/html/listar-doc-html"}
+    ]', CAST(NULL AS INT)),
 
-(N'Avisos de Cobranza', N'mail', N'/menu-level', N'Cargas Masivas',
-  N'[
-    { "displayName": "Cargar Planilla",
-      "iconName": "upload",
-      "route": "/inicio/avisos-cobranza/cargar-lote"},
+  (N'Avisos de Cobranza', N'mail', N'/menu-level', N'Cargas Masivas',
+    N'[
+      { "displayName": "Cargar Planilla",
+        "iconName": "upload",
+        "route": "/inicio/avisos-cobranza/cargar-lote"},
 
-    { "displayName": "Listado de Lotes",
-      "iconName": "list",
-      "route": "/inicio/avisos-cobranza/listar-lotes"}
-  ]', 3),
+      { "displayName": "Listado de Lotes",
+        "iconName": "list",
+        "route": "/inicio/avisos-cobranza/listar-lotes"}
+    ]', 3),
 
-(N'Administración', N'admin_panel_settings', N'/menu-level', N'Sistema',
-  N'[
-    { "displayName": "Administración",
-      "iconName": "admin_panel_settings",
-      "route": "/inicio/administracion"}
-  ]', NULL);
+  (N'Emisión Masiva', N'send', N'/menu-level', N'Cargas Masivas',
+    N'[
+      { "displayName": "Cargar Planilla",
+        "iconName": "upload",
+        "route": "/inicio/emision-masiva/cargar-lote"},
 
--- Verificacion rapida de que el JSON insertado es valido.
-SELECT ID, DISPLAY_NAME, ISJSON(CHILDREN) AS children_es_json_valido FROM GLO_MODULOS_GESTOR;
+      { "displayName": "Listado de Lotes",
+        "iconName": "list",
+        "route": "/inicio/emision-masiva/listar-lotes"}
+    ]', 4),
 
--- ----------------------------------------------------------------------------
--- UPDATE de ICON_NAME: si esta seed ya se corrio antes (con nombres tipo
--- Iconify/Tabler, ej. 'solar:home-angle-line-duotone'), usar este bloque para
--- migrar los valores existentes a nombres de ligatura de Angular Material sin
--- tener que truncar/reinsertar la tabla.
--- ----------------------------------------------------------------------------
+  (N'Administración', N'admin_panel_settings', N'/menu-level', N'Sistema',
+    N'[
+      { "displayName": "Administración",
+        "iconName": "admin_panel_settings",
+        "route": "/inicio/administracion"}
+    ]', CAST(NULL AS INT))
+) AS origen (DISPLAY_NAME, ICON_NAME, RUTA, CATEGORY, CHILDREN, APLI_CODIGO)
+ON destino.DISPLAY_NAME = origen.DISPLAY_NAME
 
-/*
-UPDATE GLO_MODULOS_GESTOR
-SET ICON_NAME = N'code',
-    CHILDREN = JSON_MODIFY(
-      JSON_MODIFY(CHILDREN, '$[0].iconName', N'description'),
-      '$[1].iconName', N'html'
-    )
-WHERE DISPLAY_NAME = N'HTML';
+WHEN MATCHED THEN
+  UPDATE SET
+    ICON_NAME   = origen.ICON_NAME,
+    RUTA        = origen.RUTA,
+    CATEGORY    = origen.CATEGORY,
+    CHILDREN    = origen.CHILDREN,
+    APLI_CODIGO = origen.APLI_CODIGO
 
-UPDATE GLO_MODULOS_GESTOR
-SET ICON_NAME = N'mail',
-    CHILDREN = JSON_MODIFY(
-      JSON_MODIFY(CHILDREN, '$[0].iconName', N'upload'),
-      '$[1].iconName', N'list'
-    )
-WHERE DISPLAY_NAME = N'Avisos de Cobranza';
+WHEN NOT MATCHED THEN
+  INSERT (DISPLAY_NAME, ICON_NAME, RUTA, CATEGORY, CHILDREN, APLI_CODIGO)
+  VALUES (origen.DISPLAY_NAME, origen.ICON_NAME, origen.RUTA, origen.CATEGORY, origen.CHILDREN, origen.APLI_CODIGO);
 
-UPDATE GLO_MODULOS_GESTOR
-SET ICON_NAME = N'admin_panel_settings',
-    CHILDREN = JSON_MODIFY(CHILDREN, '$[0].iconName', N'admin_panel_settings')
-WHERE DISPLAY_NAME = N'Administración';
-*/
+-- Verificacion rapida de que el JSON insertado/actualizado es valido.
+--SELECT ID, DISPLAY_NAME, ISJSON(CHILDREN) AS children_es_json_valido FROM GLO_MODULOS_GESTOR;

@@ -1,0 +1,101 @@
+<div class="flex items-start gap-2 bg-light-warning text-warning rounded-md p-3 mb-4 text-sm">
+  <mat-icon class="shrink-0 mt-0.5">warning</mat-icon>
+  <span>
+    Estas acciones no respetan las validaciones normales del módulo (filtros en URL, actualización automática, etc.).
+    Los resguardos del backend (lote en proceso, lote ya emitido) igual se aplican -- eliminar puede fallar si no corresponde.
+  </span>
+</div>
+
+<mat-card class="cardWithShadow">
+  <mat-card-content>
+    <div class="grid grid-cols-12 gap-4 items-center">
+      <div class="lg:col-span-4 col-span-12">
+        <mat-form-field appearance="outline" class="w-full hide-hint">
+          <mat-label>Filtrar por estado</mat-label>
+          <mat-select
+            [value]="filtroEstado()"
+            (selectionChange)="onFiltroEstadoChange($event.value)"
+          >
+            <mat-option [value]="null">Todos los estados</mat-option>
+            @for (estado of estadosDisponibles; track estado) {
+              <mat-option [value]="estado">{{ estadoLabel(estado) }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="lg:col-span-8 col-span-12 flex items-center justify-end">
+        <button mat-icon-button (click)="cargarLotes()" matTooltip="Actualizar listado">
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+<mat-card class="cardWithShadow">
+  <mat-card-content>
+    <div class="relative overflow-auto max-h-[70vh]">
+      <table mat-table [dataSource]="lotes()" class="min-w-full">
+        <ng-container matColumnDef="#">
+          <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">#</th>
+          <td mat-cell *matCellDef="let lote" class="whitespace-nowrap">{{ lote.loteId }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="archivo">
+          <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Archivo</th>
+          <td mat-cell *matCellDef="let lote" class="whitespace-nowrap">{{ lote.nombreArchivoOrigen }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="fecha">
+          <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Fecha de carga</th>
+          <td mat-cell *matCellDef="let lote" class="text-sm whitespace-nowrap">{{ lote.fechaCarga | date: "short" }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="usuario">
+          <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Usuario</th>
+          <td mat-cell *matCellDef="let lote" class="whitespace-nowrap">{{ usuarioTexto(lote.usuarioCarga) }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="estado">
+          <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Estado</th>
+          <td mat-cell *matCellDef="let lote" class="whitespace-nowrap">
+            <span class="px-3 py-1 rounded-full text-xs font-semibold" [ngClass]="estadoClase(lote.estadoLote)">
+              {{ estadoLabel(lote.estadoLote) }}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="accion">
+          <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Acción</th>
+          <td mat-cell *matCellDef="let lote" class="action-link whitespace-nowrap">
+            <a (click)="forzarEstado(lote)" class="me-2.5 cursor-pointer">
+              <mat-icon class="text-warning!" matTooltip="Forzar estado">edit</mat-icon>
+            </a>
+            <a (click)="eliminar(lote)" class="cursor-pointer">
+              <mat-icon class="text-red-600!" matTooltip="Eliminar lote">delete</mat-icon>
+            </a>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns" class="interactive-row"></tr>
+
+        <tr *matNoDataRow>
+          <td [attr.colspan]="displayedColumns.length" class="text-center text-sm text-gray-500 py-6">
+            No se encontraron coincidencias.
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <mat-paginator
+      [pageSize]="pageSize()"
+      [length]="totalElements()"
+      [pageIndex]="pageIndex()"
+      [pageSizeOptions]="[5, 10, 50, 100, 200]"
+      showFirstLastButtons
+      (page)="showMore($event)"
+    ></mat-paginator>
+  </mat-card-content>
+</mat-card>

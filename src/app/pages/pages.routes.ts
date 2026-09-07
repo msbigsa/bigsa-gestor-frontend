@@ -7,6 +7,9 @@ import { ResultadoDocHtmlComponent } from './html/resultado-doc-html/resultado-d
 import { CargarLoteComponent } from './aviso-cobranza/cargar-lote/cargar-lote.component';
 import { ListarLotesComponent } from './aviso-cobranza/listar-lotes/listar-lotes.component';
 import { DetalleLoteComponent } from './aviso-cobranza/detalle-lote/detalle-lote.component';
+import { CargarLoteEmisionComponent } from './emision-masiva/cargar-lote/cargar-lote.component';
+import { ListarLotesEmisionComponent } from './emision-masiva/listar-lotes/listar-lotes.component';
+import { DetalleLoteEmisionComponent } from './emision-masiva/detalle-lote/detalle-lote.component';
 import { AdministracionComponent } from './administracion/administracion.component';
 import { ListarNotificacionesComponent } from './notificaciones/listar-notificaciones/listar-notificaciones.component';
 import { MiPerfilComponent } from './perfil/mi-perfil/mi-perfil.component';
@@ -77,6 +80,30 @@ export const PagesRoutes: Routes = [
     component: DetalleLoteComponent,
     data: {
       title: 'Detalle de Lote de Avisos de Cobranza'
+    },
+    canActivate: [CertGuard]
+  },
+  {
+    path: 'emision-masiva/cargar-lote',
+    component: CargarLoteEmisionComponent,
+    data: {
+      title: 'Cargar Planilla de Emisión Masiva'
+    },
+    canActivate: [CertGuard]
+  },
+  {
+    path: 'emision-masiva/listar-lotes',
+    component: ListarLotesEmisionComponent,
+    data: {
+      title: 'Lotes de Emisión Masiva'
+    },
+    canActivate: [CertGuard]
+  },
+  {
+    path: 'emision-masiva/listar-lotes/detalle-lote/:id',
+    component: DetalleLoteEmisionComponent,
+    data: {
+      title: 'Detalle de Lote de Emisión Masiva'
     },
     canActivate: [CertGuard]
   },

@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { MaterialModule } from 'src/app/material.module';
 import { GeneralComponent } from './general/general.component';
 import { AdminLotesComponent } from './aviso-cobranza/admin-lotes.component';
+import { AdminLotesEmisionComponent } from './emision-masiva/admin-lotes.component';
 
 interface TabModuloAdmin {
   id: string;
@@ -11,7 +12,7 @@ interface TabModuloAdmin {
 
 @Component({
   selector: 'app-administracion',
-  imports: [MaterialModule, GeneralComponent, AdminLotesComponent],
+  imports: [MaterialModule, GeneralComponent, AdminLotesComponent, AdminLotesEmisionComponent],
   templateUrl: './administracion.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -22,6 +23,7 @@ export class AdministracionComponent {
   readonly tabs: TabModuloAdmin[] = [
     { id: 'general', label: 'Configuraciones Generales', habilitado: true },
     { id: 'avisos-cobranza', label: 'Avisos de Cobranza', habilitado: true },
+    { id: 'emision-masiva', label: 'Emisión Masiva', habilitado: true },
     { id: 'html', label: 'HTML', habilitado: false },
   ];
 }

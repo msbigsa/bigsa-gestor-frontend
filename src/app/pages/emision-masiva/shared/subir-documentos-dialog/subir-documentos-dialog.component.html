@@ -1,0 +1,28 @@
+<div class="flex items-center gap-3 border-b border-border pb-4 mb-4">
+  <mat-icon class="text-primary">file_upload</mat-icon>
+  <span class="text-lg font-semibold">Subir documentos del lote #{{ data.loteId }}</span>
+</div>
+
+<mat-dialog-content>
+  <p class="mb-4 text-sm">
+    Se aceptan un archivo .zip con varios PDFs, o un PDF suelto. Esto solo copia los archivos —
+    todavía no se asignan a ninguna fila. Después de subir, usa "Procesar documentos" para intentar
+    asignarlos.
+  </p>
+
+  <app-file-dropzone
+    [title]="'Suba el archivo de documentos'"
+    [subtitle]="'Arrastre el archivo aquí o haga clic para seleccionarlo. Se acepta .zip o .pdf.'"
+    [accept]="'.zip,.pdf'"
+    [maxSize]="100 * 1024 * 1024"
+    (fileSelected)="onArchivoSeleccionado($event)"
+    (fileRemoved)="onArchivoRemovido()"
+  ></app-file-dropzone>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button [disabled]="cargando()" (click)="cancelar()">Cancelar</button>
+  <button mat-flat-button color="primary" [disabled]="!puedeSubir()" (click)="subir()">
+    Subir
+  </button>
+</mat-dialog-actions>

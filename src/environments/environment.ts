@@ -4,6 +4,7 @@ export const environment = {
   HOST_HTML: 'http://localhost:8082/ms-bigsa-html-converter',
   HOST_AVISO_COBRANZA: 'http://localhost:8082/ms-bigsa-aviso-cobranza',
   HOST_NOTIFICA: 'http://localhost:8082/ms-bigsa-notifica',
+  HOST_EMISION_MASIVA: 'http://localhost:8082/ms-bigsa-emision-masivas',
   REINTENTS: 2,
   TOKEN_NAME: 'jwtToken',
   REFRESH_TOKEN_NAME: 'refreshToken',

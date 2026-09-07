@@ -4,6 +4,7 @@ export const environment = {
   HOST_HTML: 'http://localhost:8082',
   HOST_AVISO_COBRANZA: 'http://localhost:8083',
   HOST_NOTIFICA: 'http://localhost:8084',
+  HOST_EMISION_MASIVA: 'http://localhost:8085',
   REINTENTS: 2,
   TOKEN_NAME: 'jwtToken',
   REFRESH_TOKEN_NAME: 'refreshToken',

@@ -1,0 +1,116 @@
+<mat-card class="cardWithShadow">
+  <mat-card-header class="p-4! w-full">
+    <mat-card-title class="mb-0 text-xl font-semibold">
+      Cargar planilla de emisión masiva
+    </mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content class="border-t border-border p-6!">
+    <div class="grid grid-cols-12 gap-6">
+
+      <div class="col-span-12 lg:col-span-6">
+        <mat-label class="font-medium mb-2 block">Opción de búsqueda</mat-label>
+        <mat-form-field appearance="outline" class="w-full hide-hint">
+          <mat-select
+            placeholder="Seleccione una opción..."
+            [value]="opcionBusqueda()"
+            (selectionChange)="opcionBusqueda.set($event.value)"
+          >
+            @for (opcion of opcionesBusqueda; track opcion) {
+              <mat-option [value]="opcion">{{ opcionLabel(opcion) }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="col-span-12 lg:col-span-6 flex items-center">
+        <mat-checkbox [checked]="enviaCorreo()" (change)="onEnviaCorreoChange($event.checked)">
+          Enviar correo de confirmación
+        </mat-checkbox>
+      </div>
+
+      @if (enviaCorreo()) {
+        <div class="col-span-12 lg:col-span-4">
+          <mat-label class="font-medium mb-2 block">Destinatario del correo</mat-label>
+          <mat-form-field appearance="outline" class="w-full hide-hint">
+            <mat-select
+              placeholder="Seleccione un destinatario..."
+              [value]="codDestinatario()"
+              (selectionChange)="codDestinatario.set($event.value)"
+            >
+              @for (destinatario of destinatarios; track destinatario) {
+                <mat-option [value]="destinatario">{{ destinatarioLabel(destinatario) }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="col-span-12 lg:col-span-4">
+          <mat-label class="font-medium mb-2 block">Llave de búsqueda de documentos</mat-label>
+          <mat-form-field appearance="outline" class="w-full hide-hint">
+            <mat-select
+              placeholder="Seleccione una llave..."
+              [value]="codLlaveBusqueda()"
+              (selectionChange)="codLlaveBusqueda.set($event.value)"
+            >
+              @for (llave of llavesDisponibles(); track llave) {
+                <mat-option [value]="llave">{{ llaveLabel(llave) }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="col-span-12 lg:col-span-4">
+          <mat-label class="font-medium mb-2 block">Plantilla de correo</mat-label>
+          <mat-form-field appearance="outline" class="w-full">
+            <input
+              matInput
+              placeholder="Busque una plantilla..."
+              [formControl]="formatoControl"
+              [matAutocomplete]="autoFormato"
+              (focus)="seleccionarTexto($event)"
+            />
+            @if (formatoSeleccionado()) {
+              <button mat-icon-button matSuffix type="button" (click)="limpiarFormato()" matTooltip="Limpiar selección">
+                <mat-icon>close</mat-icon>
+              </button>
+            }
+            <mat-autocomplete #autoFormato="matAutocomplete" [displayWith]="displayFormato" (optionSelected)="onFormatoSeleccionado($event)">
+              @for (formato of formatosFiltrados(); track formato.formCodigo) {
+                <mat-option [value]="formato">{{ formato.formNombre }}</mat-option>
+              }
+            </mat-autocomplete>
+          </mat-form-field>
+        </div>
+      }
+
+      <div class="col-span-12">
+        <mat-label class="font-medium mb-2 block">Archivo (planilla CSV separada por ";", o Excel .xlsx)</mat-label>
+
+        <app-file-dropzone
+          [title]="'Suba la planilla de emisión'"
+          [subtitle]="'Arrastre el archivo aquí o haga clic para seleccionarlo. Se aceptan archivos CSV o Excel (.xlsx).'"
+          [accept]="'.csv,.xlsx'"
+          [maxSize]="100 * 1024 * 1024"
+          (fileSelected)="onArchivoSeleccionado($event)"
+          (fileRemoved)="onArchivoRemovido()"
+        ></app-file-dropzone>
+      </div>
+
+      <div class="col-span-12 flex justify-center mt-2">
+        <button
+          mat-flat-button
+          color="primary"
+          type="button"
+          class="px-6 py-5"
+          [disabled]="!puedeEnviar()"
+          (click)="enviar()"
+        >
+          <mat-icon class="mr-2">upload</mat-icon>
+          Cargar planilla
+        </button>
+      </div>
+
+    </div>
+  </mat-card-content>
+</mat-card>
