@@ -1,7 +1,7 @@
 <mat-card class="cardWithShadow">
   <mat-card-content>
     <mat-tab-group>
-      @for (tab of tabs; track tab.id) {
+      @for (tab of tabs(); track tab.id) {
         <mat-tab [label]="tab.label">
           @if (tab.habilitado) {
             @switch (tab.id) {

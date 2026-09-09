@@ -25,7 +25,9 @@
           <span [matTooltip]="getFechaCompleta(loteActual.fechaCarga)" class="text-sm text-gray-500">
             Cargado el {{ loteActual.fechaCarga | date: "short" }}
           </span>
-          <span class="text-sm text-gray-500"> · por {{ usuarioTexto(loteActual.usuarioCarga) }}</span>
+          <span class="text-sm text-gray-500" [matTooltip]="usuarioDescripcion(loteActual.usuarioCarga)">
+            · por {{ usuarioTexto(loteActual.usuarioCarga) }}
+          </span>
           <span class="text-sm text-gray-500"> · {{ opcionLabel(loteActual.opcionBusqueda) }}</span>
 
           @if (loteActual.enviaCorreo) {
@@ -39,13 +41,28 @@
 
           @if (loteActual.fechaValidacion) {
             <div class="text-xs text-gray-500 mt-1">
-              Validado el {{ loteActual.fechaValidacion | date: "short" }} · por {{ usuarioTexto(loteActual.usuarioValidacion) }}
+              Validado el {{ loteActual.fechaValidacion | date: "short" }} ·
+              <span [matTooltip]="usuarioDescripcion(loteActual.usuarioValidacion)">
+                por {{ usuarioTexto(loteActual.usuarioValidacion) }}
+              </span>
+            </div>
+          }
+
+          @if (loteActual.fechaEmision) {
+            <div class="text-xs text-gray-500 mt-1">
+              Emitido el {{ loteActual.fechaEmision | date: "short" }} ·
+              <span [matTooltip]="usuarioDescripcion(loteActual.usuarioEmision)">
+                por {{ usuarioTexto(loteActual.usuarioEmision) }}
+              </span>
             </div>
           }
 
           @if (loteActual.fechaEliminacion) {
             <div class="text-xs text-gray-500 mt-1">
-              Eliminado el {{ loteActual.fechaEliminacion | date: "short" }} · por {{ usuarioTexto(loteActual.usuarioEliminacion) }}
+              Eliminado el {{ loteActual.fechaEliminacion | date: "short" }} ·
+              <span [matTooltip]="usuarioDescripcion(loteActual.usuarioEliminacion)">
+                por {{ usuarioTexto(loteActual.usuarioEliminacion) }}
+              </span>
             </div>
           }
 
@@ -133,50 +150,66 @@
         }
       </div>
 
-      <div class="flex flex-wrap items-center gap-2" data-tour="detalle-acciones">
-        @if (!loteEliminado()) {
-          <button mat-icon-button (click)="actualizar()" matTooltip="Actualizar">
-            <mat-icon>refresh</mat-icon>
-          </button>
-        }
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div class="flex flex-wrap items-center gap-2" data-tour="detalle-acciones">
+          @if (!loteEliminado()) {
+            <button mat-icon-button (click)="actualizar()" matTooltip="Actualizar">
+              <mat-icon>refresh</mat-icon>
+            </button>
+          }
 
-        @if (puedeValidar()) {
-          <button mat-flat-button color="primary" (click)="validar()">
-            <mat-icon class="mr-2">fact_check</mat-icon>
-            Validar
-          </button>
-        }
+          @if (puedeValidar()) {
+            <button mat-flat-button color="primary" (click)="validar()">
+              <mat-icon class="mr-2">fact_check</mat-icon>
+              Validar
+            </button>
+          }
 
-        @if (puedeEmitir()) {
-          <button mat-flat-button color="primary" (click)="emitir()">
-            <mat-icon class="mr-2">send</mat-icon>
-            {{ esReintentoEmision() ? "Reintentar emisión" : "Emitir" }}
-          </button>
-        }
+          @if (puedeEmitir()) {
+            <button mat-flat-button color="primary" (click)="emitir()">
+              <mat-icon class="mr-2">send</mat-icon>
+              {{ esReintentoEmision() ? "Reintentar emisión" : "Emitir" }}
+            </button>
+          }
 
-        @if (puedeCorregir()) {
-          <button
-            mat-stroked-button
-            (click)="abrirDialogoCorreccion()"
-            [disabled]="loteEnProceso()"
-            [matTooltip]="loteEnProceso() ? 'No disponible mientras el lote está en proceso' : ''"
-          >
-            <mat-icon class="mr-2">file_upload</mat-icon>
-            Cargar corrección
-          </button>
-        }
+          @if (puedeCorregir()) {
+            <button
+              mat-stroked-button
+              (click)="abrirDialogoCorreccion()"
+              [disabled]="loteEnProceso()"
+              [matTooltip]="loteEnProceso() ? 'No disponible mientras el lote está en proceso' : ''"
+            >
+              <mat-icon class="mr-2">file_upload</mat-icon>
+              Cargar corrección
+            </button>
+          }
 
-        @if (puedeEliminar()) {
-          <button
-            mat-stroked-button
-            color="warn"
-            (click)="eliminarLote()"
-            [disabled]="loteEnProceso()"
-            [matTooltip]="loteEnProceso() ? 'No disponible mientras el lote está en proceso' : ''"
-          >
-            <mat-icon class="mr-2">delete</mat-icon>
-            Eliminar lote
-          </button>
+          @if (puedeEliminar()) {
+            <button
+              mat-stroked-button
+              color="warn"
+              (click)="eliminarLote()"
+              [disabled]="loteEnProceso()"
+              [matTooltip]="loteEnProceso() ? 'No disponible mientras el lote está en proceso' : ''"
+            >
+              <mat-icon class="mr-2">delete</mat-icon>
+              Eliminar lote
+            </button>
+          }
+        </div>
+
+        @if (puedeDescargar()) {
+          <div class="flex flex-wrap items-center gap-2" data-tour="detalle-descargas">
+            <button mat-stroked-button (click)="descargarLog()">
+              <mat-icon class="mr-2">description</mat-icon>
+              Descargar detalle del proceso
+            </button>
+
+            <button mat-stroked-button (click)="descargarResumen()">
+              <mat-icon class="mr-2">summarize</mat-icon>
+              Descargar resumen
+            </button>
+          </div>
         }
       </div>
 
@@ -279,7 +312,7 @@
             </p>
 
             @if (archivosEnCarpeta() && archivosEnCarpeta()!.length > 0) {
-              <div class="flex flex-wrap gap-2">
+              <div class="flex flex-wrap gap-2 max-h-48 overflow-y-auto p-1">
                 @for (archivo of archivosEnCarpeta(); track archivo.nombre) {
                   <span class="px-2 py-1 rounded-md border border-border text-xs">{{ archivo.nombre }}</span>
                 }
@@ -293,7 +326,7 @@
             <div class="mt-4 pt-4 border-t border-border">
               <p class="text-sm font-semibold text-gray-500 mb-2">Historial de procesamiento</p>
 
-              <div class="flex flex-col gap-2">
+              <div class="flex flex-col gap-2 max-h-96 overflow-y-auto p-1">
                 @for (carga of cargasDocumentos(); track carga.cargaDocId) {
                   <div class="border border-border rounded-md px-3 py-2">
                     <div
@@ -323,21 +356,27 @@
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                           <div>
                             <p class="font-semibold mb-1">Sin fila correspondiente ({{ carga.archivosSinFilaCorrespondiente.length }})</p>
-                            @for (nombre of carga.archivosSinFilaCorrespondiente; track nombre) {
-                              <p class="mb-0.5">{{ nombre }}</p>
-                            } @empty { <p class="mb-0">-</p> }
+                            <div class="max-h-40 overflow-y-auto">
+                              @for (nombre of carga.archivosSinFilaCorrespondiente; track nombre) {
+                                <p class="mb-0.5">{{ nombre }}</p>
+                              } @empty { <p class="mb-0">-</p> }
+                            </div>
                           </div>
                           <div>
                             <p class="font-semibold mb-1">De filas con error ({{ carga.archivosDeFilasConError.length }})</p>
-                            @for (nombre of carga.archivosDeFilasConError; track nombre) {
-                              <p class="mb-0.5">{{ nombre }}</p>
-                            } @empty { <p class="mb-0">-</p> }
+                            <div class="max-h-40 overflow-y-auto">
+                              @for (nombre of carga.archivosDeFilasConError; track nombre) {
+                                <p class="mb-0.5">{{ nombre }}</p>
+                              } @empty { <p class="mb-0">-</p> }
+                            </div>
                           </div>
                           <div>
                             <p class="font-semibold mb-1">Con fallo técnico ({{ carga.archivosConFalloTecnico.length }})</p>
-                            @for (nombre of carga.archivosConFalloTecnico; track nombre) {
-                              <p class="mb-0.5">{{ nombre }}</p>
-                            } @empty { <p class="mb-0">-</p> }
+                            <div class="max-h-40 overflow-y-auto">
+                              @for (nombre of carga.archivosConFalloTecnico; track nombre) {
+                                <p class="mb-0.5">{{ nombre }}</p>
+                              } @empty { <p class="mb-0">-</p> }
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -401,12 +440,29 @@
             <ng-container matColumnDef="documento">
               <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Documento</th>
               <td mat-cell *matCellDef="let d" class="whitespace-nowrap">
-                <span class="inline-flex items-center gap-1">
-                  {{ d.tipoDocumento ?? "-" }} @if (d.docuCodigo) { <span class="text-gray-500">#{{ d.docuCodigo }}</span> }
-                  @if (d.nombreArchivoPdfResuelto) {
+                {{ d.tipoDocumento ?? "-" }} @if (d.docuCodigo) { <span class="text-gray-500">#{{ d.docuCodigo }}</span> }
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="archivo">
+              <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Archivo</th>
+              <td mat-cell *matCellDef="let d" class="whitespace-nowrap">
+                @if (d.nombreArchivoPdfResuelto) {
+                  <span class="inline-flex items-center gap-1 text-xs text-gray-600">
                     <mat-icon class="text-success! text-base!" [matTooltip]="d.nombreArchivoPdfResuelto">attach_file</mat-icon>
-                  }
-                </span>
+                    <span class="truncate max-w-[160px]" [matTooltip]="d.nombreArchivoPdfResuelto">{{ d.nombreArchivoPdfResuelto }}</span>
+                    @if (d.estado !== "EMITIDO") {
+                      <a (click)="desasignarDocumento(d)" class="text-primary cursor-pointer hover:underline ml-1">
+                        Desasociar
+                      </a>
+                    }
+                  </span>
+                } @else if (documentoNoEncontrado(d)) {
+                  <span class="inline-flex items-center gap-1 text-xs text-error">
+                    <mat-icon class="text-error! text-base!" matTooltip="Se procesó y no se encontró ningún documento coincidente">close</mat-icon>
+                    Sin documento
+                  </span>
+                }
               </td>
             </ng-container>
 
@@ -427,6 +483,8 @@
                   class="px-3 py-1 rounded-full text-xs font-semibold"
                   [ngClass]="detalleEstadoClase(d.estado)"
                   [matTooltip]="tooltipRegistroError(d.registroError)"
+                  [class.cursor-pointer]="!!d.registroError"
+                  (click)="d.registroError && verErroresRegistro(d)"
                 >
                   {{ detalleEstadoLabel(d.estado) }}
                 </span>
@@ -495,19 +553,6 @@
                   <div><span class="text-gray-500">Correo asegurado:</span> {{ d.correoAseguradoResuelto ?? "-" }}</div>
                   <div><span class="text-gray-500">Correo final:</span> {{ d.correoFinalResuelto ?? "-" }}</div>
                 </div>
-
-                @if (d.nombreArchivoPdfResuelto) {
-                  <p class="text-xs font-semibold text-gray-500 mt-3 mb-2">Archivo asociado</p>
-                  <div class="flex items-center gap-2 text-sm">
-                    <mat-icon class="text-success!">attach_file</mat-icon>
-                    <span>{{ d.nombreArchivoPdfResuelto }}</span>
-                    @if (d.estado !== "EMITIDO") {
-                      <a (click)="desasignarDocumento(d)" class="text-xs text-primary cursor-pointer hover:underline ml-2">
-                        Desasignar
-                      </a>
-                    }
-                  </div>
-                }
 
                 @if (d.fechaEmisionReal || d.correoEstado || d.traspasoEstado) {
                   <p class="text-xs font-semibold text-gray-500 mt-3 mb-2">Emisión</p>

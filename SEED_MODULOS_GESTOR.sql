@@ -5,13 +5,6 @@
 -- Idempotente via MERGE keyed por DISPLAY_NAME: correrlo las veces que sea necesario, tanto en una
 -- base nueva como para sincronizar cambios (icono/ruta/children) en una que ya tiene datos -- nunca
 -- duplica ni reinserta (ID se mantiene estable), asi que no rompe la FK de GLO_USUARIO_CARGAS.MODULO_ID.
---
--- IMPORTANTE si se corre por sqlcmd: usar el flag -f 65001 (UTF-8). Sin eso, sqlcmd lee mal los
--- acentos (ej. "Emisión" -> "EmisiÃ³n"), el match por DISPLAY_NAME falla contra las filas ya
--- existentes, y el MERGE termina insertando filas duplicadas con el nombre mal codificado en vez de
--- actualizar las correctas. Probado: `sqlcmd ... -i SEED_MODULOS_GESTOR.sql` sin el flag duplica;
--- con `-f 65001` es idempotente. SSMS/Azure Data Studio no tienen este problema (detectan la
--- codificacion del archivo solos).
 
 MERGE GLO_MODULOS_GESTOR AS destino
 USING (VALUES

@@ -16,6 +16,13 @@
     <span>Las que no selecciones quedarán como lotes independientes.</span>
   </div>
 
+  @if (hayFilasEmitidas()) {
+    <div class="flex items-start gap-2 bg-light-warning text-warning rounded-md p-3 mb-4 text-sm">
+      <mat-icon class="shrink-0 mt-0.5">warning</mat-icon>
+      <span>{{ avisoFilasEmitidas }}</span>
+    </div>
+  }
+
   <div class="flex items-center justify-between mb-2">
     <mat-label class="font-medium block">
       {{ hijosSeleccionados().size }} de {{ data.hijos.length }} seleccionadas
@@ -32,8 +39,8 @@
       <div class="flex items-center justify-between gap-2">
         <mat-checkbox
           [checked]="hijosSeleccionados().has(hijo.loteId)"
-          [disabled]="esEmitido(hijo)"
-          [matTooltip]="esEmitido(hijo) ? 'Un lote emitido no se puede eliminar' : ''"
+          [disabled]="enProceso(hijo)"
+          [matTooltip]="enProceso(hijo) ? 'Un lote en proceso no se puede eliminar hasta que termine' : ''"
           (change)="toggleHijo(hijo.loteId, $event.checked)"
         >
           #{{ hijo.loteId }} · {{ hijo.fechaCarga | date: 'short' }}

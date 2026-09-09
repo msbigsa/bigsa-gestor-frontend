@@ -5,6 +5,7 @@ import { CodDestinatario } from 'src/app/models/emision-masiva/CodDestinatario';
 import { CodLlaveBusqueda } from 'src/app/models/emision-masiva/CodLlaveBusqueda';
 import { EstadoDetalleEmision } from 'src/app/models/emision-masiva/EstadoDetalleEmision';
 import { EstadoCargaDocumentos } from 'src/app/models/emision-masiva/EstadoCargaDocumentos';
+import { UsuarioEmisionMasiva } from 'src/app/models/emision-masiva/UsuarioEmisionMasiva';
 
 const ESTADO_LOTE_LABEL: Record<EstadoLoteEmision, string> = {
   [EstadoLoteEmision.CARGADO]: 'Cargado',
@@ -42,9 +43,29 @@ export function estadoLoteClase(estado: EstadoLoteEmision): string {
   return ESTADO_LOTE_CLASE[estado] ?? 'bg-light-info text-info';
 }
 
-// A diferencia de avisos-cobranza, aca el usuario llega como codigo crudo (string), sin nombre resuelto.
-export function usuarioTexto(usuario: string | undefined): string {
-  return usuario ?? '-';
+// Usa el contador de filas, no el estado del lote -- EMITIDO_CON_ERRORES tambien puede tener emitidas.
+export function tieneFilasEmitidas(lote: LoteEmisionResponse): boolean {
+  return (lote.totalFilasEmitidas ?? 0) > 0;
+}
+
+export const AVISO_ELIMINAR_FILAS_EMITIDAS =
+  'Este lote tiene filas EMITIDAS: esa emisión no se revierte. Solo se elimina el registro en Gestor.';
+
+// "codigo - nombre". Tambien acepta string crudo (CargaDocumentosResponse.usuarioCarga no se resuelve).
+export function usuarioTexto(usuario: UsuarioEmisionMasiva | string | undefined): string {
+  if (!usuario) {
+    return '-';
+  }
+  if (typeof usuario === 'string') {
+    return usuario;
+  }
+
+  return usuario.nombre ? `${usuario.codigo} - ${usuario.nombre}` : usuario.codigo;
+}
+
+// Para el hover del usuario; vacio si no aplica.
+export function usuarioDescripcion(usuario: UsuarioEmisionMasiva | string | undefined): string {
+  return usuario && typeof usuario !== 'string' ? (usuario.descripcion ?? '') : '';
 }
 
 function formatearFecha(fecha: string | undefined): string {

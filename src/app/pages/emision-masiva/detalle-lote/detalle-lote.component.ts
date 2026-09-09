@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule, DatePipe } from '@angular/common';
+import { HttpResponse } from '@angular/common/http';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
@@ -26,9 +27,13 @@ import {
   tooltipEstadoLote,
   tieneErrorEmision,
   usuarioTexto,
+  usuarioDescripcion,
+  tieneFilasEmitidas,
+  AVISO_ELIMINAR_FILAS_EMITIDAS,
   estadoDetalleLabel,
   estadoDetalleClase,
   tooltipRegistroError,
+  motivosError,
   numeroConDigito,
   opcionBusquedaLabel,
   codDestinatarioLabel,
@@ -48,6 +53,10 @@ import {
   EliminarLoteDialogEmisionComponent,
   EliminarLoteDialogData,
 } from '../shared/eliminar-lote-dialog/eliminar-lote-dialog.component';
+import {
+  ErroresRegistroDialogEmisionComponent,
+  ErroresRegistroDialogData,
+} from '../shared/errores-registro-dialog/errores-registro-dialog.component';
 import { LoteEmisionConfirmacion } from 'src/app/models/emision-masiva/LoteEmisionConfirmacion';
 import { TourService } from 'src/app/shared/tour/tour.service';
 import { buildDetalleLoteTourSteps } from '../emision-masiva-tour.steps';
@@ -113,7 +122,7 @@ export class DetalleLoteEmisionComponent implements OnInit {
 
   // La columna "correo" solo tiene sentido si el lote envia correo -- se agrega dinamicamente.
   readonly displayedColumns = computed(() => {
-    const columnas = ['expand', 'fila', 'documento', 'poliza', 'endoso', 'estado'];
+    const columnas = ['expand', 'fila', 'documento', 'archivo', 'poliza', 'endoso', 'estado'];
     if (this.lote()?.enviaCorreo) {
       columnas.push('correo');
     }
@@ -134,9 +143,11 @@ export class DetalleLoteEmisionComponent implements OnInit {
   readonly tooltipEstadoLote = tooltipEstadoLote;
   readonly tieneErrorEmision = tieneErrorEmision;
   readonly usuarioTexto = usuarioTexto;
+  readonly usuarioDescripcion = usuarioDescripcion;
   readonly detalleEstadoLabel = estadoDetalleLabel;
   readonly detalleEstadoClase = estadoDetalleClase;
   readonly tooltipRegistroError = tooltipRegistroError;
+  readonly motivosError = motivosError;
   readonly numeroConDigito = numeroConDigito;
   readonly opcionLabel = opcionBusquedaLabel;
   readonly destinatarioLabel = codDestinatarioLabel;
@@ -227,6 +238,47 @@ export class DetalleLoteEmisionComponent implements OnInit {
     this.cargarDetalles();
   }
 
+  puedeDescargar(): boolean {
+    return !this.loteEliminado();
+  }
+
+  descargarLog(): void {
+    const nombre = `EmisionMasiva_${this.loteId()}_${this.timestampArchivo()}.log`;
+    this.loteService.descargarLog(this.loteId()).subscribe(response => this.descargarArchivo(response, nombre));
+  }
+
+  descargarResumen(): void {
+    const nombre = `Resumen_${this.loteId()}_${this.timestampArchivo()}.csv`;
+    this.loteService.descargarResumen(this.loteId()).subscribe(response => this.descargarArchivo(response, nombre));
+  }
+
+  // Se arma el nombre aca en vez de leerlo de Content-Disposition porque ese header no esta
+  // expuesto en el CORS del backend, asi que el navegador nunca lo deja leer via JS.
+  private timestampArchivo(): string {
+    return this.datePipe.transform(new Date(), 'yyyyMMdd') ?? '';
+  }
+
+  private descargarArchivo(response: HttpResponse<Blob>, nombrePorDefecto: string): void {
+    const blob = response.body!;
+    const contentDisposition = response.headers.get('Content-Disposition');
+    let nombreArchivo = nombrePorDefecto;
+
+    if (contentDisposition) {
+      const match = contentDisposition.match(/filename="?([^"]+)"?/);
+      if (match) {
+        nombreArchivo = match[1];
+      }
+    }
+
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = nombreArchivo;
+    a.click();
+
+    window.URL.revokeObjectURL(url);
+  }
+
   onFiltroEstadoDetalleChange(estado: EstadoDetalleEmision | null): void {
     this.filtroEstadoDetalle.set(estado);
     this.pageIndex.set(0);
@@ -241,8 +293,31 @@ export class DetalleLoteEmisionComponent implements OnInit {
     this.cargarDetalles();
   }
 
+  // SIN_DOCUMENTO recien lo marca el backend al emitir -- antes de eso se infiere de que la fila esta
+  // OK (unica candidata a matching) y ya hubo un intento de "Procesar" sin dejarle archivo.
+  documentoNoEncontrado(detalle: LoteEmisionDetalleResponse): boolean {
+    if (!this.lote()?.enviaCorreo || detalle.nombreArchivoPdfResuelto) {
+      return false;
+    }
+    if (detalle.estado === EstadoDetalleEmision.SIN_DOCUMENTO) {
+      return true;
+    }
+    return detalle.estado === EstadoDetalleEmision.OK && this.cargasDocumentos().length > 0;
+  }
+
   toggleExpandido(detalle: LoteEmisionDetalleResponse): void {
     this.expandedDetalle.set(this.expandedDetalle() === detalle ? null : detalle);
+  }
+
+  verErroresRegistro(detalle: LoteEmisionDetalleResponse): void {
+    this.dialog.open(ErroresRegistroDialogEmisionComponent, {
+      width: '440px',
+      data: {
+        nroFila: detalle.nroFila,
+        poliza: detalle.nroPolizaRaw ?? '-',
+        motivos: this.motivosError(detalle.registroError),
+      } satisfies ErroresRegistroDialogData,
+    });
   }
 
   volver(): void {
@@ -268,10 +343,8 @@ export class DetalleLoteEmisionComponent implements OnInit {
     return this.lote()?.estadoLote === EstadoLoteEmision.ELIMINADO;
   }
 
-  // Un lote EMITIDO queda historico: la emision es irreversible, no se puede borrar bajo ninguna
-  // condicion (mismo guardrail que el backend aplica siempre, incluso desde Administracion).
   puedeEliminar(): boolean {
-    return !this.loteEliminado() && this.lote()?.estadoLote !== EstadoLoteEmision.EMITIDO;
+    return !this.loteEliminado();
   }
 
   // No se admiten correcciones anidadas: solo lotes "raiz" (sin padre) pueden corregirse.
@@ -305,6 +378,30 @@ export class DetalleLoteEmisionComponent implements OnInit {
       return;
     }
 
+    // Boton habilitado a proposito (senaliza que falta algo), pero el aviso es bloqueante, sin bypass.
+    if (lote.enviaCorreo && this.cargasDocumentos().length === 0) {
+      this.avisarSinDocumentosProcesados(lote);
+      return;
+    }
+
+    this.confirmarEmision(lote);
+  }
+
+  private avisarSinDocumentosProcesados(lote: LoteEmisionResponse): void {
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '460px',
+      disableClose: true,
+      data: {
+        title: 'Documentos sin procesar',
+        message: `El lote #${lote.loteId} envía correo, pero todavía no se procesaron documentos. `
+          + 'Por favor suba los archivos y procéselos en el panel "Documentos" para poder continuar.',
+        confirmText: 'Entendido',
+        type: 'warning',
+      },
+    });
+  }
+
+  private confirmarEmision(lote: LoteEmisionResponse): void {
     const esReintento = this.esReintentoEmision();
 
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
@@ -341,11 +438,12 @@ export class DetalleLoteEmisionComponent implements OnInit {
     }
 
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      width: '400px',
+      width: '440px',
       disableClose: true,
       data: {
         title: 'Eliminar lote',
-        message: `¿Está seguro que desea eliminar el lote #${lote.loteId} ("${lote.nombreArchivoOrigen}")? Esta acción no se puede deshacer.`,
+        message: `¿Está seguro que desea eliminar el lote #${lote.loteId} ("${lote.nombreArchivoOrigen}")? Esta acción no se puede deshacer.`
+          + (tieneFilasEmitidas(lote) ? `\n${AVISO_ELIMINAR_FILAS_EMITIDAS}` : ''),
         confirmText: 'Eliminar',
         cancelText: 'Cancelar',
         type: 'danger',

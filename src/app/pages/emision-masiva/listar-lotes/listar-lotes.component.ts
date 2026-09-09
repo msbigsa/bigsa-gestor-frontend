@@ -14,7 +14,7 @@ import { ConfirmDialogResult } from 'src/app/shared/components/confirm-dialog/co
 import { EmisionMasivaLoteService } from 'src/app/services/emision-masiva/emisionMasivaLote.service';
 import { LoteEmisionResponse } from 'src/app/models/emision-masiva/LoteEmisionResponse';
 import { EstadoLoteEmision } from 'src/app/models/emision-masiva/EstadoLoteEmision';
-import { estadoLoteClase, estadoLoteLabel, tooltipEstadoLote, tieneErrorEmision, usuarioTexto } from '../shared/estados-emision-masiva.util';
+import { estadoLoteClase, estadoLoteLabel, tooltipEstadoLote, tieneErrorEmision, usuarioTexto, usuarioDescripcion, tieneFilasEmitidas, AVISO_ELIMINAR_FILAS_EMITIDAS } from '../shared/estados-emision-masiva.util';
 import {
   EliminarLoteDialogEmisionComponent,
   EliminarLoteDialogData,
@@ -198,10 +198,8 @@ export class ListarLotesEmisionComponent implements OnInit {
       && lote.totalFilas > 0;
   }
 
-  // Un lote EMITIDO queda historico: la emision es irreversible, no se puede borrar bajo ninguna
-  // condicion (mismo guardrail que el backend aplica siempre, incluso desde Administracion).
   puedeEliminar(lote: LoteEmisionResponse): boolean {
-    return lote.estadoLote !== EstadoLoteEmision.ELIMINADO && lote.estadoLote !== EstadoLoteEmision.EMITIDO;
+    return lote.estadoLote !== EstadoLoteEmision.ELIMINADO;
   }
 
   puedeEmitir(lote: LoteEmisionResponse): boolean {
@@ -260,11 +258,12 @@ export class ListarLotesEmisionComponent implements OnInit {
     }
 
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      width: '400px',
+      width: '440px',
       disableClose: true,
       data: {
         title: 'Eliminar lote',
-        message: `¿Está seguro que desea eliminar el lote #${lote.loteId} ("${lote.nombreArchivoOrigen}")? Esta acción no se puede deshacer.`,
+        message: `¿Está seguro que desea eliminar el lote #${lote.loteId} ("${lote.nombreArchivoOrigen}")? Esta acción no se puede deshacer.`
+          + (tieneFilasEmitidas(lote) ? `\n${AVISO_ELIMINAR_FILAS_EMITIDAS}` : ''),
         confirmText: 'Eliminar',
         cancelText: 'Cancelar',
         type: 'danger',
@@ -327,4 +326,5 @@ export class ListarLotesEmisionComponent implements OnInit {
   readonly tooltipEstadoLote = tooltipEstadoLote;
   readonly tieneErrorEmision = tieneErrorEmision;
   readonly usuarioTexto = usuarioTexto;
+  readonly usuarioDescripcion = usuarioDescripcion;
 }

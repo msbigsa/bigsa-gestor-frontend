@@ -32,6 +32,11 @@ export class MenuService {
     return this.http.get<AccesoMenu>(`${this.url}/validar`, { params: { ruta } });
   }
 
+  // Catalogo de modulos a nivel sistema (GLO_MODULOS_GESTOR), no filtrado por permisos del usuario.
+  obtenerRutasSistema(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.url}/rutas-sistema`);
+  }
+
   /**
    * Indica si el menú ya cargado incluye la ruta dada. No consulta la BD: se basa en
    * el resultado del último obtenerMenu(), por lo que hasta que ese menú cargue

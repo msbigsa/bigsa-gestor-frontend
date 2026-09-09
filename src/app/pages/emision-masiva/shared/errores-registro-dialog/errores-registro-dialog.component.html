@@ -1,0 +1,20 @@
+<div class="dialog-header">
+  <div class="dialog-header-content">
+    <mat-icon class="dialog-header-icon">error_outline</mat-icon>
+    <span class="dialog-title">Errores en la fila #{{ data.nroFila }}</span>
+  </div>
+</div>
+
+<mat-dialog-content>
+  <p class="mb-3 text-sm text-gray-500">Póliza {{ data.poliza }}</p>
+
+  <ul class="flex flex-col gap-2 list-disc pl-5 text-sm">
+    @for (motivo of data.motivos; track motivo) {
+      <li>{{ motivo }}</li>
+    }
+  </ul>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-flat-button color="primary" (click)="cerrar()">Cerrar</button>
+</mat-dialog-actions>

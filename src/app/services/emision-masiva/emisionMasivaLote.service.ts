@@ -1,4 +1,4 @@
-import { HttpClient, HttpContext, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpContext, HttpParams, HttpResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -103,5 +103,13 @@ export class EmisionMasivaLoteService {
 
   eliminarDetalle(loteId: number, detalleId: number): Observable<void> {
     return this.http.delete<void>(`${this.url}/${loteId}/detalles/${detalleId}`);
+  }
+
+  descargarLog(loteId: number): Observable<HttpResponse<Blob>> {
+    return this.http.get(`${this.url}/${loteId}/log`, { responseType: 'blob', observe: 'response' });
+  }
+
+  descargarResumen(loteId: number): Observable<HttpResponse<Blob>> {
+    return this.http.get(`${this.url}/${loteId}/resumen`, { responseType: 'blob', observe: 'response' });
   }
 }

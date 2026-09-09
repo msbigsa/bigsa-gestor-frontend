@@ -2,15 +2,14 @@ import { EstadoLoteEmision } from './EstadoLoteEmision';
 import { OpcionBusqueda } from './OpcionBusqueda';
 import { CodDestinatario } from './CodDestinatario';
 import { CodLlaveBusqueda } from './CodLlaveBusqueda';
+import { UsuarioEmisionMasiva } from './UsuarioEmisionMasiva';
 
-// A diferencia de avisos-cobranza, este backend no resuelve el usuario contra GLO_USUARIOS:
-// los campos usuario* llegan como el codigo crudo del JWT (string), no un objeto.
 export interface LoteEmisionResponse {
   loteId: number;
   loteOrigenId?: number;
   nombreArchivoOrigen: string;
   fechaCarga: string;
-  usuarioCarga?: string;
+  usuarioCarga?: UsuarioEmisionMasiva;
 
   opcionBusqueda: OpcionBusqueda;
   enviaCorreo: boolean;
@@ -23,7 +22,7 @@ export interface LoteEmisionResponse {
   totalFilasError?: number;
   estadoLote: EstadoLoteEmision;
   fechaValidacion?: string;
-  usuarioValidacion?: string;
+  usuarioValidacion?: UsuarioEmisionMasiva;
 
   totalFilasEmitidas?: number;
   totalFilasSinDocumento?: number;
@@ -31,9 +30,9 @@ export interface LoteEmisionResponse {
   totalCorreosEnviados?: number;
   totalCorreosFallidos?: number;
   fechaEmision?: string;
-  usuarioEmision?: string;
+  usuarioEmision?: UsuarioEmisionMasiva;
   mensajeErrorEmision?: string;
 
   fechaEliminacion?: string;
-  usuarioEliminacion?: string;
+  usuarioEliminacion?: UsuarioEmisionMasiva;
 }
