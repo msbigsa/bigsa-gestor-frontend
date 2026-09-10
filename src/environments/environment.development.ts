@@ -1,3 +1,5 @@
+import { AuthMode } from 'src/app/models/AuthMode';
+
 export const environment = {
   production: false,
   HOST_LOGIN: 'http://localhost:8081',
@@ -9,5 +11,7 @@ export const environment = {
   TOKEN_NAME: 'jwtToken',
   REFRESH_TOKEN_NAME: 'refreshToken',
   TOKEN_WARNING_MINUTES: 5,
-  THEME_STORAGE_KEY: 'app-theme'
+  THEME_STORAGE_KEY: 'app-theme',
+  // Tiene que decir lo mismo que auth.mode en ms-bigsa-auth y ms-bigsa-emision-masivas
+  AUTH_MODE: 'COOKIE' as AuthMode //TOKEN | COOKIE
 };

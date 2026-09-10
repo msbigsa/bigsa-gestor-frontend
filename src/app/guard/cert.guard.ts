@@ -21,37 +21,40 @@ export const CertGuard = (route: ActivatedRouteSnapshot, state: RouterStateSnaps
         loginService.logout();
         return false;
     }
-    //2) VERIFICAR SI EL TOKEN NO HA EXPIRADO
-    const helper = new JwtHelperService();
-    const token = sessionStorage.getItem(environment.TOKEN_NAME);
 
-    if(token && !helper.isTokenExpired(token)){
+    //2) VERIFICAR SI EL TOKEN NO HA EXPIRADO -- solo posible en modo TOKEN.
+    //   En modo COOKIE el JWT es HttpOnly, JS no puede leerlo ni decodificarlo:
+    //   la expiracion la termina resolviendo el propio backend (401/403) en el paso 4.
+    if (environment.AUTH_MODE !== 'COOKIE') {
+        const helper = new JwtHelperService();
+        const token = sessionStorage.getItem(environment.TOKEN_NAME);
 
-        const url = state.url;
-
-        //3) RUTAS LIBRES: SIEMPRE ACCESIBLES CON SOLO ESTAR LOGUEADO, SIN VALIDAR CONTRA LA BD
-        if(RUTAS_LIBRES.includes(url)){
-            return true;
+        if (!token || helper.isTokenExpired(token)) {
+            loginService.logout();
+            return false;
         }
-
-        //4) VERIFICAR SI TIENE PERMISO ASIGNADO PARA ESTA PANTALLA
-        return menuService.validarAcceso(url).pipe(
-            map(acceso => {
-                if(acceso.permitido){
-                    return true;
-                }
-                router.navigate(['/prohibido']);
-                return false;
-            }),
-            // fail-closed: si la validacion falla o el servicio no responde, se bloquea la navegacion
-            catchError(() => {
-                router.navigate(['/noEncontrado']);
-                return of(false);
-            })
-        );
-
-    }else{
-        loginService.logout();
-        return false;
     }
+
+    const url = state.url;
+
+    //3) RUTAS LIBRES: SIEMPRE ACCESIBLES CON SOLO ESTAR LOGUEADO, SIN VALIDAR CONTRA LA BD
+    if(RUTAS_LIBRES.includes(url)){
+        return true;
+    }
+
+    //4) VERIFICAR SI TIENE PERMISO ASIGNADO PARA ESTA PANTALLA
+    return menuService.validarAcceso(url).pipe(
+        map(acceso => {
+            if(acceso.permitido){
+                return true;
+            }
+            router.navigate(['/prohibido']);
+            return false;
+        }),
+        // fail-closed: si la validacion falla o el servicio no responde, se bloquea la navegacion
+        catchError(() => {
+            router.navigate(['/noEncontrado']);
+            return of(false);
+        })
+    );
 }

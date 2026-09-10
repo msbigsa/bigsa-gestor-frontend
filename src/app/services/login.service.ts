@@ -36,12 +36,17 @@ interface IRefreshRequest {
   refreshToken: string;
 }
 
+// En modo COOKIE no hay JWT que guardar (viaja en una cookie HttpOnly, JS no puede leerlo) --
+// este marcador es lo unico que sessionStorage guarda para saber que hay una sesion activa.
+const SESSION_ACTIVE_KEY = 'sessionActive';
+
 @Injectable({
   providedIn: 'root',
 })
 export class LoginService {
 
   private readonly url = `${environment.HOST_LOGIN}/auth`;
+  private readonly logoutUrl = `${this.url}/logout`;
 
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
@@ -157,12 +162,20 @@ export class LoginService {
     this.notificacionService.stop();
     this.tabLock.release();
 
+    // JS no puede borrar una cookie HttpOnly por su cuenta -- fire-and-forget,
+    // no bloquea el logout local si el backend no responde.
+    this.http.post(this.logoutUrl, null).subscribe({ error: () => {} });
+
     sessionStorage.clear();
 
     this.router.navigate(['authentication/login']);
   }
 
   isLogged(): boolean {
+
+    if (environment.AUTH_MODE === 'COOKIE') {
+      return sessionStorage.getItem(SESSION_ACTIVE_KEY) != null;
+    }
 
     const token = sessionStorage.getItem(environment.TOKEN_NAME);
 
@@ -196,6 +209,11 @@ export class LoginService {
 
   refreshToken(): Observable<LoginResponse> {
 
+    if (environment.AUTH_MODE === 'COOKIE') {
+      // el refresh token viaja en su propia cookie HttpOnly (Path=/auth/refresh), no en el body
+      return this.http.post<LoginResponse>(`${this.url}/refresh`, null);
+    }
+
     const refreshToken = sessionStorage.getItem(environment.REFRESH_TOKEN_NAME);
 
     if (!refreshToken) {
@@ -209,9 +227,17 @@ export class LoginService {
 
   guardarSesion(response: LoginResponse): void {
 
-    sessionStorage.setItem(environment.TOKEN_NAME, response.jwtToken);
-
-    sessionStorage.setItem(environment.REFRESH_TOKEN_NAME, response.refreshToken);
+    if (environment.AUTH_MODE === 'COOKIE') {
+      // jwtToken y refreshToken vienen null a proposito (ver ms-bigsa-auth) -- viajan en cookies
+      sessionStorage.setItem(SESSION_ACTIVE_KEY, '1');
+    } else {
+      if (response.jwtToken) {
+        sessionStorage.setItem(environment.TOKEN_NAME, response.jwtToken);
+      }
+      if (response.refreshToken) {
+        sessionStorage.setItem(environment.REFRESH_TOKEN_NAME, response.refreshToken);
+      }
+    }
 
     this.tabLock.acquire();
   }

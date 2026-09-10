@@ -30,6 +30,7 @@ import { spanishPaginatorIntl } from './core/i18n/mat-paginator-intl-es';
 import { registerLocaleData } from '@angular/common';
 import localeEsCl from '@angular/common/locales/es-CL';
 import { serverErrorInterceptor } from './interceptors/server-errors.interceptor';
+import { credentialsInterceptor } from './interceptors/credentials.interceptor';
 import { provideToastr } from 'ngx-toastr';
 
 registerLocaleData(localeEsCl);
@@ -71,9 +72,10 @@ export const appConfig: ApplicationConfig = {
     ),
     provideHttpClient(
        withInterceptors([
+        credentialsInterceptor,
         loadingInterceptor,
         serverErrorInterceptor
-      ]), 
+      ]),
       withInterceptorsFromDi()
     ),
  {
