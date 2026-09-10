@@ -1,7 +1,7 @@
 import { HttpClient, HttpContext, HttpParams } from '@angular/common/http';
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
-import { EventSourcePolyfill } from 'event-source-polyfill';
+import { EventSourcePolyfill, EventSourcePolyfillInit } from 'event-source-polyfill';
 
 import { environment } from 'src/environments/environment';
 import { SKIP_GLOBAL_LOADING } from 'src/app/interceptors/loading.token';
@@ -39,7 +39,7 @@ export class NotificacionService {
   }
 
   // Se llama al iniciar sesion y cada vez que se refresca el token (ver LoginService),
-  // para que el stream siempre viaje con un Bearer vigente.
+  // para que el stream siempre viaje con una credencial vigente (header o cookie segun el modo).
   start(): void {
 
     this.stop();
@@ -48,9 +48,9 @@ export class NotificacionService {
       return;
     }
 
-    const token = sessionStorage.getItem(environment.TOKEN_NAME);
+    const options = this.buildEventSourceOptions();
 
-    if (!token) {
+    if (!options) {
       return;
     }
 
@@ -58,12 +58,7 @@ export class NotificacionService {
       noLeidas => this.notificaciones.set(noLeidas)
     );
 
-    this.eventSource = new EventSourcePolyfill(`${this.url}/stream`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      },
-      heartbeatTimeout: 90000
-    });
+    this.eventSource = new EventSourcePolyfill(`${this.url}/stream`, options);
 
     // El backend manda el evento con nombre custom "notificacion" (SseEmitter.event().name(...)),
     // no el evento "message" por defecto -- onmessage no se dispara para eventos con nombre propio.
@@ -73,6 +68,27 @@ export class NotificacionService {
 
       this.notificaciones.update(actuales => [notificacion, ...actuales]);
     });
+  }
+
+  // EventSourcePolyfill no pasa por HttpClient, asi que el interceptor de credenciales nunca lo toca.
+  // En COOKIE, withCredentials hace que el navegador adjunte la cookie solo (como cualquier request
+  // credentialed normal); en TOKEN, no hay otra forma de mandarlo salvo el header armado a mano.
+  private buildEventSourceOptions(): EventSourcePolyfillInit | null {
+
+    if (environment.AUTH_MODE === 'COOKIE') {
+      return { withCredentials: true, heartbeatTimeout: 90000 };
+    }
+
+    const token = sessionStorage.getItem(environment.TOKEN_NAME);
+
+    if (!token) {
+      return null;
+    }
+
+    return {
+      headers: { Authorization: `Bearer ${token}` },
+      heartbeatTimeout: 90000
+    };
   }
 
   stop(): void {

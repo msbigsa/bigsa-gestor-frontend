@@ -1,3 +1,6 @@
+// Comentado: nadie importa normalizeReplies ni existe ../pages/apps/profile-content/profileData
+// en este repo (resto del template "Modernize", nunca se conecto). Rompia tsc --noEmit.
+/*
 import { Post } from "../pages/apps/profile-content/profileData";
 
 
@@ -21,4 +24,4 @@ export function normalizeReplies(posts: Post[]): Post[] {
         })),
       },
     }));
-  }
+  } */
