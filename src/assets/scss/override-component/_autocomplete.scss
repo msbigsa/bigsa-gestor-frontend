@@ -1,8 +1,20 @@
 @use "sass:map";
 @use "@angular/material" as mat;
 
+// Misma elevacion que mat-select (_default-variables.scss) para que un autocomplete de
+// "buscar y seleccionar" se vea igual de marcado que un dropdown real.
 @include mat.autocomplete-overrides(
   (
-    container-elevation-shadow: var(--mat-sys-level2),
+    container-elevation-shadow: var(--mat-sys-level3),
   )
 );
+
+// Icono manual que imita la flecha de mat-select -- un input+autocomplete no trae una por
+// defecto (Material solo la genera para el componente mat-select real).
+.autocomplete-caret {
+  transition: transform 150ms cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.autocomplete-caret--open {
+  transform: rotate(180deg);
+}

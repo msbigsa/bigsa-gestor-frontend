@@ -21,9 +21,10 @@
 
       <div class="col-span-12" data-tour="carga-compania">
         <mat-label class="font-medium mb-2 block">Compañía</mat-label>
-        <mat-form-field appearance="outline" class="w-full">
+        <mat-form-field appearance="outline" class="w-full hide-hint">
           <input
             matInput
+            #triggerCia="matAutocompleteTrigger"
             placeholder="Busque una compañía..."
             [formControl]="ciaControl"
             [matAutocomplete]="autoCia"
@@ -33,6 +34,8 @@
             <button mat-icon-button matSuffix type="button" (click)="limpiarCia()" matTooltip="Limpiar selección">
               <mat-icon>close</mat-icon>
             </button>
+          } @else {
+            <mat-icon matSuffix class="autocomplete-caret" [class.autocomplete-caret--open]="triggerCia.panelOpen">arrow_drop_down</mat-icon>
           }
           <mat-autocomplete #autoCia="matAutocomplete" [displayWith]="displayCia" (optionSelected)="onCiaSeleccionada($event)">
             @for (cia of ciasFiltradas(); track cia.ciasCodigo) {
@@ -44,9 +47,10 @@
 
       <div class="col-span-12 lg:col-span-6" data-tour="carga-plantilla-cliente">
         <mat-label class="font-medium mb-2 block">Plantilla para el cliente</mat-label>
-        <mat-form-field appearance="outline" class="w-full">
+        <mat-form-field appearance="outline" class="w-full hide-hint">
           <input
             matInput
+            #triggerPlantillaCliente="matAutocompleteTrigger"
             placeholder="Busque una plantilla..."
             [formControl]="plantillaClienteControl"
             [matAutocomplete]="autoPlantillaCliente"
@@ -56,6 +60,8 @@
             <button mat-icon-button matSuffix type="button" (click)="limpiarPlantillaCliente()" matTooltip="Limpiar selección">
               <mat-icon>close</mat-icon>
             </button>
+          } @else {
+            <mat-icon matSuffix class="autocomplete-caret" [class.autocomplete-caret--open]="triggerPlantillaCliente.panelOpen">arrow_drop_down</mat-icon>
           }
           <mat-autocomplete #autoPlantillaCliente="matAutocomplete" [displayWith]="displayPlantilla" (optionSelected)="onPlantillaClienteSeleccionada($event)">
             @for (plantilla of plantillasClienteFiltradas(); track plantilla.formCodigo) {
@@ -67,9 +73,10 @@
 
       <div class="col-span-12 lg:col-span-6" data-tour="carga-plantilla-ejecutivo">
         <mat-label class="font-medium mb-2 block">Plantilla para el ejecutivo</mat-label>
-        <mat-form-field appearance="outline" class="w-full">
+        <mat-form-field appearance="outline" class="w-full hide-hint">
           <input
             matInput
+            #triggerPlantillaEjecutivo="matAutocompleteTrigger"
             placeholder="Busque una plantilla..."
             [formControl]="plantillaEjecutivoControl"
             [matAutocomplete]="autoPlantillaEjecutivo"
@@ -79,6 +86,8 @@
             <button mat-icon-button matSuffix type="button" (click)="limpiarPlantillaEjecutivo()" matTooltip="Limpiar selección">
               <mat-icon>close</mat-icon>
             </button>
+          } @else {
+            <mat-icon matSuffix class="autocomplete-caret" [class.autocomplete-caret--open]="triggerPlantillaEjecutivo.panelOpen">arrow_drop_down</mat-icon>
           }
           <mat-autocomplete #autoPlantillaEjecutivo="matAutocomplete" [displayWith]="displayPlantilla" (optionSelected)="onPlantillaEjecutivoSeleccionada($event)">
             @for (plantilla of plantillasEjecutivoFiltradas(); track plantilla.formCodigo) {

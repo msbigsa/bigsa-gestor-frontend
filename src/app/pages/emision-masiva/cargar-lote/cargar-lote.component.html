@@ -73,9 +73,10 @@
 
         <div class="col-span-12 lg:col-span-4" data-tour="carga-plantilla">
           <mat-label class="font-medium mb-2 block">Plantilla de correo</mat-label>
-          <mat-form-field appearance="outline" class="w-full">
+          <mat-form-field appearance="outline" class="w-full hide-hint">
             <input
               matInput
+              #triggerFormato="matAutocompleteTrigger"
               placeholder="Busque una plantilla..."
               [formControl]="formatoControl"
               [matAutocomplete]="autoFormato"
@@ -85,6 +86,8 @@
               <button mat-icon-button matSuffix type="button" (click)="limpiarFormato()" matTooltip="Limpiar selección">
                 <mat-icon>close</mat-icon>
               </button>
+            } @else {
+              <mat-icon matSuffix class="autocomplete-caret" [class.autocomplete-caret--open]="triggerFormato.panelOpen">arrow_drop_down</mat-icon>
             }
             <mat-autocomplete #autoFormato="matAutocomplete" [displayWith]="displayFormato" (optionSelected)="onFormatoSeleccionado($event)">
               @for (formato of formatosFiltrados(); track formato.formCodigo) {
