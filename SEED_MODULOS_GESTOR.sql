@@ -41,6 +41,21 @@ USING (VALUES
         "route": "/inicio/emision-masiva/listar-lotes"}
     ]', 4),
 
+  (N'Vida y Salud', N'local_hospital', N'/menu-level', N'Cargas Masivas',
+    N'[
+      { "displayName": "Cargar Planilla",
+        "iconName": "upload",
+        "route": "/inicio/vida-y-salud/cargar-lote"},
+
+      { "displayName": "Listado de Lotes",
+        "iconName": "list",
+        "route": "/inicio/vida-y-salud/listar-lotes"},
+
+      { "displayName": "Mantenedor de Compañías",
+        "iconName": "business",
+        "route": "/inicio/vida-y-salud/mantenedor-companias"}
+    ]', 5),
+
   (N'Administración', N'admin_panel_settings', N'/menu-level', N'Sistema',
     N'[
       { "displayName": "Administración",

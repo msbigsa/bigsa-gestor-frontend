@@ -10,6 +10,10 @@ import { DetalleLoteComponent } from './aviso-cobranza/detalle-lote/detalle-lote
 import { CargarLoteEmisionComponent } from './emision-masiva/cargar-lote/cargar-lote.component';
 import { ListarLotesEmisionComponent } from './emision-masiva/listar-lotes/listar-lotes.component';
 import { DetalleLoteEmisionComponent } from './emision-masiva/detalle-lote/detalle-lote.component';
+import { CargarLoteVidaSaludComponent } from './vida-y-salud/cargar-lote/cargar-lote.component';
+import { ListarLotesVidaSaludComponent } from './vida-y-salud/listar-lotes/listar-lotes.component';
+import { DetalleLoteVidaSaludComponent } from './vida-y-salud/detalle-lote/detalle-lote.component';
+import { ListarCompaniasVidaSaludComponent } from './vida-y-salud/mantenedor-companias/listar-companias.component';
 import { AdministracionComponent } from './administracion/administracion.component';
 import { ListarNotificacionesComponent } from './notificaciones/listar-notificaciones/listar-notificaciones.component';
 import { MiPerfilComponent } from './perfil/mi-perfil/mi-perfil.component';
@@ -104,6 +108,38 @@ export const PagesRoutes: Routes = [
     component: DetalleLoteEmisionComponent,
     data: {
       title: 'Detalle de Lote de Emisión Masiva'
+    },
+    canActivate: [CertGuard]
+  },
+  {
+    path: 'vida-y-salud/cargar-lote',
+    component: CargarLoteVidaSaludComponent,
+    data: {
+      title: 'Cargar Planilla de Vida y Salud'
+    },
+    canActivate: [CertGuard]
+  },
+  {
+    path: 'vida-y-salud/listar-lotes',
+    component: ListarLotesVidaSaludComponent,
+    data: {
+      title: 'Lotes de Vida y Salud'
+    },
+    canActivate: [CertGuard]
+  },
+  {
+    path: 'vida-y-salud/listar-lotes/detalle-lote/:id',
+    component: DetalleLoteVidaSaludComponent,
+    data: {
+      title: 'Detalle de Lote de Vida y Salud'
+    },
+    canActivate: [CertGuard]
+  },
+  {
+    path: 'vida-y-salud/mantenedor-companias',
+    component: ListarCompaniasVidaSaludComponent,
+    data: {
+      title: 'Mantenedor de Compañías de Vida y Salud'
     },
     canActivate: [CertGuard]
   },

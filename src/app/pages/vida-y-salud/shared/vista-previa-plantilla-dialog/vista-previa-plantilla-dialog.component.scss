@@ -1,0 +1,13 @@
+.preview-frame {
+  width: 100%;
+  height: 50vh;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 12px;
+  background: #fff;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+
+  &.loaded {
+    opacity: 1;
+  }
+}

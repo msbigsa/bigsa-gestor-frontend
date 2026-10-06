@@ -4,6 +4,7 @@ import { MenuService } from 'src/app/layouts/full/vertical/sidebar/sidebar-data'
 import { GeneralComponent } from './general/general.component';
 import { AdminLotesComponent } from './aviso-cobranza/admin-lotes.component';
 import { AdminLotesEmisionComponent } from './emision-masiva/admin-lotes.component';
+import { AdminLotesVidaSaludComponent } from './vida-y-salud/admin-lotes.component';
 
 interface TabModuloAdmin {
   id: string;
@@ -13,7 +14,7 @@ interface TabModuloAdmin {
 
 @Component({
   selector: 'app-administracion',
-  imports: [MaterialModule, GeneralComponent, AdminLotesComponent, AdminLotesEmisionComponent],
+  imports: [MaterialModule, GeneralComponent, AdminLotesComponent, AdminLotesEmisionComponent, AdminLotesVidaSaludComponent],
   templateUrl: './administracion.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -31,6 +32,7 @@ export class AdministracionComponent implements OnInit {
     { id: 'general', label: 'Configuraciones Generales', habilitado: true },
     { id: 'avisos-cobranza', label: 'Avisos de Cobranza', habilitado: true },
     { id: 'emision-masiva', label: 'Emisión Masiva', habilitado: true },
+    { id: 'vida-y-salud', label: 'Vida y Salud', habilitado: true },
     { id: 'html', label: 'HTML', habilitado: false },
   ];
 
@@ -49,6 +51,8 @@ export class AdministracionComponent implements OnInit {
         return this.rutasSistema().has('/inicio/avisos-cobranza/listar-lotes');
       case 'emision-masiva':
         return this.rutasSistema().has('/inicio/emision-masiva/listar-lotes');
+      case 'vida-y-salud':
+        return this.rutasSistema().has('/inicio/vida-y-salud/listar-lotes');
       default:
         return true;
     }

@@ -1,0 +1,617 @@
+<div class="flex items-center justify-between mb-4">
+  <button mat-button color="primary" (click)="volver()">
+    <mat-icon class="mr-1">arrow_back</mat-icon>
+    Volver al listado
+  </button>
+
+  <button
+    mat-icon-button
+    type="button"
+    matTooltip="Ver tour guiado"
+    (click)="iniciarTour()"
+  >
+    <mat-icon>help_outline</mat-icon>
+  </button>
+</div>
+
+@if (lote(); as loteActual) {
+  <mat-card class="cardWithShadow mb-6">
+    <mat-card-content class="p-6!">
+      <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+        <div>
+          <h2 class="text-xl font-semibold mb-1">
+            Lote #{{ loteActual.loteId }} — {{ loteActual.nombreArchivoOrigen }}
+          </h2>
+          <span [matTooltip]="getFechaCompleta(loteActual.fechaCarga)" class="text-sm text-gray-500">
+            Cargado el {{ loteActual.fechaCarga | date: "short" }}
+          </span>
+          <span class="text-sm text-gray-500"> · {{ nombreCompania(loteActual.ciasCodigo) }}</span>
+          <span
+            class="text-sm text-gray-500"
+            [matTooltip]="usuarioDescripcion(loteActual.usuarioCarga)"
+          > · por {{ usuarioTexto(loteActual.usuarioCarga) }}</span>
+
+          <div class="text-xs text-gray-500 mt-1">
+            {{ loteActual.incluyePdf ? 'Incluye Facturas y Nóminas' : 'No incluye Facturas (regularización de Documento)' }}
+            @if (loteActual.enviaCorreo) {
+              · Envía correo ({{ agrupacionLabel(loteActual.agrupacionCorreo!) }})
+            } @else {
+              · No envía correo
+            }
+          </div>
+
+          @if (loteActual.fechaValidacion) {
+            <div class="text-xs text-gray-500 mt-1">
+              Validado el {{ loteActual.fechaValidacion | date: "short" }} ·
+              <span [matTooltip]="usuarioDescripcion(loteActual.usuarioValidacion)">
+                por {{ usuarioTexto(loteActual.usuarioValidacion) }}
+              </span>
+            </div>
+          }
+
+          @if (loteActual.fechaEliminacion) {
+            <div class="text-xs text-gray-500 mt-1">
+              Eliminado el {{ loteActual.fechaEliminacion | date: "short" }} ·
+              <span [matTooltip]="usuarioDescripcion(loteActual.usuarioEliminacion)">
+                por {{ usuarioTexto(loteActual.usuarioEliminacion) }}
+              </span>
+            </div>
+          }
+
+          @if (loteActual.loteOrigenId) {
+            <div class="mt-1">
+              <a
+                (click)="irADetalleLote(loteActual.loteOrigenId)"
+                class="text-sm text-primary cursor-pointer hover:underline"
+              >
+                ↳ Corrige al lote #{{ loteActual.loteOrigenId }}
+              </a>
+            </div>
+          }
+        </div>
+
+        <span
+          class="px-3 py-1 rounded-full text-sm font-semibold"
+          [ngClass]="estadoClase(loteActual.estadoLote)"
+          [matTooltip]="tooltipEstadoLote(loteActual)"
+        >
+          {{ estadoLabel(loteActual.estadoLote) }}
+        </span>
+      </div>
+
+      @if (tieneErrorLote(loteActual)) {
+        <div class="flex items-start gap-2 rounded-md border border-error bg-light-error text-error px-3 py-2 mb-4 text-sm">
+          <mat-icon class="shrink-0">error_outline</mat-icon>
+          <span>{{ loteActual.mensajeError }}</span>
+        </div>
+      }
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4" data-tour="detalle-resumen">
+        <div class="border border-border rounded-md p-3 text-center">
+          <p class="text-2xl font-semibold mb-0">{{ loteActual.totalFilas }}</p>
+          <p class="text-xs text-gray-500 mb-0">Filas totales</p>
+        </div>
+
+        @if (loteActual.totalFilasOk != null) {
+          <div class="border border-border rounded-md p-3 text-center">
+            <p class="text-2xl font-semibold mb-0 text-success">{{ loteActual.totalFilasOk }}</p>
+            <p class="text-xs text-gray-500 mb-0">Válidas</p>
+          </div>
+        }
+
+        @if (loteActual.totalFilasError != null) {
+          <div class="border border-border rounded-md p-3 text-center">
+            <p class="text-2xl font-semibold mb-0 text-error">{{ loteActual.totalFilasError }}</p>
+            <p class="text-xs text-gray-500 mb-0">Con error</p>
+          </div>
+        }
+
+        @if (loteActual.totalFilasFacturadas != null) {
+          <div class="border border-border rounded-md p-3 text-center">
+            <p class="text-2xl font-semibold mb-0 text-success">{{ loteActual.totalFilasFacturadas }}</p>
+            <p class="text-xs text-gray-500 mb-0">Facturadas</p>
+          </div>
+        }
+
+        @if (loteActual.totalFilasSinDocumento != null) {
+          <div class="border border-border rounded-md p-3 text-center">
+            <p class="text-2xl font-semibold mb-0 text-warning">{{ loteActual.totalFilasSinDocumento }}</p>
+            <p class="text-xs text-gray-500 mb-0">Sin documento</p>
+          </div>
+        }
+
+        @if (loteActual.totalFilasErrorFacturacion != null) {
+          <div class="border border-border rounded-md p-3 text-center">
+            <p class="text-2xl font-semibold mb-0 text-error">{{ loteActual.totalFilasErrorFacturacion }}</p>
+            <p class="text-xs text-gray-500 mb-0">Error de facturación</p>
+          </div>
+        }
+
+        @if (loteActual.totalCorreosEnviados != null) {
+          <div class="border border-border rounded-md p-3 text-center">
+            <p class="text-2xl font-semibold mb-0 text-success">{{ loteActual.totalCorreosEnviados }}</p>
+            <p class="text-xs text-gray-500 mb-0">Correos enviados</p>
+          </div>
+        }
+
+        @if (loteActual.totalCorreosFallidos != null) {
+          <div class="border border-border rounded-md p-3 text-center">
+            <p class="text-2xl font-semibold mb-0 text-error">{{ loteActual.totalCorreosFallidos }}</p>
+            <p class="text-xs text-gray-500 mb-0">Correos fallidos</p>
+          </div>
+        }
+      </div>
+
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div class="flex flex-wrap items-center gap-2" data-tour="detalle-acciones">
+          @if (!loteEliminado()) {
+            <button mat-icon-button (click)="actualizar()" matTooltip="Actualizar">
+              <mat-icon>refresh</mat-icon>
+            </button>
+          }
+
+          @if (puedeValidar()) {
+            <button mat-flat-button color="primary" (click)="validar()">
+              <mat-icon class="mr-2">fact_check</mat-icon>
+              Validar
+            </button>
+          }
+
+          @if (puedeFacturar()) {
+            <button mat-flat-button color="primary" (click)="facturar()">
+              <mat-icon class="mr-2">send</mat-icon>
+              {{ esReintentoFacturacion() ? "Reintentar facturación" : "Facturar" }}
+            </button>
+          }
+
+          @if (puedeCorregir()) {
+            <button
+              mat-stroked-button
+              (click)="abrirDialogoCorreccion()"
+              [disabled]="loteEnProceso()"
+              [matTooltip]="loteEnProceso() ? 'No disponible mientras el lote está en proceso' : ''"
+            >
+              <mat-icon class="mr-2">file_upload</mat-icon>
+              Cargar corrección
+            </button>
+          }
+
+          @if (puedeEliminar()) {
+            <button
+              mat-stroked-button
+              color="warn"
+              (click)="eliminarLote()"
+              [disabled]="loteEnProceso()"
+              [matTooltip]="loteEnProceso() ? 'No disponible mientras el lote está en proceso' : ''"
+            >
+              <mat-icon class="mr-2">delete</mat-icon>
+              Eliminar lote
+            </button>
+          }
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          @if (puedeVerPlantilla()) {
+            <button mat-stroked-button (click)="verPlantilla()">
+              <mat-icon class="mr-2">visibility</mat-icon>
+              Ver plantilla
+            </button>
+          }
+
+          @if (puedeDescargar()) {
+            <button mat-stroked-button (click)="descargarLog()">
+              <mat-icon class="mr-2">description</mat-icon>
+              Descargar detalle del proceso
+            </button>
+
+            <button mat-stroked-button (click)="descargarResumen()">
+              <mat-icon class="mr-2">summarize</mat-icon>
+              Descargar resumen
+            </button>
+          }
+        </div>
+      </div>
+
+      @if (correcciones().length > 0) {
+        <div class="mt-4 pt-4 border-t border-border">
+          <p class="text-sm font-semibold text-gray-500 mb-2">Correcciones de este lote</p>
+          <div class="flex flex-col gap-2">
+            @for (correccion of correcciones(); track correccion.loteId) {
+              <a
+                (click)="irADetalleLote(correccion.loteId)"
+                class="flex items-center justify-between gap-2 border border-border rounded-md px-3 py-2 cursor-pointer hover:bg-gray-50"
+              >
+                <span class="text-sm">
+                  Lote #{{ correccion.loteId }} — {{ correccion.fechaCarga | date: "short" }}
+                </span>
+                <span class="inline-flex items-center gap-1.5">
+                  <span
+                    class="px-2 py-0.5 rounded-full text-xs font-semibold"
+                    [ngClass]="estadoClase(correccion.estadoLote)"
+                    [matTooltip]="tooltipEstadoLote(correccion)"
+                  >
+                    {{ estadoLabel(correccion.estadoLote) }}
+                  </span>
+                  @if (tieneErrorLote(correccion)) {
+                    <mat-icon
+                      class="text-error! shrink-0"
+                      [matTooltip]="correccion.mensajeError ?? ''"
+                    >warning</mat-icon>
+                  }
+                </span>
+              </a>
+            }
+          </div>
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
+
+  @if (loteEliminado()) {
+    <mat-card class="cardWithShadow">
+      <mat-card-content class="text-center text-sm text-gray-500 py-6">
+        <mat-icon class="align-middle mr-1">delete</mat-icon>
+        Este lote fue eliminado. No se conservan los registros asociados.
+      </mat-card-content>
+    </mat-card>
+  } @else {
+    <mat-accordion multi class="block cardWithShadow rounded-xl! overflow-hidden">
+
+      @if (loteActual.incluyePdf) {
+        <mat-expansion-panel
+          [expanded]="documentosExpandido()"
+          (opened)="documentosExpandido.set(true)"
+          (closed)="documentosExpandido.set(false)"
+        >
+          <mat-expansion-panel-header data-tour="detalle-documentos">
+            <mat-panel-title>Documentos</mat-panel-title>
+            <mat-panel-description [class.text-warning]="documentosRequiereAtencion()">
+              {{ documentosResumen() }}
+            </mat-panel-description>
+          </mat-expansion-panel-header>
+
+          <div class="flex flex-wrap items-center justify-end gap-2 mb-4">
+            <button mat-icon-button (click)="cargarArchivosCarpeta()" matTooltip="Actualizar carpeta">
+              <mat-icon>refresh</mat-icon>
+            </button>
+
+            @if (puedeGestionarDocumentos()) {
+              <button mat-stroked-button (click)="abrirDialogoSubirDocumentos()">
+                <mat-icon class="mr-2">upload_file</mat-icon>
+                Subir documentos
+              </button>
+
+              <button
+                mat-flat-button
+                color="primary"
+                [disabled]="cargaDocEnCursoId() !== null"
+                (click)="procesarDocumentos()"
+              >
+                <mat-icon class="mr-2">sync</mat-icon>
+                Procesar documentos
+              </button>
+            }
+          </div>
+
+          @if (!puedeGestionarDocumentos()) {
+            <p class="text-sm text-gray-500 mb-4">
+              @if (loteActual.estadoLote === "PROCESANDO_DOCUMENTOS") {
+                Hay un procesamiento de documentos en curso. Espera a que termine para volver a subir o procesar.
+              } @else if (loteActual.estadoLote === "CARGADO" || loteActual.estadoLote === "ERROR_VALIDACION") {
+                Valida el lote primero para poder subir y procesar documentos.
+              } @else {
+                La carpeta de documentos de este lote ya no está disponible.
+              }
+            </p>
+          }
+
+          <div class="mb-2">
+            <p class="text-sm font-semibold text-gray-500 mb-2">
+              Archivos sin procesar en la carpeta ({{ archivosEnCarpeta()?.length ?? 0 }})
+            </p>
+
+            @if (archivosEnCarpeta() && archivosEnCarpeta()!.length > 0) {
+              <div class="flex flex-wrap gap-2 max-h-48 overflow-y-auto p-1">
+                @for (archivo of archivosEnCarpeta(); track archivo.nombre) {
+                  <span class="px-2 py-1 rounded-md border border-border text-xs">{{ archivo.nombre }}</span>
+                }
+              </div>
+            } @else {
+              <p class="text-sm text-gray-500">No hay archivos pendientes de procesar.</p>
+            }
+          </div>
+
+          @if (cargasDocumentos().length > 0) {
+            <div class="mt-4 pt-4 border-t border-border">
+              <p class="text-sm font-semibold text-gray-500 mb-2">Historial de procesamiento</p>
+
+              <div class="flex flex-col gap-2 max-h-96 overflow-y-auto p-1">
+                @for (carga of cargasDocumentos(); track carga.cargaDocId) {
+                  <div class="border border-border rounded-md px-3 py-2">
+                    <div
+                      class="flex items-center justify-between gap-2 cursor-pointer"
+                      (click)="toggleExpandidoCarga(carga)"
+                    >
+                      <span class="text-sm">
+                        {{ carga.fechaCarga | date: "short" }} · por {{ usuarioTexto(carga.usuarioCarga) }}
+                        · {{ carga.totalDocumentosMatcheados ?? 0 }} asignado(s)
+                      </span>
+                      <span class="inline-flex items-center gap-1.5">
+                        <span
+                          class="px-2 py-0.5 rounded-full text-xs font-semibold"
+                          [ngClass]="cargaDocClase(carga.estado)"
+                        >
+                          {{ cargaDocLabel(carga.estado) }}
+                        </span>
+                        <mat-icon>{{ expandedCarga() === carga ? "expand_less" : "expand_more" }}</mat-icon>
+                      </span>
+                    </div>
+
+                    @if (expandedCarga() === carga) {
+                      <div class="mt-2 pt-2 border-t border-border text-xs text-gray-600">
+                        @if (carga.mensajeError) {
+                          <p class="text-error mb-2">{{ carga.mensajeError }}</p>
+                        }
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                          <div>
+                            <p class="font-semibold mb-1">Sin fila correspondiente ({{ carga.archivosSinFilaCorrespondiente.length }})</p>
+                            <div class="max-h-40 overflow-y-auto">
+                              @for (nombre of carga.archivosSinFilaCorrespondiente; track nombre) {
+                                <p class="mb-0.5">{{ nombre }}</p>
+                              } @empty { <p class="mb-0">-</p> }
+                            </div>
+                          </div>
+                          <div>
+                            <p class="font-semibold mb-1">De filas con error ({{ carga.archivosDeFilasConError.length }})</p>
+                            <div class="max-h-40 overflow-y-auto">
+                              @for (nombre of carga.archivosDeFilasConError; track nombre) {
+                                <p class="mb-0.5">{{ nombre }}</p>
+                              } @empty { <p class="mb-0">-</p> }
+                            </div>
+                          </div>
+                          <div>
+                            <p class="font-semibold mb-1">Con fallo técnico ({{ carga.archivosConFalloTecnico.length }})</p>
+                            <div class="max-h-40 overflow-y-auto">
+                              @for (nombre of carga.archivosConFalloTecnico; track nombre) {
+                                <p class="mb-0.5">{{ nombre }}</p>
+                              } @empty { <p class="mb-0">-</p> }
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </mat-expansion-panel>
+      }
+
+      <mat-expansion-panel
+        [expanded]="detalleExpandido()"
+        (opened)="detalleExpandido.set(true)"
+        (closed)="detalleExpandido.set(false)"
+      >
+        <mat-expansion-panel-header>
+          <mat-panel-title>Detalle de filas</mat-panel-title>
+          <mat-panel-description>{{ totalElements() }} fila(s)</mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <div class="grid grid-cols-12 gap-4 items-center mb-4">
+          <div class="lg:col-span-6 col-span-12" data-tour="detalle-filtro-estado">
+            <mat-form-field appearance="outline" class="w-full hide-hint">
+              <mat-label>Filtrar por estado</mat-label>
+              <mat-select
+                [value]="filtroEstadoDetalle()"
+                (selectionChange)="onFiltroEstadoDetalleChange($event.value)"
+              >
+                <mat-option [value]="null">Todos los estados</mat-option>
+                @for (estado of estadosDetalleDisponibles; track estado) {
+                  <mat-option [value]="estado">{{ detalleEstadoLabel(estado) }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="relative overflow-auto max-h-[70vh]">
+          <table mat-table [dataSource]="detalles()" multiTemplateDataRows class="min-w-full">
+            <ng-container matColumnDef="expand">
+              <th mat-header-cell *matHeaderCellDef></th>
+              <td
+                mat-cell
+                *matCellDef="let d; let first = first"
+                class="whitespace-nowrap"
+                [attr.data-tour]="first ? 'detalle-expandir' : null"
+              >
+                <button mat-icon-button (click)="toggleExpandido(d)" matTooltip="Ver datos originales de la planilla">
+                  <mat-icon>{{ expandedDetalle() === d ? "expand_less" : "expand_more" }}</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="fila">
+              <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Fila</th>
+              <td mat-cell *matCellDef="let d" class="whitespace-nowrap">{{ d.nroFila }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="factura">
+              <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Factura</th>
+              <td mat-cell *matCellDef="let d" class="whitespace-nowrap">{{ d.nroFacturaRaw ?? "-" }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="poliza">
+              <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Póliza</th>
+              <td mat-cell *matCellDef="let d" class="whitespace-nowrap">{{ d.nroPolizaRaw ?? "-" }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="fecha">
+              <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Fecha factura</th>
+              <td mat-cell *matCellDef="let d" class="whitespace-nowrap">{{ d.fechaFacturaRaw ?? "-" }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="total">
+              <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Total factura</th>
+              <td mat-cell *matCellDef="let d" class="whitespace-nowrap">{{ d.totalFacturaRaw ?? "-" }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="archivo">
+              <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Archivo</th>
+              <td mat-cell *matCellDef="let d" class="whitespace-nowrap">
+                @if (d.nombreArchivoPdfResuelto) {
+                  <span class="inline-flex items-center gap-1 text-xs text-gray-600">
+                    <mat-icon class="text-success! text-base!" [matTooltip]="d.nombreArchivoPdfResuelto">attach_file</mat-icon>
+                    <span class="truncate max-w-[160px]" [matTooltip]="d.nombreArchivoPdfResuelto">{{ d.nombreArchivoPdfResuelto }}</span>
+                    @if (d.estado !== "FACTURADO") {
+                      <a (click)="desasignarDocumento(d)" class="text-primary cursor-pointer hover:underline ml-1">
+                        Desasociar
+                      </a>
+                    }
+                  </span>
+                } @else if (documentoNoEncontrado(d)) {
+                  <span class="inline-flex items-center gap-1 text-xs text-error">
+                    <mat-icon class="text-error! text-base!" matTooltip="Se procesó y no se encontró ningún documento coincidente">close</mat-icon>
+                    Sin documento
+                  </span>
+                }
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="correo">
+              <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Correo resuelto</th>
+              <td mat-cell *matCellDef="let d" class="whitespace-nowrap">{{ d.correoResuelto ?? "-" }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="correoEnvio">
+              <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Correo</th>
+              <td mat-cell *matCellDef="let d" class="whitespace-nowrap">
+                @if (d.correoEstado === "ENVIADO") {
+                  <mat-icon class="text-success!" matTooltip="Correo enviado">mail</mat-icon>
+                } @else if (d.correoEstado === "FALLIDO") {
+                  <mat-icon class="text-error!" [matTooltip]="d.correoError ?? 'Falló el envío de correo'">error_outline</mat-icon>
+                } @else {
+                  <span class="text-gray-400">-</span>
+                }
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="estado">
+              <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Estado</th>
+              <td mat-cell *matCellDef="let d" class="whitespace-nowrap">
+                <span
+                  class="px-3 py-1 rounded-full text-xs font-semibold"
+                  [ngClass]="detalleEstadoClase(d.estado)"
+                  [matTooltip]="tooltipRegistroError(d.registroError)"
+                  [class.cursor-pointer]="!!d.registroError"
+                  (click)="d.registroError && verErroresRegistro(d)"
+                >
+                  {{ detalleEstadoLabel(d.estado) }}
+                </span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="accion">
+              <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Acción</th>
+              <td
+                mat-cell
+                *matCellDef="let d; let first = first"
+                class="action-link whitespace-nowrap"
+                [attr.data-tour]="first ? 'detalle-accion' : null"
+              >
+                @if (d.estado !== "FACTURADO") {
+                  <a
+                    (click)="eliminarDetalle(d)"
+                    class="me-2.5"
+                    [class.cursor-pointer]="!loteEnProceso()"
+                    [class.opacity-40]="loteEnProceso()"
+                    [class.pointer-events-none]="loteEnProceso()"
+                  >
+                    <mat-icon
+                      class="text-red-600!"
+                      [matTooltip]="loteEnProceso() ? 'No disponible mientras el lote está en proceso' : 'Eliminar registro'"
+                    >delete</mat-icon>
+                  </a>
+                }
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="expandedDetail">
+              <td mat-cell *matCellDef="let d" [attr.colspan]="displayedColumns().length" class="bg-gray-50 p-4">
+                <p class="text-xs font-semibold text-gray-500 mb-2">Datos originales de la planilla</p>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm mb-3">
+                  <div><span class="text-gray-500">Tipo factura:</span> {{ d.tipoFacturaRaw ?? "-" }}</div>
+                  <div><span class="text-gray-500">Póliza:</span> {{ d.nroPolizaRaw ?? "-" }}</div>
+                  <div><span class="text-gray-500">Periodo:</span> {{ d.periodoRaw ?? "-" }}</div>
+                  <div><span class="text-gray-500">Rut asegurado:</span> {{ d.rutAseguradoRaw ?? "-" }}</div>
+                  <div><span class="text-gray-500">Factura:</span> {{ d.nroFacturaRaw ?? "-" }}</div>
+                  <div><span class="text-gray-500">Fecha factura:</span> {{ d.fechaFacturaRaw ?? "-" }}</div>
+                  <div><span class="text-gray-500">Ramo:</span> {{ d.codRamoRaw ?? "-" }}</div>
+                  <div><span class="text-gray-500">Tipo cambio:</span> {{ d.tipoCambioRaw ?? "-" }}</div>
+                  <div><span class="text-gray-500">Prima neta afecta:</span> {{ d.primaNetaAfectaRaw ?? "-" }}</div>
+                  <div><span class="text-gray-500">Prima neta exenta:</span> {{ d.primaNetaExentaRaw ?? "-" }}</div>
+                  <div><span class="text-gray-500">IVA:</span> {{ d.ivaRaw ?? "-" }}</div>
+                  <div><span class="text-gray-500">Total factura:</span> {{ d.totalFacturaRaw ?? "-" }}</div>
+                  <div><span class="text-gray-500">Ítem asegurado:</span> {{ d.itemAseguradoRaw ?? "-" }}</div>
+                </div>
+
+                @if (d.docuCodigo != null) {
+                  <p class="text-xs font-semibold text-gray-500 mb-2">Datos resueltos</p>
+                  <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                    <div><span class="text-gray-500">Doc. código:</span> {{ d.docuCodigo }}</div>
+                    <div><span class="text-gray-500">Póliza:</span> {{ d.nroPoliza }}-{{ d.digPoliza }}</div>
+                    <div><span class="text-gray-500">Periodo:</span> {{ d.periodoMes }}/{{ d.periodoAnio }}</div>
+                    <div><span class="text-gray-500">Rut asegurado:</span> {{ d.rutAsegurado ?? "-" }}</div>
+                    <div><span class="text-gray-500">Ítem asegurado:</span> {{ d.itemAseguradoNumero ?? "-" }}</div>
+                    <div><span class="text-gray-500">Ramo:</span> {{ d.ramoCodigo ?? "-" }}</div>
+                    <div><span class="text-gray-500">Prima neta doc.:</span> {{ d.primaNetaDocumento ?? "-" }}</div>
+                    <div><span class="text-gray-500">Prima neta planilla:</span> {{ d.primaNetaPlanillaMo ?? "-" }}</div>
+                  </div>
+                }
+
+                @if (d.fechaFacturacionReal || d.correoEstado) {
+                  <p class="text-xs font-semibold text-gray-500 mt-3 mb-2">Facturación</p>
+                  <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                    @if (d.fechaFacturacionReal) {
+                      <div><span class="text-gray-500">Facturado el:</span> {{ d.fechaFacturacionReal | date: "short" }}</div>
+                    }
+                    @if (d.correoEstado) {
+                      <div>
+                        <span class="text-gray-500">Correo:</span>
+                        {{ d.correoEstado === "ENVIADO" ? "Enviado" : "Fallido" }}
+                        @if (d.correoError) { <span class="text-error"> — {{ d.correoError }}</span> }
+                      </div>
+                    }
+                  </div>
+                }
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns(); sticky: true"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns()" class="interactive-row"></tr>
+            <tr
+              mat-row
+              *matRowDef="let row; columns: ['expandedDetail']"
+              [class.hidden]="expandedDetalle() !== row"
+            ></tr>
+
+            <tr *matNoDataRow>
+              <td [attr.colspan]="displayedColumns().length" class="text-center text-sm text-gray-500 py-6">
+                No se encontraron coincidencias.
+              </td>
+            </tr>
+          </table>
+        </div>
+
+        <mat-paginator
+          [pageSize]="pageSize()"
+          [length]="totalElements()"
+          [pageIndex]="pageIndex()"
+          [pageSizeOptions]="[5, 10, 50, 100, 200]"
+          showFirstLastButtons
+          (page)="showMore($event)"
+        ></mat-paginator>
+      </mat-expansion-panel>
+    </mat-accordion>
+  }
+}

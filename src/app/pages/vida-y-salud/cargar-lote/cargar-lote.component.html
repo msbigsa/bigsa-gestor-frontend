@@ -1,0 +1,144 @@
+<mat-card class="cardWithShadow">
+  <mat-card-header class="p-4! w-full">
+    <div class="flex items-center justify-between w-full">
+      <mat-card-title class="mb-0 text-xl font-semibold">
+        Cargar planilla de Vida y Salud
+      </mat-card-title>
+
+      <button
+        mat-icon-button
+        type="button"
+        matTooltip="Ver tour guiado"
+        (click)="iniciarTour()"
+      >
+        <mat-icon>help_outline</mat-icon>
+      </button>
+    </div>
+  </mat-card-header>
+
+  <mat-card-content class="border-t border-border p-6!">
+    <div class="grid grid-cols-12 gap-6">
+
+      <div class="col-span-12 lg:col-span-6" data-tour="carga-compania">
+        <mat-label class="font-medium mb-2 block">Compañía</mat-label>
+        <mat-form-field appearance="outline" class="w-full hide-hint">
+          <input
+            matInput
+            #triggerCia="matAutocompleteTrigger"
+            placeholder="Busque una compañía..."
+            [formControl]="ciaControl"
+            [matAutocomplete]="autoCia"
+            (focus)="seleccionarTexto($event)"
+          />
+          @if (ciaSeleccionada()) {
+            <button mat-icon-button matSuffix type="button" (click)="limpiarCia()" matTooltip="Limpiar selección">
+              <mat-icon>close</mat-icon>
+            </button>
+          } @else {
+            <mat-icon matSuffix class="autocomplete-caret" [class.autocomplete-caret--open]="triggerCia.panelOpen">arrow_drop_down</mat-icon>
+          }
+          <mat-autocomplete #autoCia="matAutocomplete" [displayWith]="displayCia" (optionSelected)="onCiaSeleccionada($event)">
+            @for (cia of ciasFiltradas(); track cia.ciasCodigo) {
+              <mat-option [value]="cia">{{ cia.ciasNombre }}</mat-option>
+            }
+          </mat-autocomplete>
+        </mat-form-field>
+      </div>
+
+      <div class="col-span-12" data-tour="carga-incluye-pdf">
+        <mat-label class="font-medium mb-2 block">Tipo de carga</mat-label>
+        <mat-radio-group
+          class="flex flex-col sm:flex-row gap-2 sm:gap-8"
+          [value]="incluyePdf()"
+          (change)="onIncluyePdfChange($event.value)"
+        >
+          <mat-radio-button [value]="true">Incluye Facturas y Nóminas</mat-radio-button>
+          <mat-radio-button [value]="false">No incluye Facturas (regularización de Documento)</mat-radio-button>
+        </mat-radio-group>
+      </div>
+
+      <div class="col-span-12 flex items-center" data-tour="carga-envia-correo">
+        <mat-checkbox
+          [checked]="enviaCorreo()"
+          [disabled]="!incluyePdf()"
+          [matTooltip]="!incluyePdf() ? 'Requiere seleccionar «Incluye Facturas y Nóminas»' : ''"
+          (change)="onEnviaCorreoChange($event.checked)"
+        >
+          Enviar correo
+        </mat-checkbox>
+      </div>
+
+      @if (enviaCorreo()) {
+        <div class="col-span-12 lg:col-span-6" data-tour="carga-agrupacion">
+          <mat-label class="font-medium mb-2 block">Agrupación del correo</mat-label>
+          <mat-form-field appearance="outline" class="w-full hide-hint">
+            <mat-select
+              placeholder="Seleccione una agrupación..."
+              [value]="agrupacionCorreo()"
+              (selectionChange)="agrupacionCorreo.set($event.value)"
+            >
+              @for (agrupacion of agrupaciones; track agrupacion) {
+                <mat-option [value]="agrupacion">{{ agrupacionLabel(agrupacion) }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="col-span-12 lg:col-span-6" data-tour="carga-plantilla">
+          <mat-label class="font-medium mb-2 block">Plantilla de correo</mat-label>
+          <mat-form-field appearance="outline" class="w-full hide-hint">
+            <input
+              matInput
+              #triggerFormato="matAutocompleteTrigger"
+              placeholder="Busque una plantilla..."
+              [formControl]="formatoControl"
+              [matAutocomplete]="autoFormato"
+              (focus)="seleccionarTexto($event)"
+            />
+            @if (formatoSeleccionado()) {
+              <button mat-icon-button matSuffix type="button" (click)="limpiarFormato()" matTooltip="Limpiar selección">
+                <mat-icon>close</mat-icon>
+              </button>
+            } @else {
+              <mat-icon matSuffix class="autocomplete-caret" [class.autocomplete-caret--open]="triggerFormato.panelOpen">arrow_drop_down</mat-icon>
+            }
+            <mat-autocomplete #autoFormato="matAutocomplete" [displayWith]="displayFormato" (optionSelected)="onFormatoSeleccionado($event)">
+              @for (formato of formatosFiltrados(); track formato.formCodigo) {
+                <mat-option [value]="formato">{{ formato.formNombre }}</mat-option>
+              }
+            </mat-autocomplete>
+          </mat-form-field>
+        </div>
+      }
+
+      <div class="col-span-12" data-tour="carga-archivo">
+        <mat-label class="font-medium mb-2 block">Archivo (planilla CSV separada por ";", o Excel .xlsx)</mat-label>
+
+        <app-file-dropzone
+          [title]="'Suba la planilla de facturación'"
+          [subtitle]="'Arrastre el archivo aquí o haga clic para seleccionarlo. Se aceptan archivos CSV o Excel (.xlsx).'"
+          [accept]="'.csv,.xlsx'"
+          [maxSize]="100 * 1024 * 1024"
+          (fileSelected)="onArchivoSeleccionado($event)"
+          (fileRemoved)="onArchivoRemovido()"
+        ></app-file-dropzone>
+      </div>
+
+      <div class="col-span-12 flex justify-center mt-2">
+        <button
+          mat-flat-button
+          color="primary"
+          type="button"
+          class="px-6 py-5"
+          data-tour="carga-enviar"
+          [disabled]="!puedeEnviar()"
+          (click)="enviar()"
+        >
+          <mat-icon class="mr-2">upload</mat-icon>
+          Cargar planilla
+        </button>
+      </div>
+
+    </div>
+  </mat-card-content>
+</mat-card>

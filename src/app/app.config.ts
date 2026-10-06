@@ -113,6 +113,7 @@ export const appConfig: ApplicationConfig = {
             new URL(environment.HOST_NOTIFICA).host,
             new URL(environment.HOST_LOGIN).host,
             new URL(environment.HOST_EMISION_MASIVA).host,
+            new URL(environment.HOST_VIDA_Y_SALUD).host,
           ],
           disallowedRoutes: [
             `${environment.HOST_LOGIN}/auth/login/forgot`,

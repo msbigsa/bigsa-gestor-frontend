@@ -1,0 +1,59 @@
+<mat-card class="cardWithShadow">
+  <mat-card-content>
+    <div class="flex items-center justify-between gap-2">
+      <h2 class="text-xl font-semibold mb-0">Mantenedor de compañías</h2>
+
+      <div class="flex items-center gap-2">
+        <button mat-icon-button (click)="cargarConfiguraciones()" matTooltip="Actualizar listado">
+          <mat-icon>refresh</mat-icon>
+        </button>
+
+        <button mat-flat-button color="primary" (click)="nuevaCompania()">
+          <mat-icon class="mr-2">add</mat-icon>
+          Nueva compañía
+        </button>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+<mat-card class="cardWithShadow">
+  <mat-card-content>
+    <div class="relative overflow-auto max-h-[70vh]">
+      <table mat-table [dataSource]="configuraciones()" class="min-w-full">
+        <ng-container matColumnDef="ciasCodigo">
+          <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Compañía</th>
+          <td mat-cell *matCellDef="let c" class="whitespace-nowrap">{{ nombreCompania(c.ciasCodigo) }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="aNombreDe">
+          <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">A nombre de</th>
+          <td mat-cell *matCellDef="let c" class="whitespace-nowrap">{{ c.aNombreDe || "-" }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="tipoMatch">
+          <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Tipo de match</th>
+          <td mat-cell *matCellDef="let c" class="whitespace-nowrap">{{ c.tipoMatch || "-" }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="accion">
+          <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Acción</th>
+          <td mat-cell *matCellDef="let c" class="action-link whitespace-nowrap">
+            <a (click)="editarCompania(c)" class="cursor-pointer">
+              <mat-icon class="text-primary!" matTooltip="Editar">edit</mat-icon>
+            </a>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+        <tr *matNoDataRow>
+          <td [attr.colspan]="displayedColumns.length" class="text-center text-sm text-gray-500 py-6">
+            No se encontraron coincidencias.
+          </td>
+        </tr>
+      </table>
+    </div>
+  </mat-card-content>
+</mat-card>

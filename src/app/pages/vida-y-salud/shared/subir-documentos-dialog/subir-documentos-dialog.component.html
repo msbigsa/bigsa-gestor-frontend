@@ -1,0 +1,29 @@
+<div class="flex items-center gap-3 border-b border-border pb-4 mb-4">
+  <mat-icon class="text-primary">file_upload</mat-icon>
+  <span class="text-lg font-semibold">Subir documentos del lote #{{ data.loteId }}</span>
+</div>
+
+<mat-dialog-content>
+  <p class="mb-4 text-sm">
+    Se acepta un .zip con varios archivos o un archivo suelto: los PDF de las facturas y los archivos
+    adicionales que se adjuntan al correo (.pdf, .csv, .xls, .xlsx). Esto solo copia los archivos —
+    todavía no se asignan a ninguna fila. Después de subir, usa "Procesar documentos" para asignar las
+    facturas; los adicionales quedan en la carpeta y se adjuntan al enviar los correos.
+  </p>
+
+  <app-file-dropzone
+    [title]="'Suba el archivo de documentos'"
+    [subtitle]="'Arrastre el archivo aquí o haga clic para seleccionarlo. Se acepta .zip, .pdf, .csv, .xls o .xlsx.'"
+    [accept]="'.zip,.pdf,.csv,.xls,.xlsx'"
+    [maxSize]="100 * 1024 * 1024"
+    (fileSelected)="onArchivoSeleccionado($event)"
+    (fileRemoved)="onArchivoRemovido()"
+  ></app-file-dropzone>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button [disabled]="cargando()" (click)="cancelar()">Cancelar</button>
+  <button mat-flat-button color="primary" [disabled]="!puedeSubir()" (click)="subir()">
+    Subir
+  </button>
+</mat-dialog-actions>

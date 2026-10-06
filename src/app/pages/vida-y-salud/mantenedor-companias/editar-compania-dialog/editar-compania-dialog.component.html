@@ -1,0 +1,175 @@
+<div class="flex items-center gap-3 border-b border-border pb-4 mb-4">
+  <mat-icon class="text-primary">business</mat-icon>
+  <span class="text-lg font-semibold">
+    {{ esEdicion ? "Editar compañía " + textoCia : "Nueva compañía" }}
+  </span>
+</div>
+
+<mat-dialog-content [formGroup]="form">
+  <div class="grid grid-cols-12 gap-4">
+
+    <div class="col-span-12">
+      @if (esEdicion) {
+        <mat-label class="font-medium mb-2 block">Compañía</mat-label>
+        <p class="text-sm">{{ textoCia }}</p>
+      } @else {
+        <mat-label class="font-medium mb-2 block">Compañía</mat-label>
+        <mat-form-field appearance="outline" class="w-full hide-hint">
+          <input
+            matInput
+            #triggerCia="matAutocompleteTrigger"
+            placeholder="Busque una compañía..."
+            [formControl]="ciaControl"
+            [matAutocomplete]="autoCia"
+            (focus)="seleccionarTexto($event)"
+          />
+          <mat-icon matSuffix class="autocomplete-caret" [class.autocomplete-caret--open]="triggerCia.panelOpen">arrow_drop_down</mat-icon>
+          <mat-autocomplete #autoCia="matAutocomplete" [displayWith]="displayCia" (optionSelected)="onCiaSeleccionada($event)">
+            @for (cia of ciasFiltradas(); track cia.ciasCodigo) {
+              <mat-option [value]="cia">{{ cia.ciasNombre }}</mat-option>
+            }
+          </mat-autocomplete>
+        </mat-form-field>
+      }
+    </div>
+
+    <div class="col-span-12">
+      <p class="text-sm font-semibold text-gray-500 mb-0 mt-2">Matching / parseo de archivo</p>
+    </div>
+
+    <div class="col-span-6 lg:col-span-3">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Posición factura</mat-label>
+        <input matInput type="number" formControlName="posFactura" />
+      </mat-form-field>
+    </div>
+    <div class="col-span-6 lg:col-span-3">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Largo factura</mat-label>
+        <input matInput type="number" formControlName="larFactura" />
+      </mat-form-field>
+    </div>
+    <div class="col-span-6 lg:col-span-3">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Posición factura (nombre)</mat-label>
+        <input matInput type="number" formControlName="posFacturaNom" />
+      </mat-form-field>
+    </div>
+    <div class="col-span-6 lg:col-span-3">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Largo factura (nombre)</mat-label>
+        <input matInput type="number" formControlName="larFacturaNom" />
+      </mat-form-field>
+    </div>
+
+    <div class="col-span-6 lg:col-span-3">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Posición póliza (nombre)</mat-label>
+        <input matInput type="number" formControlName="posPolizaNom" />
+      </mat-form-field>
+    </div>
+    <div class="col-span-6 lg:col-span-3">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Largo póliza (nombre)</mat-label>
+        <input matInput type="number" formControlName="larPolizaNom" />
+      </mat-form-field>
+    </div>
+    <div class="col-span-6 lg:col-span-3">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Tipo RUT</mat-label>
+        <input matInput type="number" formControlName="tipoRut" />
+      </mat-form-field>
+    </div>
+    <div class="col-span-6 lg:col-span-3">
+      <mat-form-field appearance="outline" class="w-full hide-hint">
+        <mat-label>Tipo de match</mat-label>
+        <mat-select formControlName="tipoMatch">
+          <mat-option value="SUBSTRING">Substring</mat-option>
+          <mat-option value="EXACTO">Exacto</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="col-span-6 lg:col-span-4 flex items-center">
+      <mat-checkbox [checked]="ciaRepitePoliza()" (change)="ciaRepitePoliza.set($event.checked)">
+        Cía repite póliza
+      </mat-checkbox>
+    </div>
+    <div class="col-span-6 lg:col-span-4">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Prefijo</mat-label>
+        <input matInput formControlName="prefijo" />
+      </mat-form-field>
+    </div>
+    <div class="col-span-6 lg:col-span-4">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Tipo nómina</mat-label>
+        <input matInput formControlName="tipoNomina" />
+      </mat-form-field>
+    </div>
+
+    <div class="col-span-12">
+      <p class="text-sm font-semibold text-gray-500 mb-0 mt-2">Datos bancarios</p>
+    </div>
+
+    <div class="col-span-12 lg:col-span-6">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>A nombre de</mat-label>
+        <input matInput formControlName="aNombreDe" />
+      </mat-form-field>
+    </div>
+    <div class="col-span-12 lg:col-span-6">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Fantasía</mat-label>
+        <input matInput formControlName="fantasia" />
+      </mat-form-field>
+    </div>
+
+    <div class="col-span-6 lg:col-span-4">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>RUT</mat-label>
+        <input matInput formControlName="rut" />
+      </mat-form-field>
+    </div>
+    <div class="col-span-6 lg:col-span-4">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Banco</mat-label>
+        <input matInput formControlName="banco" />
+      </mat-form-field>
+    </div>
+    <div class="col-span-6 lg:col-span-4">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Cuenta corriente</mat-label>
+        <input matInput formControlName="ctacte" />
+      </mat-form-field>
+    </div>
+
+    <div class="col-span-12">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Dirección</mat-label>
+        <input matInput formControlName="direccion" />
+      </mat-form-field>
+    </div>
+
+    <div class="col-span-6">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Comuna</mat-label>
+        <input matInput formControlName="comuna" />
+      </mat-form-field>
+    </div>
+    <div class="col-span-6">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Ciudad</mat-label>
+        <input matInput formControlName="ciudad" />
+      </mat-form-field>
+    </div>
+
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button [disabled]="guardando()" (click)="cancelar()">Cancelar</button>
+  <button mat-flat-button color="primary" [disabled]="!puedeGuardar()" (click)="guardar()">
+    Guardar
+  </button>
+</mat-dialog-actions>
