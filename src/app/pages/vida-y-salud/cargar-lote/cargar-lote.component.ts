@@ -59,7 +59,7 @@ export class CargarLoteVidaSaludComponent {
       toObservable(this.companias),
       this.ciaControl.valueChanges.pipe(startWith('')),
     ]).pipe(
-      map(([companias, valor]) => this.filtrar(companias, c => c.ciasNombre, valor)),
+      map(([companias, valor]) => this.filtrar(companias, this.textoCia, valor)),
     ),
     { initialValue: [] as CompaniaDisponible[] },
   );
@@ -118,8 +118,11 @@ export class CargarLoteVidaSaludComponent {
     return lista.filter(item => texto(item).toLowerCase().includes(consulta));
   }
 
+  // "codigo - nombre": mas facil de ubicar para quienes se guian por el codigo (igual que aviso-cobranza).
+  private textoCia = (cia: CompaniaDisponible): string => `${cia.ciasCodigo} - ${cia.ciasNombre}`;
+
   displayCia = (cia: CompaniaDisponible | string | null): string =>
-    !cia ? '' : (typeof cia === 'string' ? cia : cia.ciasNombre);
+    !cia ? '' : (typeof cia === 'string' ? cia : this.textoCia(cia));
 
   displayFormato = (formato: FormatoDisponible | string | null): string =>
     !formato ? '' : (typeof formato === 'string' ? formato : formato.formNombre);

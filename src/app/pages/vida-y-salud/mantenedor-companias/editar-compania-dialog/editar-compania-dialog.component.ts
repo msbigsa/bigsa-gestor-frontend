@@ -52,7 +52,7 @@ export class EditarCompaniaDialogComponent {
   readonly ciasFiltradas = toSignal(
     this.ciaControl.valueChanges.pipe(
       startWith(''),
-      map(valor => this.filtrar(this.companiasDisponibles, c => c.ciasNombre, valor)),
+      map(valor => this.filtrar(this.companiasDisponibles, this.textoOpcionCia, valor)),
     ),
     { initialValue: this.companiasDisponibles },
   );
@@ -104,8 +104,11 @@ export class EditarCompaniaDialogComponent {
     return resultado;
   }
 
+  // "codigo - nombre": mas facil de ubicar para quienes se guian por el codigo (igual que aviso-cobranza).
+  private textoOpcionCia = (cia: CompaniaDisponible): string => `${cia.ciasCodigo} - ${cia.ciasNombre}`;
+
   displayCia = (cia: CompaniaDisponible | string | null): string =>
-    !cia ? '' : (typeof cia === 'string' ? cia : cia.ciasNombre);
+    !cia ? '' : (typeof cia === 'string' ? cia : this.textoOpcionCia(cia));
 
   onCiaSeleccionada(event: MatAutocompleteSelectedEvent): void {
     this.ciaSeleccionada.set(event.option.value as CompaniaDisponible);

@@ -26,7 +26,7 @@
           <mat-icon matSuffix class="autocomplete-caret" [class.autocomplete-caret--open]="triggerCia.panelOpen">arrow_drop_down</mat-icon>
           <mat-autocomplete #autoCia="matAutocomplete" [displayWith]="displayCia" (optionSelected)="onCiaSeleccionada($event)">
             @for (cia of ciasFiltradas(); track cia.ciasCodigo) {
-              <mat-option [value]="cia">{{ cia.ciasNombre }}</mat-option>
+              <mat-option [value]="cia">{{ cia.ciasCodigo }} - {{ cia.ciasNombre }}</mat-option>
             }
           </mat-autocomplete>
         </mat-form-field>
