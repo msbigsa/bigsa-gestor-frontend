@@ -128,10 +128,10 @@
               >
                 {{ estadoLabel(lote.estadoLote) }}
               </span>
-              @if (tieneErrorEnvio(lote)) {
+              @if (tieneErrorLote(lote)) {
                 <mat-icon
                   class="text-error! shrink-0"
-                  [matTooltip]="lote.mensajeErrorEnvio ?? ''"
+                  [matTooltip]="lote.mensajeError ?? ''"
                 >warning</mat-icon>
               }
             </span>

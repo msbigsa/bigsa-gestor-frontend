@@ -25,7 +25,7 @@ import {
   estadoLoteLabel,
   estadoLoteClase,
   tooltipEstadoLote,
-  tieneErrorEmision,
+  tieneErrorLote,
   usuarioTexto,
   usuarioDescripcion,
   tieneFilasEmitidas,
@@ -141,7 +141,7 @@ export class DetalleLoteEmisionComponent implements OnInit {
   readonly estadoLabel = estadoLoteLabel;
   readonly estadoClase = estadoLoteClase;
   readonly tooltipEstadoLote = tooltipEstadoLote;
-  readonly tieneErrorEmision = tieneErrorEmision;
+  readonly tieneErrorLote = tieneErrorLote;
   readonly usuarioTexto = usuarioTexto;
   readonly usuarioDescripcion = usuarioDescripcion;
   readonly detalleEstadoLabel = estadoDetalleLabel;

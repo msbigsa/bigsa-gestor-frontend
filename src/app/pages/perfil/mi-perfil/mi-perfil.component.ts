@@ -48,7 +48,7 @@ export class MiPerfilComponent {
     }
 
     if (!TIPOS_PERMITIDOS.includes(archivo.type)) {
-      this.toastr.error('Formato no soportado -- use JPG, PNG o WEBP', 'Error');
+      this.toastr.error('Formato no soportado - use JPG, PNG o WEBP', 'Error');
       return;
     }
 

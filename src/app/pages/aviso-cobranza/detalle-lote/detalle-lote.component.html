@@ -79,10 +79,10 @@
         </span>
       </div>
 
-      @if (tieneErrorEnvio(loteActual)) {
+      @if (tieneErrorLote(loteActual)) {
         <div class="flex items-start gap-2 rounded-md border border-error bg-light-error text-error px-3 py-2 mb-4 text-sm">
           <mat-icon class="shrink-0">error_outline</mat-icon>
-          <span>{{ loteActual.mensajeErrorEnvio }}</span>
+          <span>{{ loteActual.mensajeError }}</span>
         </div>
       }
 
@@ -211,10 +211,10 @@
                   >
                     {{ estadoLabel(correccion.estadoLote) }}
                   </span>
-                  @if (tieneErrorEnvio(correccion)) {
+                  @if (tieneErrorLote(correccion)) {
                     <mat-icon
                       class="text-error! shrink-0"
-                      [matTooltip]="correccion.mensajeErrorEnvio ?? ''"
+                      [matTooltip]="correccion.mensajeError ?? ''"
                     >warning</mat-icon>
                   }
                 </span>

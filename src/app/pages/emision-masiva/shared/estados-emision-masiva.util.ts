@@ -72,15 +72,20 @@ function formatearFecha(fecha: string | undefined): string {
   return fecha ? new Date(fecha).toLocaleString('es-CL', { dateStyle: 'short', timeStyle: 'short' }) : '-';
 }
 
-// Info de auditoria (fecha + usuario) para el hover del badge de estado -- prioriza el evento
-// mas reciente relevante al estado actual (eliminado > emitido > validado); vacio si no hay nada aun.
+// Estados de lote que el backend puede acompañar de un mensajeError generico (una sola columna para
+// cualquier fase -- el estado ya distingue cual). EMITIDO_CON_ERRORES lo trae si se abrio el circuit
+// breaker de traspaso/correo (se retoma con "Reintentar").
+const ESTADOS_CON_MENSAJE_ERROR: EstadoLoteEmision[] = [
+  EstadoLoteEmision.ERROR_VALIDACION,
+  EstadoLoteEmision.ERROR_EMISION,
+  EstadoLoteEmision.EMITIDO_CON_ERRORES,
+];
+
+// Info de auditoria (fecha + usuario) para el hover del badge de estado -- prioriza el evento mas
+// reciente (eliminado > emitido > validado). El error del lote se muestra aparte (banner / icono).
 export function tooltipEstadoLote(lote: LoteEmisionResponse): string {
   if (lote.estadoLote === EstadoLoteEmision.ELIMINADO && lote.fechaEliminacion) {
     return `Eliminado el ${formatearFecha(lote.fechaEliminacion)} por ${usuarioTexto(lote.usuarioEliminacion)}`;
-  }
-
-  if (tieneErrorEmision(lote)) {
-    return `Error al emitir: ${lote.mensajeErrorEmision}`;
   }
 
   if (lote.fechaEmision) {
@@ -95,8 +100,9 @@ export function tooltipEstadoLote(lote: LoteEmisionResponse): string {
 }
 
 // Para mostrar el motivo de forma visible (no solo en el hover) y evitar el error silencioso.
-export function tieneErrorEmision(lote: LoteEmisionResponse): boolean {
-  return lote.estadoLote === EstadoLoteEmision.ERROR_EMISION && !!lote.mensajeErrorEmision;
+// Cubre cualquier estado del lote que pueda traer mensaje (validacion, emision o circuit breaker), no solo uno.
+export function tieneErrorLote(lote: LoteEmisionResponse): boolean {
+  return ESTADOS_CON_MENSAJE_ERROR.includes(lote.estadoLote) && !!lote.mensajeError;
 }
 
 const OPCION_BUSQUEDA_LABEL: Record<OpcionBusqueda, string> = {

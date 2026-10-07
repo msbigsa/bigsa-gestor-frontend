@@ -31,7 +31,7 @@ import {
   origenCorreoTooltip,
   usuarioTexto,
   tooltipEstadoLote,
-  tieneErrorEnvio,
+  tieneErrorLote,
   motivosError,
   tooltipRegistroError,
 } from '../shared/estados-aviso-cobranza.util';
@@ -109,7 +109,7 @@ export class DetalleLoteComponent implements OnInit {
   readonly origenCorreoIcono = origenCorreoIcono;
   readonly origenCorreoClase = origenCorreoClase;
   readonly tooltipEstadoLote = tooltipEstadoLote;
-  readonly tieneErrorEnvio = tieneErrorEnvio;
+  readonly tieneErrorLote = tieneErrorLote;
   readonly usuarioTexto = usuarioTexto;
   readonly motivosError = motivosError;
   readonly tooltipRegistroError = tooltipRegistroError;

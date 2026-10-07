@@ -112,15 +112,15 @@ function formatearFecha(fecha: string | undefined): string {
   return fecha ? new Date(fecha).toLocaleString('es-CL', { dateStyle: 'short', timeStyle: 'short' }) : '-';
 }
 
-// Info de auditoria (fecha + usuario) para el hover del badge de estado -- prioriza el evento
-// mas reciente relevante al estado actual (eliminado > error de envio > enviado > validado); vacio si no hay nada aun.
+// Estados de lote que el backend puede acompañar de un mensajeError generico (una sola columna para
+// cualquier fase -- el estado ya distingue cual).
+const ESTADOS_CON_MENSAJE_ERROR: EstadoLote[] = [EstadoLote.ERROR_VALIDACION, EstadoLote.ERROR_ENVIO];
+
+// Info de auditoria (fecha + usuario) para el hover del badge de estado -- prioriza el evento mas
+// reciente (eliminado > enviado > validado). El error del lote se muestra aparte (banner / icono).
 export function tooltipEstadoLote(lote: LoteCargaResponse): string {
   if (lote.estadoLote === EstadoLote.ELIMINADO && lote.fechaEliminacion) {
     return `Eliminado el ${formatearFecha(lote.fechaEliminacion)} por ${usuarioOTexto(lote.usuarioEliminacion)}`;
-  }
-
-  if (tieneErrorEnvio(lote)) {
-    return `Error al enviar: ${lote.mensajeErrorEnvio}`;
   }
 
   if (lote.fechaEnvio) {
@@ -135,8 +135,9 @@ export function tooltipEstadoLote(lote: LoteCargaResponse): string {
 }
 
 // Para mostrar el motivo de forma visible (no solo en el hover) y evitar el error silencioso.
-export function tieneErrorEnvio(lote: LoteCargaResponse): boolean {
-  return lote.estadoLote === EstadoLote.ERROR_ENVIO && !!lote.mensajeErrorEnvio;
+// Cubre cualquier estado de error del lote (validacion o envio), no solo uno.
+export function tieneErrorLote(lote: LoteCargaResponse): boolean {
+  return ESTADOS_CON_MENSAJE_ERROR.includes(lote.estadoLote) && !!lote.mensajeError;
 }
 
 // Replica el split que hace el backend (LoteLogServiceImpl.dividirMotivos) para poder listar los motivos por separado.

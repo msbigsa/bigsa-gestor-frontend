@@ -10,6 +10,8 @@ export interface LoteCargaResponse {
   usuarioCarga?: UsuarioAvisoCobranza;
   totalFilas: number;
   estadoLote: EstadoLote;
+  // Generico para el lote completo, cualquier fase -- estadoLote ya distingue cual
+  mensajeError?: string;
 
   totalFilasOk?: number;
   totalFilasError?: number;
@@ -21,7 +23,6 @@ export interface LoteCargaResponse {
   totalFilasEnvioFallido?: number;
   fechaEnvio?: string;
   usuarioEnvio?: UsuarioAvisoCobranza;
-  mensajeErrorEnvio?: string;
 
   fechaEliminacion?: string;
   usuarioEliminacion?: UsuarioAvisoCobranza;

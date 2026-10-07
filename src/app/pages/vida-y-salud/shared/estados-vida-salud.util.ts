@@ -71,16 +71,11 @@ const ESTADOS_CON_MENSAJE_ERROR: EstadoLoteVidaSalud[] = [
   EstadoLoteVidaSalud.FACTURADO_CON_ERRORES,
 ];
 
-// Info de auditoria (fecha + usuario) para el hover del badge de estado -- prioriza el evento
-// mas reciente relevante al estado actual (eliminado > error > facturado > validado); vacio si no
-// hay nada aun.
+// Info de auditoria (fecha + usuario) para el hover del badge de estado -- prioriza el evento mas
+// reciente (eliminado > facturado > validado). El error del lote se muestra aparte (banner / icono).
 export function tooltipEstadoLote(lote: LoteVidaSaludResponse): string {
   if (lote.estadoLote === EstadoLoteVidaSalud.ELIMINADO && lote.fechaEliminacion) {
     return `Eliminado el ${formatearFecha(lote.fechaEliminacion)} por ${usuarioTexto(lote.usuarioEliminacion)}`;
-  }
-
-  if (tieneErrorLote(lote)) {
-    return `Error: ${lote.mensajeError}`;
   }
 
   if (lote.fechaFacturacion) {

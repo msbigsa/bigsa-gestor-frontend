@@ -16,7 +16,7 @@ import { AvisoCobranzaCompaniaService } from 'src/app/services/aviso-cobranza/av
 import { LoteCargaResponse } from 'src/app/models/aviso-cobranza/LoteCargaResponse';
 import { CompaniaDisponible } from 'src/app/models/aviso-cobranza/CompaniaDisponible';
 import { EstadoLote } from 'src/app/models/aviso-cobranza/EstadoLote';
-import { estadoLoteClase, estadoLoteLabel, filasPendientesDeEnviar, usuarioTexto, tooltipEstadoLote, tieneErrorEnvio } from '../shared/estados-aviso-cobranza.util';
+import { estadoLoteClase, estadoLoteLabel, filasPendientesDeEnviar, usuarioTexto, tooltipEstadoLote, tieneErrorLote } from '../shared/estados-aviso-cobranza.util';
 import {
   EliminarLoteDialogComponent,
   EliminarLoteDialogData,
@@ -346,6 +346,6 @@ export class ListarLotesComponent implements OnInit {
   readonly estadoLabel = estadoLoteLabel;
   readonly estadoClase = estadoLoteClase;
   readonly tooltipEstadoLote = tooltipEstadoLote;
-  readonly tieneErrorEnvio = tieneErrorEnvio;
+  readonly tieneErrorLote = tieneErrorLote;
   readonly usuarioTexto = usuarioTexto;
 }

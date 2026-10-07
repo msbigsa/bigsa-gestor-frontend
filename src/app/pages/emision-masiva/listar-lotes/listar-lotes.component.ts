@@ -14,7 +14,7 @@ import { ConfirmDialogResult } from 'src/app/shared/components/confirm-dialog/co
 import { EmisionMasivaLoteService } from 'src/app/services/emision-masiva/emisionMasivaLote.service';
 import { LoteEmisionResponse } from 'src/app/models/emision-masiva/LoteEmisionResponse';
 import { EstadoLoteEmision } from 'src/app/models/emision-masiva/EstadoLoteEmision';
-import { estadoLoteClase, estadoLoteLabel, tooltipEstadoLote, tieneErrorEmision, usuarioTexto, usuarioDescripcion, tieneFilasEmitidas, AVISO_ELIMINAR_FILAS_EMITIDAS } from '../shared/estados-emision-masiva.util';
+import { estadoLoteClase, estadoLoteLabel, tooltipEstadoLote, tieneErrorLote, usuarioTexto, usuarioDescripcion, tieneFilasEmitidas, AVISO_ELIMINAR_FILAS_EMITIDAS } from '../shared/estados-emision-masiva.util';
 import {
   EliminarLoteDialogEmisionComponent,
   EliminarLoteDialogData,
@@ -324,7 +324,7 @@ export class ListarLotesEmisionComponent implements OnInit {
   readonly estadoLabel = estadoLoteLabel;
   readonly estadoClase = estadoLoteClase;
   readonly tooltipEstadoLote = tooltipEstadoLote;
-  readonly tieneErrorEmision = tieneErrorEmision;
+  readonly tieneErrorLote = tieneErrorLote;
   readonly usuarioTexto = usuarioTexto;
   readonly usuarioDescripcion = usuarioDescripcion;
 }

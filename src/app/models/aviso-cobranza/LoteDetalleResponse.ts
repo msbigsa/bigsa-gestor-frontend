@@ -23,4 +23,6 @@ export interface LoteDetalleResponse {
 
   estado: EstadoDetalle;
   registroError?: string;
+  // Correo real usado en el envio (cliente o fallback a ejecutivo)
+  destinatarioEnvio?: string;
 }
