@@ -56,6 +56,18 @@ USING (VALUES
         "route": "/inicio/vida-y-salud/mantenedor-companias"}
     ]', 5),
 
+  -- APLI_CODIGO pendiente: el backend aun usa el placeholder 0 (cargamasivagenerica.aplicacion.codigo).
+  (N'Carga Masiva Genérica', N'post_add', N'/menu-level', N'Cargas Masivas',
+    N'[
+      { "displayName": "Cargar Planilla",
+        "iconName": "upload",
+        "route": "/inicio/carga-masiva-generica/cargar-lote"},
+
+      { "displayName": "Listado de Lotes",
+        "iconName": "list",
+        "route": "/inicio/carga-masiva-generica/listar-lotes"}
+    ]', CAST(NULL AS INT)),
+
   (N'Administración', N'admin_panel_settings', N'/menu-level', N'Sistema',
     N'[
       { "displayName": "Administración",

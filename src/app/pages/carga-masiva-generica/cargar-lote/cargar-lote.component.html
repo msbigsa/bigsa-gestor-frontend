@@ -1,0 +1,303 @@
+<mat-card class="cardWithShadow">
+  <mat-card-header class="p-4! w-full">
+    <mat-card-title class="mb-0 text-xl font-semibold">
+      Cargar planilla de Carga Masiva Genérica
+    </mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content class="border-t border-border p-6!" [formGroup]="form">
+    <div class="grid grid-cols-12 gap-6">
+
+      <!-- Tipo de carga -->
+      <div class="col-span-12 lg:col-span-8">
+        <mat-label class="font-medium mb-2 block">Tipo de carga</mat-label>
+        <mat-form-field appearance="outline" class="w-full hide-hint">
+          <mat-select
+            placeholder="Seleccione un tipo de carga..."
+            [value]="tipoSeleccionado()"
+            (selectionChange)="onTipoCargaChange($event.value)"
+          >
+            @for (tipo of tiposCarga(); track tipo.tipoCarga) {
+              <mat-option [value]="tipo">{{ tipo.opcionLegacy }} - {{ tipo.descripcion }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        @if (config().ayudaPlanilla) {
+          <p class="text-xs text-gray-500 mt-1 mb-0">{{ config().ayudaPlanilla }}</p>
+        }
+      </div>
+
+      @if (tipoSeleccionado(); as tipo) {
+
+        @if (tipo.permiteMultiplesCompanias) {
+          <div class="col-span-12">
+            <mat-checkbox formControlName="multiplesCompanias">Múltiples Compañías</mat-checkbox>
+            <p class="text-xs text-gray-500 mt-1 mb-0">
+              @if (multiplesCompanias()) {
+                Compañía, negocio, ramo, plan, moneda, pago automático, pago por ítem, fecha de nacimiento y fecha de
+                propuesta se leen de cada fila de la planilla. La forma de pago se toma de la planilla y la fecha de
+                pago es la de hoy.
+              } @else {
+                Los parámetros de la carga se definen en esta pantalla y aplican a todas las filas.
+              }
+            </p>
+          </div>
+        }
+
+        @if (companiaUnica()) {
+          <!-- Datos generales -->
+          <div class="col-span-12 border-t border-border pt-4">
+            <p class="text-base font-semibold mb-0">Datos generales</p>
+          </div>
+
+          <div class="col-span-12 md:col-span-4">
+            <mat-label class="font-medium mb-2 block">Compañía</mat-label>
+            <app-selector-catalogo formControlName="ciasCodigo" [opciones]="companias()" placeholder="Busque una compañía..." />
+          </div>
+
+          <div class="col-span-12 md:col-span-4">
+            <mat-label class="font-medium mb-2 block">Negocio (opcional)</mat-label>
+            <app-selector-catalogo
+              formControlName="negoCodigo"
+              [opciones]="negocios()"
+              [placeholder]="valores().ciasCodigo ? 'Busque un negocio...' : 'Elija primero la compañía'"
+            />
+          </div>
+
+          <div class="col-span-12 md:col-span-4">
+            <mat-label class="font-medium mb-2 block">
+              Ramo{{ config().ramoObligatorio ? '' : ' (opcional)' }}
+            </mat-label>
+            <app-selector-catalogo formControlName="ramoCodigo" [opciones]="ramos()" placeholder="Busque un ramo..." />
+          </div>
+
+          @if (mostrarPlanYMoneda()) {
+            <div class="col-span-12 md:col-span-4">
+              <mat-label class="font-medium mb-2 block">Plan de cobertura</mat-label>
+              <app-selector-catalogo
+                formControlName="plcoCorrelativo"
+                [opciones]="planesCobertura()"
+                placeholder="Requiere compañía, negocio y ramo..."
+              />
+              <mat-checkbox formControlName="usaPlanPlanilla">Usa plan de cobertura indicado en la planilla</mat-checkbox>
+            </div>
+
+            <div class="col-span-12 md:col-span-4">
+              <mat-label class="font-medium mb-2 block">Moneda</mat-label>
+              <app-selector-catalogo formControlName="domiMoneCod" [opciones]="monedas()" placeholder="Busque una moneda..." />
+              <mat-checkbox formControlName="usaMonedaPlanilla">Usa moneda indicada en la planilla</mat-checkbox>
+            </div>
+          }
+
+          <div class="col-span-12 flex flex-col sm:flex-row gap-2 sm:gap-8">
+            <mat-checkbox formControlName="modificaFecNacSexo">Modifica fechas de nacimiento y sexo</mat-checkbox>
+            <mat-checkbox formControlName="modificaDireccion">Modifica dirección</mat-checkbox>
+          </div>
+
+          <!-- Fecha de propuesta -->
+          <div class="col-span-12 border-t border-border pt-4">
+            <p class="text-base font-semibold mb-0">Fecha de propuesta</p>
+          </div>
+
+          <div class="col-span-12 md:col-span-6">
+            <mat-radio-group class="flex flex-col sm:flex-row gap-2 sm:gap-8" formControlName="fechaPropuestaOrigen">
+              @for (origen of origenesFechaPropuesta; track origen) {
+                <mat-radio-button [value]="origen">{{ fechaPropuestaOrigenLabel(origen) }}</mat-radio-button>
+              }
+            </mat-radio-group>
+          </div>
+
+          @if (valores().fechaPropuestaOrigen === 'FIJA') {
+            <div class="col-span-12 md:col-span-4">
+              <mat-label class="font-medium mb-2 block">Fecha de propuesta</mat-label>
+              <mat-form-field appearance="outline" class="w-full hide-hint">
+                <input matInput type="date" formControlName="fechaPropuesta" />
+              </mat-form-field>
+            </div>
+          }
+
+          <!-- Dejar emitido (solo tipos que lo permiten) -->
+          @if (mostrarEmision()) {
+            <div class="col-span-12 border-t border-border pt-4">
+              <p class="text-base font-semibold mb-0">Emisión</p>
+            </div>
+
+            <div class="col-span-12">
+              <mat-checkbox formControlName="dejaEmitido">Dejar emitidos los documentos</mat-checkbox>
+            </div>
+
+            @if (valores().dejaEmitido) {
+              <div class="col-span-12">
+                <mat-label class="font-medium mb-2 block">Origen de las fechas de emisión y recepción</mat-label>
+                <mat-radio-group class="flex flex-col sm:flex-row gap-2 sm:gap-8" formControlName="fechasEmisionOrigen">
+                  @for (origen of origenesFechasEmision; track origen) {
+                    <mat-radio-button [value]="origen">{{ fechasEmisionOrigenLabel(origen) }}</mat-radio-button>
+                  }
+                </mat-radio-group>
+              </div>
+
+              @if (mostrarFechasEmision()) {
+                <div class="col-span-12 md:col-span-4">
+                  <mat-label class="font-medium mb-2 block">Fecha de emisión</mat-label>
+                  <mat-form-field appearance="outline" class="w-full hide-hint">
+                    <input matInput type="date" formControlName="fechaEmision" />
+                  </mat-form-field>
+                </div>
+
+                <div class="col-span-12 md:col-span-4">
+                  <mat-label class="font-medium mb-2 block">Fecha de recepción</mat-label>
+                  <mat-form-field appearance="outline" class="w-full hide-hint">
+                    <input matInput type="date" formControlName="fechaRecepcion" />
+                  </mat-form-field>
+                </div>
+              }
+            }
+          }
+
+          <!-- Forma de pago -->
+          <div class="col-span-12 border-t border-border pt-4">
+            <p class="text-base font-semibold mb-0">Forma de pago</p>
+          </div>
+
+          <div class="col-span-12 flex flex-col gap-2">
+            <mat-checkbox formControlName="registraPago">
+              Pago automático (los documentos quedan documentados)
+            </mat-checkbox>
+            @if (valores().registraPago) {
+              <mat-checkbox formControlName="pagoPorItem" class="ml-8">Los pagos serán individuales por cada ítem</mat-checkbox>
+            }
+            <mat-checkbox formControlName="pagoDesdePlanilla">Usar la información de la planilla para la forma de pago</mat-checkbox>
+          </div>
+
+          <div class="col-span-12 md:col-span-4">
+            <mat-label class="font-medium mb-2 block">
+              Plan de pago{{ formaPagoObligatoria() ? '' : ' (opcional)' }}
+            </mat-label>
+            <app-selector-catalogo formControlName="fpagCodigo" [opciones]="opcionesPlanesPago()" placeholder="Busque un plan de pago..." />
+            @if (planPagoSeleccionado(); as plan) {
+              <p class="text-xs text-gray-500 mt-1 mb-0">
+                {{ plan.numeroCuotas > 0 ? plan.numeroCuotas + ' cuota(s)' : 'Contado' }} · anticipo {{ plan.porcAnticipo }}%
+              </p>
+            }
+          </div>
+
+          <div class="col-span-12 md:col-span-4">
+            <mat-label class="font-medium mb-2 block">
+              Forma de pago{{ formaPagoObligatoria() ? '' : ' (opcional)' }}
+            </mat-label>
+            <mat-form-field appearance="outline" class="w-full hide-hint">
+              <mat-select placeholder="Seleccione una forma de pago..." formControlName="formaPago">
+                <mat-option [value]="null">Sin forma de pago</mat-option>
+                @for (forma of formasPago; track forma.codigo) {
+                  <mat-option [value]="forma.codigo">{{ forma.codigo }} - {{ forma.descripcion }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          @if (pagoAutomatico()) {
+            <div class="col-span-12 md:col-span-4">
+              <mat-label class="font-medium mb-2 block">Fecha de pago</mat-label>
+              <mat-form-field appearance="outline" class="w-full hide-hint">
+                <input matInput type="date" formControlName="fechaPago" />
+              </mat-form-field>
+            </div>
+          }
+
+          @if (pideInstitucion()) {
+            <div class="col-span-12 md:col-span-4">
+              <mat-label class="font-medium mb-2 block">{{ etiquetaInstitucion() }}</mat-label>
+              <app-selector-catalogo formControlName="ifinCodigo" [opciones]="opcionesInstitucion()" placeholder="Busque..." />
+            </div>
+          }
+
+          @if (pideBancoEmisor()) {
+            <div class="col-span-12 md:col-span-4">
+              <mat-label class="font-medium mb-2 block">Banco emisor</mat-label>
+              <app-selector-catalogo formControlName="ifinCodigoEmisor" [opciones]="bancos()" placeholder="Busque un banco..." />
+            </div>
+          }
+
+          @if (pideNumero()) {
+            <div class="col-span-12 md:col-span-4">
+              <mat-label class="font-medium mb-2 block">{{ etiquetaNumero() }}</mat-label>
+              <mat-form-field appearance="outline" class="w-full hide-hint">
+                <input matInput maxlength="20" formControlName="nroTransaccion" />
+              </mat-form-field>
+            </div>
+          }
+
+          <div class="col-span-12 md:col-span-4">
+            <mat-label class="font-medium mb-2 block">% descuento (opcional)</mat-label>
+            <mat-form-field appearance="outline" class="w-full hide-hint">
+              <input matInput type="number" step="0.01" formControlName="porcDescuento" />
+            </mat-form-field>
+          </div>
+
+          <div class="col-span-12 md:col-span-8">
+            <mat-label class="font-medium mb-2 block">Glosa del pago (opcional)</mat-label>
+            <mat-form-field appearance="outline" class="w-full hide-hint">
+              <input matInput formControlName="glosaPago" />
+            </mat-form-field>
+          </div>
+
+          <!-- Vencimientos de las cuotas (Ing_Fechas) -->
+          @if (mostrarVencimientos()) {
+            <div class="col-span-12">
+              <mat-label class="font-medium mb-1 block">Fechas de vencimiento de las cuotas</mat-label>
+              <p class="text-xs text-gray-500 mb-3">
+                Una fecha por cuota del plan de pago, propuestas desde la fecha de pago + 1 mes. Puede editarlas;
+                cada una debe ser igual o posterior a la anterior.
+              </p>
+
+              <div class="grid grid-cols-12 gap-3">
+                @for (control of vencimientos.controls; track control; let i = $index) {
+                  <div class="col-span-12 sm:col-span-6 lg:col-span-3 flex items-center gap-1">
+                    <span class="text-sm text-gray-500 w-16 shrink-0">Cuota {{ i + 1 }}</span>
+                    <mat-form-field appearance="outline" class="w-full hide-hint">
+                      <input matInput type="date" [formControl]="control" />
+                    </mat-form-field>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+        }
+
+        <!-- Archivo -->
+        <div class="col-span-12 border-t border-border pt-4">
+          <mat-label class="font-medium mb-2 block">Archivo (planilla Excel .xlsx, o CSV separado por ";")</mat-label>
+
+          <app-file-dropzone
+            [title]="'Suba la planilla de la carga'"
+            [subtitle]="'Arrastre el archivo aquí o haga clic para seleccionarlo. Se aceptan archivos Excel (.xlsx) o CSV. El formato .xls no se admite.'"
+            [accept]="'.csv,.xlsx'"
+            [maxSize]="100 * 1024 * 1024"
+            (fileSelected)="onArchivoSeleccionado($event)"
+            (fileRemoved)="onArchivoRemovido()"
+          ></app-file-dropzone>
+        </div>
+      }
+
+      <div class="col-span-12 flex flex-col items-center gap-2 mt-2">
+        <button
+          mat-flat-button
+          color="primary"
+          type="button"
+          class="px-6 py-5"
+          [disabled]="!puedeEnviar()"
+          (click)="enviar()"
+        >
+          <mat-icon class="mr-2">upload</mat-icon>
+          Cargar planilla
+        </button>
+
+        @if (faltantes().length > 0) {
+          <p class="text-xs text-gray-500 mb-0 text-center">Falta: {{ faltantes().join(', ') }}</p>
+        }
+      </div>
+
+    </div>
+  </mat-card-content>
+</mat-card>

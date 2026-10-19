@@ -14,6 +14,9 @@ import { CargarLoteVidaSaludComponent } from './vida-y-salud/cargar-lote/cargar-
 import { ListarLotesVidaSaludComponent } from './vida-y-salud/listar-lotes/listar-lotes.component';
 import { DetalleLoteVidaSaludComponent } from './vida-y-salud/detalle-lote/detalle-lote.component';
 import { ListarCompaniasVidaSaludComponent } from './vida-y-salud/mantenedor-companias/listar-companias.component';
+import { CargarLoteCargaMasivaComponent } from './carga-masiva-generica/cargar-lote/cargar-lote.component';
+import { ListarLotesCargaMasivaComponent } from './carga-masiva-generica/listar-lotes/listar-lotes.component';
+import { DetalleLoteCargaMasivaComponent } from './carga-masiva-generica/detalle-lote/detalle-lote.component';
 import { AdministracionComponent } from './administracion/administracion.component';
 import { ListarNotificacionesComponent } from './notificaciones/listar-notificaciones/listar-notificaciones.component';
 import { MiPerfilComponent } from './perfil/mi-perfil/mi-perfil.component';
@@ -140,6 +143,30 @@ export const PagesRoutes: Routes = [
     component: ListarCompaniasVidaSaludComponent,
     data: {
       title: 'Mantenedor de Compañías de Vida y Salud'
+    },
+    canActivate: [CertGuard]
+  },
+  {
+    path: 'carga-masiva-generica/cargar-lote',
+    component: CargarLoteCargaMasivaComponent,
+    data: {
+      title: 'Cargar Planilla de Carga Masiva Genérica'
+    },
+    canActivate: [CertGuard]
+  },
+  {
+    path: 'carga-masiva-generica/listar-lotes',
+    component: ListarLotesCargaMasivaComponent,
+    data: {
+      title: 'Lotes de Carga Masiva Genérica'
+    },
+    canActivate: [CertGuard]
+  },
+  {
+    path: 'carga-masiva-generica/listar-lotes/detalle-lote/:id',
+    component: DetalleLoteCargaMasivaComponent,
+    data: {
+      title: 'Detalle de Lote de Carga Masiva Genérica'
     },
     canActivate: [CertGuard]
   },

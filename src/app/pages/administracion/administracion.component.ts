@@ -5,6 +5,7 @@ import { GeneralComponent } from './general/general.component';
 import { AdminLotesComponent } from './aviso-cobranza/admin-lotes.component';
 import { AdminLotesEmisionComponent } from './emision-masiva/admin-lotes.component';
 import { AdminLotesVidaSaludComponent } from './vida-y-salud/admin-lotes.component';
+import { AdminLotesCargaMasivaComponent } from './carga-masiva-generica/admin-lotes.component';
 
 interface TabModuloAdmin {
   id: string;
@@ -14,7 +15,10 @@ interface TabModuloAdmin {
 
 @Component({
   selector: 'app-administracion',
-  imports: [MaterialModule, GeneralComponent, AdminLotesComponent, AdminLotesEmisionComponent, AdminLotesVidaSaludComponent],
+  imports: [
+    MaterialModule, GeneralComponent, AdminLotesComponent, AdminLotesEmisionComponent, AdminLotesVidaSaludComponent,
+    AdminLotesCargaMasivaComponent,
+  ],
   templateUrl: './administracion.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -33,6 +37,7 @@ export class AdministracionComponent implements OnInit {
     { id: 'avisos-cobranza', label: 'Avisos de Cobranza', habilitado: true },
     { id: 'emision-masiva', label: 'Emisión Masiva', habilitado: true },
     { id: 'vida-y-salud', label: 'Vida y Salud', habilitado: true },
+    { id: 'carga-masiva-generica', label: 'Carga Masiva Genérica', habilitado: true },
     { id: 'html', label: 'HTML', habilitado: false },
   ];
 
@@ -53,6 +58,8 @@ export class AdministracionComponent implements OnInit {
         return this.rutasSistema().has('/inicio/emision-masiva/listar-lotes');
       case 'vida-y-salud':
         return this.rutasSistema().has('/inicio/vida-y-salud/listar-lotes');
+      case 'carga-masiva-generica':
+        return this.rutasSistema().has('/inicio/carga-masiva-generica/listar-lotes');
       default:
         return true;
     }

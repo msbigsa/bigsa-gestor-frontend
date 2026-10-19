@@ -1,0 +1,344 @@
+<div class="flex items-center justify-between mb-4">
+  <button mat-button color="primary" (click)="volver()">
+    <mat-icon class="mr-1">arrow_back</mat-icon>
+    Volver al listado
+  </button>
+</div>
+
+@if (lote(); as loteActual) {
+  <mat-card class="cardWithShadow mb-6">
+    <mat-card-content class="p-6!">
+      <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+        <div>
+          <h2 class="text-xl font-semibold mb-1">
+            Lote #{{ loteActual.loteId }} — {{ loteActual.nombreArchivoOrigen }}
+          </h2>
+          <span [matTooltip]="getFechaCompleta(loteActual.fechaCarga)" class="text-sm text-gray-500">
+            Cargado el {{ loteActual.fechaCarga | date: "short" }}
+          </span>
+          <span class="text-sm text-gray-500"> · {{ compania(loteActual) }}</span>
+          <span
+            class="text-sm text-gray-500"
+            [matTooltip]="usuarioDescripcion(loteActual.usuarioCarga)"
+          > · por {{ usuarioTexto(loteActual.usuarioCarga) }}</span>
+
+          <div class="text-xs text-gray-500 mt-1">
+            {{ loteActual.tipoCargaDescripcion }} · Planilla {{ layoutLabel(loteActual.layout) }}
+          </div>
+
+          @if (loteActual.fechaValidacion) {
+            <div class="text-xs text-gray-500 mt-1">
+              Validado el {{ loteActual.fechaValidacion | date: "short" }} ·
+              <span [matTooltip]="usuarioDescripcion(loteActual.usuarioValidacion)">
+                por {{ usuarioTexto(loteActual.usuarioValidacion) }}
+              </span>
+            </div>
+          }
+
+          @if (loteActual.fechaEliminacion) {
+            <div class="text-xs text-gray-500 mt-1">
+              Eliminado el {{ loteActual.fechaEliminacion | date: "short" }} ·
+              <span [matTooltip]="usuarioDescripcion(loteActual.usuarioEliminacion)">
+                por {{ usuarioTexto(loteActual.usuarioEliminacion) }}
+              </span>
+            </div>
+          }
+
+          @if (loteActual.loteOrigenId) {
+            <div class="mt-1">
+              <a
+                (click)="irADetalleLote(loteActual.loteOrigenId)"
+                class="text-sm text-primary cursor-pointer hover:underline"
+              >
+                ↳ Corrige al lote #{{ loteActual.loteOrigenId }}
+              </a>
+            </div>
+          }
+        </div>
+
+        <span
+          class="px-3 py-1 rounded-full text-sm font-semibold"
+          [ngClass]="estadoClase(loteActual.estadoLote)"
+          [matTooltip]="tooltipEstadoLote(loteActual)"
+        >
+          {{ estadoLabel(loteActual.estadoLote) }}
+        </span>
+      </div>
+
+      @if (tieneErrorLote(loteActual)) {
+        <div class="flex items-start gap-2 rounded-md border border-error bg-light-error text-error px-3 py-2 mb-4 text-sm">
+          <mat-icon class="shrink-0">error_outline</mat-icon>
+          <span>{{ loteActual.mensajeError }}</span>
+        </div>
+      }
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+        <div class="border border-border rounded-md p-3 text-center">
+          <p class="text-2xl font-semibold mb-0">{{ loteActual.totalFilas }}</p>
+          <p class="text-xs text-gray-500 mb-0">Filas totales</p>
+        </div>
+
+        @if (loteActual.totalFilasOk != null) {
+          <div class="border border-border rounded-md p-3 text-center">
+            <p class="text-2xl font-semibold mb-0 text-success">{{ loteActual.totalFilasOk }}</p>
+            <p class="text-xs text-gray-500 mb-0">Válidas</p>
+          </div>
+        }
+
+        @if (loteActual.totalFilasError != null) {
+          <div class="border border-border rounded-md p-3 text-center">
+            <p class="text-2xl font-semibold mb-0 text-error">{{ loteActual.totalFilasError }}</p>
+            <p class="text-xs text-gray-500 mb-0">Con error</p>
+          </div>
+        }
+      </div>
+
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div class="flex flex-wrap items-center gap-2">
+          @if (!loteEliminado()) {
+            <button mat-icon-button (click)="actualizar()" matTooltip="Actualizar">
+              <mat-icon>refresh</mat-icon>
+            </button>
+          }
+
+          @if (puedeValidar()) {
+            <button mat-flat-button color="primary" (click)="validar()">
+              <mat-icon class="mr-2">fact_check</mat-icon>
+              Validar
+            </button>
+          }
+
+          @if (puedeEjecutar()) {
+            <span [matTooltip]="avisoEjecucion">
+              <button mat-flat-button color="primary" [disabled]="!ejecucionDisponible">
+                <mat-icon class="mr-2">play_circle</mat-icon>
+                Ejecutar carga
+              </button>
+            </span>
+          }
+
+          @if (puedeCorregir()) {
+            <button
+              mat-stroked-button
+              (click)="abrirDialogoCorreccion()"
+              [disabled]="loteEnProceso()"
+              [matTooltip]="loteEnProceso() ? 'No disponible mientras el lote está en proceso' : ''"
+            >
+              <mat-icon class="mr-2">file_upload</mat-icon>
+              Cargar corrección
+            </button>
+          }
+
+          @if (puedeEliminar()) {
+            <button
+              mat-stroked-button
+              color="warn"
+              (click)="eliminarLote()"
+              [disabled]="loteEnProceso()"
+              [matTooltip]="loteEnProceso() ? 'No disponible mientras el lote está en proceso' : ''"
+            >
+              <mat-icon class="mr-2">delete</mat-icon>
+              Eliminar lote
+            </button>
+          }
+        </div>
+
+        @if (puedeDescargar()) {
+          <div class="flex flex-wrap items-center gap-2">
+            <button mat-stroked-button (click)="descargarLog()">
+              <mat-icon class="mr-2">description</mat-icon>
+              Descargar detalle del proceso
+            </button>
+
+            <button mat-stroked-button (click)="descargarResumen()">
+              <mat-icon class="mr-2">summarize</mat-icon>
+              Descargar resumen
+            </button>
+          </div>
+        }
+      </div>
+
+      @if (correcciones().length > 0) {
+        <div class="mt-4 pt-4 border-t border-border">
+          <p class="text-sm font-semibold text-gray-500 mb-2">Correcciones de este lote</p>
+          <div class="flex flex-col gap-2">
+            @for (correccion of correcciones(); track correccion.loteId) {
+              <a
+                (click)="irADetalleLote(correccion.loteId)"
+                class="flex items-center justify-between gap-2 border border-border rounded-md px-3 py-2 cursor-pointer hover:bg-gray-50"
+              >
+                <span class="text-sm">
+                  Lote #{{ correccion.loteId }} — {{ correccion.fechaCarga | date: "short" }}
+                </span>
+                <span class="inline-flex items-center gap-1.5">
+                  <span
+                    class="px-2 py-0.5 rounded-full text-xs font-semibold"
+                    [ngClass]="estadoClase(correccion.estadoLote)"
+                    [matTooltip]="tooltipEstadoLote(correccion)"
+                  >
+                    {{ estadoLabel(correccion.estadoLote) }}
+                  </span>
+                  @if (tieneErrorLote(correccion)) {
+                    <mat-icon
+                      class="text-error! shrink-0"
+                      [matTooltip]="correccion.mensajeError ?? ''"
+                    >warning</mat-icon>
+                  }
+                </span>
+              </a>
+            }
+          </div>
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
+
+  @if (loteEliminado()) {
+    <mat-card class="cardWithShadow">
+      <mat-card-content class="text-center text-sm text-gray-500 py-6">
+        <mat-icon class="align-middle mr-1">delete</mat-icon>
+        Este lote fue eliminado. No se conservan los registros asociados.
+      </mat-card-content>
+    </mat-card>
+  } @else {
+    <mat-accordion multi class="block cardWithShadow rounded-xl! overflow-hidden">
+
+      <mat-expansion-panel
+        [expanded]="parametrosExpandido()"
+        (opened)="parametrosExpandido.set(true)"
+        (closed)="parametrosExpandido.set(false)"
+      >
+        <mat-expansion-panel-header>
+          <mat-panel-title>Parámetros de la carga</mat-panel-title>
+          <mat-panel-description>
+            {{ loteActual.multiplesCompanias ? 'Múltiples Compañías (parámetros por fila)' : 'Compañía única' }}
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+
+        @for (grupo of parametros(); track grupo.seccion) {
+          <p class="text-xs font-semibold text-gray-500 mb-2" [class.mt-4]="!$first">{{ grupo.seccion }}</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
+            @for (item of grupo.items; track item.etiqueta) {
+              <div><span class="text-gray-500">{{ item.etiqueta }}:</span> {{ item.valor }}</div>
+            }
+          </div>
+        }
+      </mat-expansion-panel>
+
+      <mat-expansion-panel
+        [expanded]="detalleExpandido()"
+        (opened)="detalleExpandido.set(true)"
+        (closed)="detalleExpandido.set(false)"
+      >
+        <mat-expansion-panel-header>
+          <mat-panel-title>Detalle de filas</mat-panel-title>
+          <mat-panel-description>{{ totalElements() }} fila(s)</mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <div class="grid grid-cols-12 gap-4 items-center mb-4">
+          <div class="lg:col-span-6 col-span-12">
+            <mat-form-field appearance="outline" class="w-full hide-hint">
+              <mat-label>Filtrar por estado</mat-label>
+              <mat-select
+                [value]="filtroEstadoDetalle()"
+                (selectionChange)="onFiltroEstadoDetalleChange($event.value)"
+              >
+                <mat-option [value]="null">Todos los estados</mat-option>
+                @for (estado of estadosDetalleDisponibles; track estado) {
+                  <mat-option [value]="estado">{{ detalleEstadoLabel(estado) }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="relative overflow-auto max-h-[70vh]">
+          <table mat-table [dataSource]="detalles()" class="min-w-full">
+            <ng-container matColumnDef="fila">
+              <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Fila</th>
+              <td mat-cell *matCellDef="let d" class="whitespace-nowrap">{{ d.nroFila }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="grupo">
+              <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">
+                <span matTooltip="Filas consecutivas que comparten documento (p. ej. la misma póliza)">Grupo</span>
+              </th>
+              <td mat-cell *matCellDef="let d" class="whitespace-nowrap">{{ d.grupo ?? "-" }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="estado">
+              <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Estado</th>
+              <td mat-cell *matCellDef="let d" class="whitespace-nowrap">
+                <span
+                  class="px-3 py-1 rounded-full text-xs font-semibold"
+                  [ngClass]="detalleEstadoClase(d.estado)"
+                  [matTooltip]="tooltipRegistroError(d.registroError)"
+                  [class.cursor-pointer]="!!d.registroError"
+                  (click)="d.registroError && verErroresRegistro(d)"
+                >
+                  {{ detalleEstadoLabel(d.estado) }}
+                </span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="motivos">
+              <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Motivos</th>
+              <td mat-cell *matCellDef="let d">
+                @if (d.registroError) {
+                  <a
+                    (click)="verErroresRegistro(d)"
+                    class="block max-w-[480px] truncate text-sm text-error cursor-pointer hover:underline"
+                    [matTooltip]="motivosError(d.registroError).length > 1 ? 'Ver los ' + motivosError(d.registroError).length + ' motivos' : 'Ver motivo'"
+                  >
+                    {{ motivosError(d.registroError)[0] }}
+                    @if (motivosError(d.registroError).length > 1) {
+                      <span class="text-gray-500">(+{{ motivosError(d.registroError).length - 1 }})</span>
+                    }
+                  </a>
+                } @else {
+                  <span class="text-gray-400">-</span>
+                }
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="accion">
+              <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Acción</th>
+              <td mat-cell *matCellDef="let d" class="action-link whitespace-nowrap">
+                <a
+                  (click)="eliminarDetalle(d)"
+                  class="me-2.5"
+                  [class.cursor-pointer]="!loteEnProceso()"
+                  [class.opacity-40]="loteEnProceso()"
+                  [class.pointer-events-none]="loteEnProceso()"
+                >
+                  <mat-icon
+                    class="text-red-600!"
+                    [matTooltip]="loteEnProceso() ? 'No disponible mientras el lote está en proceso' : 'Eliminar registro'"
+                  >delete</mat-icon>
+                </a>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns" class="interactive-row"></tr>
+
+            <tr *matNoDataRow>
+              <td [attr.colspan]="displayedColumns.length" class="text-center text-sm text-gray-500 py-6">
+                No se encontraron coincidencias.
+              </td>
+            </tr>
+          </table>
+        </div>
+
+        <mat-paginator
+          [pageSize]="pageSize()"
+          [length]="totalElements()"
+          [pageIndex]="pageIndex()"
+          [pageSizeOptions]="[5, 10, 50, 100, 200]"
+          showFirstLastButtons
+          (page)="showMore($event)"
+        ></mat-paginator>
+      </mat-expansion-panel>
+    </mat-accordion>
+  }
+}
