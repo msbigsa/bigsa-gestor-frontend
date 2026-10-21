@@ -355,6 +355,7 @@ export class CargarLoteCargaMasivaComponent {
     }
 
     agregar('modificaDireccion', v.modificaDireccion);
+    agregar('ciasCodigo', v.ciasCodigo);
     agregar('negoCodigo', v.negoCodigo);
     agregar('ramoCodigo', v.ramoCodigo);
     agregar('modificaFecNacSexo', v.modificaFecNacSexo);
