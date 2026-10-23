@@ -56,4 +56,20 @@ export interface LoteCargaResponse {
   usuarioValidacion?: UsuarioCargaMasiva;
   fechaEliminacion?: string;
   usuarioEliminacion?: UsuarioCargaMasiva;
+
+  // Ejecucion por la cola
+  idSolicitud?: string;
+  intentoEjecucion?: number;
+  // Hay una ejecucion en curso (encolada, revalidando o ejecutando): no se permiten otras acciones.
+  ejecucionActiva: boolean;
+  // Posicion en la cola mientras esta EN_COLA (solo en el detalle del lote).
+  posicionCola?: number;
+  fechaEncolado?: string;
+  usuarioEjecucion?: UsuarioCargaMasiva;
+  fechaInicioEjecucion?: string;
+  fechaFinEjecucion?: string;
+  totalFilasEjecutadas?: number;
+  totalFilasErrorEjecucion?: number;
+  fechaCancelacion?: string;
+  usuarioCancelacion?: UsuarioCargaMasiva;
 }

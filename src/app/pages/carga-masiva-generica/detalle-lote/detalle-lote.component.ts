@@ -24,10 +24,6 @@ import { EstadoDetalleCarga } from 'src/app/models/carga-masiva-generica/EstadoD
 import { FechaPropuestaOrigen } from 'src/app/models/carga-masiva-generica/FechaPropuestaOrigen';
 import { FechasEmisionOrigen } from 'src/app/models/carga-masiva-generica/FechasEmisionOrigen';
 import {
-  AVISO_EJECUCION_NO_DISPONIBLE,
-  EJECUCION_DISPONIBLE,
-  ESTADOS_EJECUTABLES,
-  ESTADOS_EN_PROCESO,
   estadoDetalleClase,
   estadoDetalleLabel,
   estadoLoteClase,
@@ -41,7 +37,10 @@ import {
   formaPagoPideInstitucion,
   formaPagoPideNumero,
   layoutLabel,
+  loteEnProceso,
   motivosError,
+  puedeCancelarEjecucion,
+  puedeEjecutarLote,
   siNo,
   tieneErrorLote,
   tooltipEstadoLote,
@@ -233,8 +232,6 @@ export class DetalleLoteCargaMasivaComponent implements OnInit {
   readonly motivosError = motivosError;
   readonly tooltipRegistroError = tooltipRegistroError;
   readonly layoutLabel = layoutLabel;
-  readonly ejecucionDisponible = EJECUCION_DISPONIBLE;
-  readonly avisoEjecucion = AVISO_EJECUCION_NO_DISPONIBLE;
 
   constructor() {
     effect(() => {
@@ -261,7 +258,7 @@ export class DetalleLoteCargaMasivaComponent implements OnInit {
         const seguiaEnProceso = this.loteEnProceso();
         this.lote.set(data);
 
-        // Al terminar la validacion se refrescan las filas una vez mas para ver su estado final.
+        // Al terminar la validacion o la ejecucion se refrescan las filas una vez mas para ver su estado final.
         if (seguiaEnProceso && !this.loteEnProceso()) {
           this.cargarDetalles(true);
         }
@@ -283,8 +280,7 @@ export class DetalleLoteCargaMasivaComponent implements OnInit {
 
   // Usado para deshabilitar (no ocultar) acciones de mutacion mientras hay una en curso.
   loteEnProceso(): boolean {
-    const estado = this.lote()?.estadoLote;
-    return !!estado && ESTADOS_EN_PROCESO.includes(estado);
+    return loteEnProceso(this.lote());
   }
 
   cargarLote(silencioso = false): void {
@@ -350,8 +346,31 @@ export class DetalleLoteCargaMasivaComponent implements OnInit {
   }
 
   puedeEjecutar(): boolean {
+    return puedeEjecutarLote(this.lote());
+  }
+
+  puedeCancelarEjecucion(): boolean {
+    return puedeCancelarEjecucion(this.lote());
+  }
+
+  // Reintento: se retoma lo que no se cargo.
+  esReintento(): boolean {
     const estado = this.lote()?.estadoLote;
-    return !!estado && ESTADOS_EJECUTABLES.includes(estado);
+    return estado === EstadoLoteCarga.EJECUTADO_CON_ERRORES || estado === EstadoLoteCarga.ERROR_EJECUCION;
+  }
+
+  ejecutar(): void {
+    const lote = this.lote();
+    if (lote) {
+      this.confirmarEjecucion(lote, () => this.cargarLote());
+    }
+  }
+
+  cancelarEjecucion(): void {
+    const lote = this.lote();
+    if (lote) {
+      this.confirmarCancelacion(lote, () => this.actualizar());
+    }
   }
 
   loteEliminado(): boolean {
@@ -388,6 +407,64 @@ export class DetalleLoteCargaMasivaComponent implements OnInit {
     this.loteService.validarLote(this.loteId()).subscribe(() => {
       this.toastr.info('Validación de lote iniciada', 'En proceso');
       this.cargarLote();
+    });
+  }
+
+  // La ejecucion se encola: la revalidacion y la grabacion corren cuando la cola la despacha.
+  private confirmarEjecucion(lote: LoteCargaResponse, alEncolar: () => void): void {
+    const reintento = lote.estadoLote === EstadoLoteCarga.EJECUTADO_CON_ERRORES
+      || lote.estadoLote === EstadoLoteCarga.ERROR_EJECUCION;
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '480px',
+      disableClose: true,
+      data: {
+        title: reintento ? 'Reintentar ejecución' : 'Ejecutar carga',
+        message: reintento
+          ? `¿Reintentar la ejecución del lote #${lote.loteId}? Se vuelven a validar las filas que no se cargaron y se `
+            + 'graban las que pasen; las ya cargadas no se repiten.'
+          : `¿Ejecutar el lote #${lote.loteId} ("${lote.nombreArchivoOrigen}")? Antes de grabar se vuelve a validar, `
+            + 'y se cargan las filas que pasen la validación.',
+        confirmText: reintento ? 'Reintentar' : 'Ejecutar',
+        cancelText: 'Cancelar',
+        type: 'warning',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe(resultado => {
+      if (resultado !== ConfirmDialogResult.CONFIRM) {
+        return;
+      }
+
+      this.loteService.ejecutarLote(lote.loteId).subscribe(encolada => {
+        const posicion = encolada.posicionCola ? ` (posición ${encolada.posicionCola} en la cola)` : '';
+        this.toastr.info(`Ejecución del lote encolada${posicion}`, 'En proceso');
+        alEncolar();
+      });
+    });
+  }
+
+  private confirmarCancelacion(lote: LoteCargaResponse, alCancelar: () => void): void {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '440px',
+      disableClose: true,
+      data: {
+        title: 'Cancelar ejecución',
+        message: `¿Cancelar la ejecución del lote #${lote.loteId}? El lote vuelve a su estado anterior y se puede ejecutar más adelante.`,
+        confirmText: 'Cancelar ejecución',
+        cancelText: 'Volver',
+        type: 'danger',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe(resultado => {
+      if (resultado !== ConfirmDialogResult.CONFIRM) {
+        return;
+      }
+
+      this.loteService.cancelarEjecucion(lote.loteId).subscribe(() => {
+        this.toastr.success('Ejecución cancelada', 'Exitoso');
+        alCancelar();
+      });
     });
   }
 

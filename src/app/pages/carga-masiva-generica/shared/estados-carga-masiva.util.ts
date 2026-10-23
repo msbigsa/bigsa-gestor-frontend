@@ -7,15 +7,33 @@ import { FechaPropuestaOrigen } from 'src/app/models/carga-masiva-generica/Fecha
 import { FechasEmisionOrigen } from 'src/app/models/carga-masiva-generica/FechasEmisionOrigen';
 
 // Coincide con EstadoLoteCarga.INTERMEDIOS del backend.
-export const ESTADOS_EN_PROCESO: EstadoLoteCarga[] = [EstadoLoteCarga.VALIDANDO];
+export const ESTADOS_EN_PROCESO: EstadoLoteCarga[] = [
+  EstadoLoteCarga.VALIDANDO,
+  EstadoLoteCarga.EN_COLA,
+  EstadoLoteCarga.EJECUTANDO,
+];
 
-// Estados desde los que se podra ejecutar el lote cuando exista la fase de ejecucion.
-export const ESTADOS_EJECUTABLES: EstadoLoteCarga[] = [EstadoLoteCarga.VALIDADO_OK, EstadoLoteCarga.VALIDADO_CON_ERRORES];
+// Coincide con EstadoLoteCarga.EJECUTABLES del backend: validado, o reintento de lo que quedo pendiente.
+export const ESTADOS_EJECUTABLES: EstadoLoteCarga[] = [
+  EstadoLoteCarga.VALIDADO_OK,
+  EstadoLoteCarga.VALIDADO_CON_ERRORES,
+  EstadoLoteCarga.EJECUTADO_CON_ERRORES,
+  EstadoLoteCarga.ERROR_EJECUCION,
+];
 
-// Corte D-17: la ejecucion no tiene endpoint todavia; el boton se muestra deshabilitado.
-export const EJECUCION_DISPONIBLE = false;
-export const AVISO_EJECUCION_NO_DISPONIBLE =
-  'La ejecución aún no está disponible: se habilitará cuando se defina su mecanismo en el backend.';
+// Estado transitorio o ejecucion en curso (durante la revalidacion el lote pasa un instante por VALIDADO_*).
+export function loteEnProceso(lote: LoteCargaResponse | null | undefined): boolean {
+  return !!lote && (ESTADOS_EN_PROCESO.includes(lote.estadoLote) || lote.ejecucionActiva);
+}
+
+export function puedeEjecutarLote(lote: LoteCargaResponse | null | undefined): boolean {
+  return !!lote && !lote.ejecucionActiva && ESTADOS_EJECUTABLES.includes(lote.estadoLote);
+}
+
+// Solo se cancela mientras espera en la cola (el backend tambien exige que sea quien la pidio).
+export function puedeCancelarEjecucion(lote: LoteCargaResponse | null | undefined): boolean {
+  return !!lote && lote.ejecucionActiva && lote.estadoLote === EstadoLoteCarga.EN_COLA;
+}
 
 const ESTADO_LOTE_LABEL: Record<EstadoLoteCarga, string> = {
   [EstadoLoteCarga.CARGADO]: 'Cargado',
@@ -23,6 +41,11 @@ const ESTADO_LOTE_LABEL: Record<EstadoLoteCarga, string> = {
   [EstadoLoteCarga.VALIDADO_OK]: 'Validado OK',
   [EstadoLoteCarga.VALIDADO_CON_ERRORES]: 'Validado con errores',
   [EstadoLoteCarga.ERROR_VALIDACION]: 'Error de validación',
+  [EstadoLoteCarga.EN_COLA]: 'En cola',
+  [EstadoLoteCarga.EJECUTANDO]: 'Ejecutando...',
+  [EstadoLoteCarga.EJECUTADO_OK]: 'Ejecutado OK',
+  [EstadoLoteCarga.EJECUTADO_CON_ERRORES]: 'Ejecutado con errores',
+  [EstadoLoteCarga.ERROR_EJECUCION]: 'Error de ejecución',
   [EstadoLoteCarga.ELIMINADO]: 'Eliminado',
 };
 
@@ -32,6 +55,11 @@ const ESTADO_LOTE_CLASE: Record<EstadoLoteCarga, string> = {
   [EstadoLoteCarga.VALIDADO_OK]: 'bg-light-success text-success',
   [EstadoLoteCarga.VALIDADO_CON_ERRORES]: 'bg-light-warning text-warning',
   [EstadoLoteCarga.ERROR_VALIDACION]: 'bg-light-error text-error',
+  [EstadoLoteCarga.EN_COLA]: 'bg-light-info text-info',
+  [EstadoLoteCarga.EJECUTANDO]: 'bg-light-warning text-warning',
+  [EstadoLoteCarga.EJECUTADO_OK]: 'bg-light-success text-success',
+  [EstadoLoteCarga.EJECUTADO_CON_ERRORES]: 'bg-light-warning text-warning',
+  [EstadoLoteCarga.ERROR_EJECUCION]: 'bg-light-error text-error',
   [EstadoLoteCarga.ELIMINADO]: 'bg-light text-dark',
 };
 
@@ -67,6 +95,23 @@ export function tooltipEstadoLote(lote: LoteCargaResponse): string {
     return `Eliminado el ${formatearFecha(lote.fechaEliminacion)} por ${usuarioTexto(lote.usuarioEliminacion)}`;
   }
 
+  if (lote.estadoLote === EstadoLoteCarga.EN_COLA && lote.fechaEncolado) {
+    const posicion = lote.posicionCola != null ? ` (posición ${lote.posicionCola})` : '';
+    return `En cola desde el ${formatearFecha(lote.fechaEncolado)}${posicion}, pedido por ${usuarioTexto(lote.usuarioEjecucion)}`;
+  }
+
+  if (lote.fechaFinEjecucion && !lote.ejecucionActiva) {
+    return `Ejecutado el ${formatearFecha(lote.fechaFinEjecucion)}, pedido por ${usuarioTexto(lote.usuarioEjecucion)}`;
+  }
+
+  if (lote.fechaInicioEjecucion && lote.ejecucionActiva) {
+    return `Ejecución iniciada el ${formatearFecha(lote.fechaInicioEjecucion)}, pedida por ${usuarioTexto(lote.usuarioEjecucion)}`;
+  }
+
+  if (lote.fechaCancelacion && !lote.ejecucionActiva) {
+    return `Ejecución cancelada el ${formatearFecha(lote.fechaCancelacion)} por ${usuarioTexto(lote.usuarioCancelacion)}`;
+  }
+
   if (lote.fechaValidacion) {
     return `Validado el ${formatearFecha(lote.fechaValidacion)} por ${usuarioTexto(lote.usuarioValidacion)}`;
   }
@@ -75,7 +120,8 @@ export function tooltipEstadoLote(lote: LoteCargaResponse): string {
 }
 
 export function tieneErrorLote(lote: LoteCargaResponse): boolean {
-  return lote.estadoLote === EstadoLoteCarga.ERROR_VALIDACION && !!lote.mensajeError;
+  return (lote.estadoLote === EstadoLoteCarga.ERROR_VALIDACION || lote.estadoLote === EstadoLoteCarga.ERROR_EJECUCION)
+    && !!lote.mensajeError;
 }
 
 const ESTADO_DETALLE_LABEL: Record<EstadoDetalleCarga, string> = {
@@ -83,6 +129,8 @@ const ESTADO_DETALLE_LABEL: Record<EstadoDetalleCarga, string> = {
   [EstadoDetalleCarga.OK]: 'OK',
   [EstadoDetalleCarga.ERROR]: 'Error',
   [EstadoDetalleCarga.OMITIDO]: 'Omitido',
+  [EstadoDetalleCarga.EJECUTADO]: 'Ejecutado',
+  [EstadoDetalleCarga.ERROR_EJECUCION]: 'Error al grabar',
 };
 
 const ESTADO_DETALLE_CLASE: Record<EstadoDetalleCarga, string> = {
@@ -90,6 +138,8 @@ const ESTADO_DETALLE_CLASE: Record<EstadoDetalleCarga, string> = {
   [EstadoDetalleCarga.OK]: 'bg-light-success text-success',
   [EstadoDetalleCarga.ERROR]: 'bg-light-error text-error',
   [EstadoDetalleCarga.OMITIDO]: 'bg-light text-dark',
+  [EstadoDetalleCarga.EJECUTADO]: 'bg-light-success text-success',
+  [EstadoDetalleCarga.ERROR_EJECUCION]: 'bg-light-error text-error',
 };
 
 export function estadoDetalleLabel(estado: EstadoDetalleCarga): string {

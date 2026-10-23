@@ -91,7 +91,31 @@
             <p class="text-xs text-gray-500 mb-0">Con error</p>
           </div>
         }
+
+        @if (loteActual.totalFilasEjecutadas != null) {
+          <div class="border border-border rounded-md p-3 text-center">
+            <p class="text-2xl font-semibold mb-0 text-success">{{ loteActual.totalFilasEjecutadas }}</p>
+            <p class="text-xs text-gray-500 mb-0">Cargadas</p>
+          </div>
+        }
+
+        @if (loteActual.totalFilasErrorEjecucion != null) {
+          <div class="border border-border rounded-md p-3 text-center">
+            <p class="text-2xl font-semibold mb-0 text-error">{{ loteActual.totalFilasErrorEjecucion }}</p>
+            <p class="text-xs text-gray-500 mb-0">Error al grabar</p>
+          </div>
+        }
       </div>
+
+      @if (loteActual.estadoLote === 'EN_COLA') {
+        <div class="flex items-start gap-2 rounded-md border border-info bg-light-info text-info px-3 py-2 mb-4 text-sm">
+          <mat-icon class="shrink-0">schedule</mat-icon>
+          <span>
+            Ejecución en cola{{ loteActual.posicionCola != null ? ' (posición ' + loteActual.posicionCola + ')' : '' }}.
+            Antes de grabar se vuelve a validar el lote.
+          </span>
+        </div>
+      }
 
       <div class="flex flex-wrap items-center justify-between gap-2">
         <div class="flex flex-wrap items-center gap-2">
@@ -109,12 +133,17 @@
           }
 
           @if (puedeEjecutar()) {
-            <span [matTooltip]="avisoEjecucion">
-              <button mat-flat-button color="primary" [disabled]="!ejecucionDisponible">
-                <mat-icon class="mr-2">play_circle</mat-icon>
-                Ejecutar carga
-              </button>
-            </span>
+            <button mat-flat-button color="primary" (click)="ejecutar()">
+              <mat-icon class="mr-2">{{ esReintento() ? 'replay' : 'play_circle' }}</mat-icon>
+              {{ esReintento() ? 'Reintentar ejecución' : 'Ejecutar carga' }}
+            </button>
+          }
+
+          @if (puedeCancelarEjecucion()) {
+            <button mat-stroked-button color="warn" (click)="cancelarEjecucion()">
+              <mat-icon class="mr-2">cancel</mat-icon>
+              Cancelar ejecución
+            </button>
           }
 
           @if (puedeCorregir()) {

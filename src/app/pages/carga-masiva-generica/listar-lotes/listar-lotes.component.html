@@ -160,12 +160,13 @@
               </a>
             }
             @if (puedeEjecutar(lote)) {
-              <a
-                class="me-2.5"
-                [class.opacity-40]="!ejecucionDisponible"
-                [class.cursor-not-allowed]="!ejecucionDisponible"
-              >
-                <mat-icon class="text-success!" [matTooltip]="avisoEjecucion">play_circle</mat-icon>
+              <a (click)="ejecutar(lote)" class="me-2.5 cursor-pointer">
+                <mat-icon class="text-success!" matTooltip="Ejecutar carga">play_circle</mat-icon>
+              </a>
+            }
+            @if (puedeCancelarEjecucion(lote)) {
+              <a (click)="cancelarEjecucion(lote)" class="me-2.5 cursor-pointer">
+                <mat-icon class="text-red-600!" matTooltip="Cancelar ejecución">cancel</mat-icon>
               </a>
             }
             @if (puedeEliminar(lote)) {
