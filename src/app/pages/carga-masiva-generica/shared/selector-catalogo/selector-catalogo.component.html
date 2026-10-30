@@ -9,7 +9,7 @@
     (blur)="onTouched()"
   />
   @if (seleccionada()) {
-    <button mat-icon-button matSuffix type="button" (click)="limpiar()" matTooltip="Limpiar selección">
+    <button mat-icon-button matSuffix type="button" (click)="limpiar($event, trigger, auto)" matTooltip="Limpiar selección">
       <mat-icon>close</mat-icon>
     </button>
   } @else {

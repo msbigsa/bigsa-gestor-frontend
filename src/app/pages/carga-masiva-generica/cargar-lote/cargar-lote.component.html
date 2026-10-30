@@ -1,15 +1,26 @@
 <mat-card class="cardWithShadow">
   <mat-card-header class="p-4! w-full">
-    <mat-card-title class="mb-0 text-xl font-semibold">
-      Cargar planilla de Carga Masiva Genérica
-    </mat-card-title>
+    <div class="flex items-center justify-between w-full">
+      <mat-card-title class="mb-0 text-xl font-semibold">
+        Cargar planilla de Carga Masiva Genérica
+      </mat-card-title>
+
+      <button
+        mat-icon-button
+        type="button"
+        matTooltip="Ver tour guiado"
+        (click)="iniciarTour()"
+      >
+        <mat-icon>help_outline</mat-icon>
+      </button>
+    </div>
   </mat-card-header>
 
   <mat-card-content class="border-t border-border p-6!" [formGroup]="form">
     <div class="grid grid-cols-12 gap-6">
 
       <!-- Tipo de carga -->
-      <div class="col-span-12 lg:col-span-8">
+      <div class="col-span-12 lg:col-span-8" data-tour="carga-tipo">
         <mat-label class="font-medium mb-2 block">Tipo de carga</mat-label>
         <mat-form-field appearance="outline" class="w-full hide-hint">
           <mat-select
@@ -30,7 +41,7 @@
       @if (tipoSeleccionado(); as tipo) {
 
         @if (tipo.permiteMultiplesCompanias) {
-          <div class="col-span-12">
+          <div class="col-span-12" data-tour="carga-multiples-companias">
             <mat-checkbox formControlName="multiplesCompanias">Múltiples Compañías</mat-checkbox>
             <p class="text-xs text-gray-500 mt-1 mb-0">
               @if (multiplesCompanias()) {
@@ -50,7 +61,7 @@
             <p class="text-base font-semibold mb-0">Datos generales</p>
           </div>
 
-          <div class="col-span-12 md:col-span-4">
+          <div class="col-span-12 md:col-span-4" data-tour="carga-compania">
             <mat-label class="font-medium mb-2 block">Compañía</mat-label>
             <app-selector-catalogo formControlName="ciasCodigo" [opciones]="companias()" placeholder="Busque una compañía..." />
           </div>
@@ -155,7 +166,7 @@
           }
 
           <!-- Forma de pago -->
-          <div class="col-span-12 border-t border-border pt-4">
+          <div class="col-span-12 border-t border-border pt-4" data-tour="carga-forma-pago">
             <p class="text-base font-semibold mb-0">Forma de pago</p>
           </div>
 
@@ -266,7 +277,7 @@
         }
 
         <!-- Archivo -->
-        <div class="col-span-12 border-t border-border pt-4">
+        <div class="col-span-12 border-t border-border pt-4" data-tour="carga-archivo">
           <mat-label class="font-medium mb-2 block">Archivo (planilla Excel .xlsx, o CSV separado por ";")</mat-label>
 
           <app-file-dropzone
@@ -286,6 +297,7 @@
           color="primary"
           type="button"
           class="px-6 py-5"
+          data-tour="carga-enviar"
           [disabled]="!puedeEnviar()"
           (click)="enviar()"
         >

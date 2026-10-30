@@ -5,7 +5,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MaterialModule } from 'src/app/material.module';
 import { LoteCargaResponse } from 'src/app/models/carga-masiva-generica/LoteCargaResponse';
 import { EstadoLoteCarga } from 'src/app/models/carga-masiva-generica/EstadoLoteCarga';
-import { estadoLoteLabel } from 'src/app/pages/carga-masiva-generica/shared/estados-carga-masiva.util';
+import { ESTADOS_EN_PROCESO, estadoLoteLabel } from 'src/app/pages/carga-masiva-generica/shared/estados-carga-masiva.util';
 
 export interface ForzarEstadoDialogData {
   lote: LoteCargaResponse;
@@ -21,7 +21,8 @@ export interface ForzarEstadoDialogData {
 })
 export class ForzarEstadoDialogCargaMasivaComponent {
 
-  readonly estadosDisponibles = Object.values(EstadoLoteCarga);
+  // Sin los transitorios: el backend los rechaza.
+  readonly estadosDisponibles = Object.values(EstadoLoteCarga).filter(e => !ESTADOS_EN_PROCESO.includes(e));
   readonly estadoLabel = estadoLoteLabel;
 
   readonly estadoSeleccionado = signal<EstadoLoteCarga | null>(null);

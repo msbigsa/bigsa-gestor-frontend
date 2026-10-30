@@ -72,4 +72,10 @@ export interface LoteCargaResponse {
   totalFilasErrorEjecucion?: number;
   fechaCancelacion?: string;
   usuarioCancelacion?: UsuarioCargaMasiva;
+  // Se detiene despues de la fila en curso.
+  cancelacionPedida: boolean;
+  // Solo en el detalle; volver a ejecutar las cierra.
+  polizasSinCerrar?: number;
+  // Solo en el detalle; se revisan a mano (motivo en el log).
+  polizasCierreError?: number;
 }

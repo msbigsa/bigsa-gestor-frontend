@@ -9,6 +9,7 @@ export const environment = {
   HOST_EMISION_MASIVA: 'http://localhost:8085',
   HOST_VIDA_Y_SALUD: 'http://localhost:8086',
   HOST_CARGA_MASIVA_GENERICA: 'http://localhost:8087',
+  HOST_SCHEDULER: 'http://localhost:8088',
   REINTENTS: 2,
   TOKEN_NAME: 'jwtToken',
   REFRESH_TOKEN_NAME: 'refreshToken',

@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { SKIP_GLOBAL_LOADING } from 'src/app/interceptors/loading.token';
 import { EjecucionEncolada } from '../../models/carga-masiva-generica/EjecucionEncolada';
+import { CancelacionEjecucion } from '../../models/carga-masiva-generica/CancelacionEjecucion';
 import { LoteCargaConfirmacion } from '../../models/carga-masiva-generica/LoteCargaConfirmacion';
 import { LoteCargaResponse } from '../../models/carga-masiva-generica/LoteCargaResponse';
 import { EstadoLoteCarga } from '../../models/carga-masiva-generica/EstadoLoteCarga';
@@ -79,9 +80,9 @@ export class CargaMasivaGenericaLoteService {
     return this.http.post<EjecucionEncolada>(`${this.url}/${loteId}/ejecutar`, null);
   }
 
-  // Solo mientras espera en la cola y solo quien la pidio.
-  cancelarEjecucion(loteId: number): Observable<void> {
-    return this.http.post<void>(`${this.url}/${loteId}/cancelar-ejecucion`, null);
+  // En la cola o en curso; solo quien la pidio.
+  cancelarEjecucion(loteId: number): Observable<CancelacionEjecucion> {
+    return this.http.post<CancelacionEjecucion>(`${this.url}/${loteId}/cancelar-ejecucion`, null);
   }
 
   listarDetalles(loteId: number, page: number, size: number, estado?: EstadoDetalleCarga, silencioso = false): Observable<any> {

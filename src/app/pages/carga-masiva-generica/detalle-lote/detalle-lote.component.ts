@@ -23,7 +23,16 @@ import { EstadoLoteCarga } from 'src/app/models/carga-masiva-generica/EstadoLote
 import { EstadoDetalleCarga } from 'src/app/models/carga-masiva-generica/EstadoDetalleCarga';
 import { FechaPropuestaOrigen } from 'src/app/models/carga-masiva-generica/FechaPropuestaOrigen';
 import { FechasEmisionOrigen } from 'src/app/models/carga-masiva-generica/FechasEmisionOrigen';
+import { CancelacionEjecucion } from 'src/app/models/carga-masiva-generica/CancelacionEjecucion';
+import { LoginService } from 'src/app/services/login.service';
+import { MenuService } from 'src/app/layouts/full/vertical/sidebar/sidebar-data';
+import { TourService } from 'src/app/shared/tour/tour.service';
+import { buildDetalleLoteTourSteps } from '../carga-masiva-generica-tour.steps';
 import {
+  accionEjecutarLabel,
+  dialogoCancelacion,
+  dialogoEjecucion,
+  esReintentoEjecucion,
   estadoDetalleClase,
   estadoDetalleLabel,
   estadoLoteClase,
@@ -62,6 +71,8 @@ import {
   ErroresRegistroDialogData,
 } from '../shared/errores-registro-dialog/errores-registro-dialog.component';
 
+const RUTA_COLA_ACTIVA = '/inicio/cola-ejecucion/cola-activa';
+
 // Un parametro del lote para el panel "Parametros de la carga".
 interface ParametroLote {
   etiqueta: string;
@@ -84,6 +95,9 @@ export class DetalleLoteCargaMasivaComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly toastr = inject(ToastrService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly loginService = inject(LoginService);
+  private readonly menuService = inject(MenuService);
+  private readonly tourService = inject(TourService);
 
   private static readonly INTERVALO_POLLING_MS = 5000;
 
@@ -114,7 +128,7 @@ export class DetalleLoteCargaMasivaComponent implements OnInit {
   readonly parametrosExpandido = signal(false);
   readonly detalleExpandido = signal(true);
 
-  readonly displayedColumns = ['fila', 'grupo', 'estado', 'motivos', 'accion'];
+  readonly displayedColumns = ['fila', 'grupo', 'estado', 'accion'];
 
   // Agrupados por seccion, como en la pantalla de carga; solo lo que aplica al modo del lote.
   readonly parametros = computed(() => {
@@ -232,6 +246,7 @@ export class DetalleLoteCargaMasivaComponent implements OnInit {
   readonly motivosError = motivosError;
   readonly tooltipRegistroError = tooltipRegistroError;
   readonly layoutLabel = layoutLabel;
+  readonly accionEjecutarLabel = accionEjecutarLabel;
 
   constructor() {
     effect(() => {
@@ -350,13 +365,34 @@ export class DetalleLoteCargaMasivaComponent implements OnInit {
   }
 
   puedeCancelarEjecucion(): boolean {
-    return puedeCancelarEjecucion(this.lote());
+    return puedeCancelarEjecucion(this.lote(), this.loginService.profile()?.codigo);
   }
 
-  // Reintento: se retoma lo que no se cargo.
+  // Reintento o retoma: se sigue con lo que no se cargo.
   esReintento(): boolean {
-    const estado = this.lote()?.estadoLote;
-    return estado === EstadoLoteCarga.EJECUTADO_CON_ERRORES || estado === EstadoLoteCarga.ERROR_EJECUCION;
+    return esReintentoEjecucion(this.lote()?.estadoLote);
+  }
+
+  puedeVerEnCola(): boolean {
+    return !!this.lote()?.ejecucionActiva && !!this.lote()?.idSolicitud && this.menuService.tieneAcceso(RUTA_COLA_ACTIVA);
+  }
+
+  verEnCola(): void {
+    this.router.navigate([RUTA_COLA_ACTIVA], { queryParams: { solicitud: this.lote()?.idSolicitud } });
+  }
+
+  // Mientras corre, tener polizas sin cerrar es lo normal.
+  polizasSinCerrar(): number {
+    const lote = this.lote();
+    return lote && !lote.ejecucionActiva ? lote.polizasSinCerrar ?? 0 : 0;
+  }
+
+  polizasCierreError(): number {
+    return this.lote()?.polizasCierreError ?? 0;
+  }
+
+  iniciarTour(): void {
+    this.tourService.start(buildDetalleLoteTourSteps(!this.loteEliminado(), this.detalles().length > 0));
   }
 
   ejecutar(): void {
@@ -412,22 +448,10 @@ export class DetalleLoteCargaMasivaComponent implements OnInit {
 
   // La ejecucion se encola: la revalidacion y la grabacion corren cuando la cola la despacha.
   private confirmarEjecucion(lote: LoteCargaResponse, alEncolar: () => void): void {
-    const reintento = lote.estadoLote === EstadoLoteCarga.EJECUTADO_CON_ERRORES
-      || lote.estadoLote === EstadoLoteCarga.ERROR_EJECUCION;
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '480px',
       disableClose: true,
-      data: {
-        title: reintento ? 'Reintentar ejecución' : 'Ejecutar carga',
-        message: reintento
-          ? `¿Reintentar la ejecución del lote #${lote.loteId}? Se vuelven a validar las filas que no se cargaron y se `
-            + 'graban las que pasen; las ya cargadas no se repiten.'
-          : `¿Ejecutar el lote #${lote.loteId} ("${lote.nombreArchivoOrigen}")? Antes de grabar se vuelve a validar, `
-            + 'y se cargan las filas que pasen la validación.',
-        confirmText: reintento ? 'Reintentar' : 'Ejecutar',
-        cancelText: 'Cancelar',
-        type: 'warning',
-      },
+      data: dialogoEjecucion(lote),
     });
 
     dialogRef.afterClosed().subscribe(resultado => {
@@ -445,15 +469,9 @@ export class DetalleLoteCargaMasivaComponent implements OnInit {
 
   private confirmarCancelacion(lote: LoteCargaResponse, alCancelar: () => void): void {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      width: '440px',
+      width: '480px',
       disableClose: true,
-      data: {
-        title: 'Cancelar ejecución',
-        message: `¿Cancelar la ejecución del lote #${lote.loteId}? El lote vuelve a su estado anterior y se puede ejecutar más adelante.`,
-        confirmText: 'Cancelar ejecución',
-        cancelText: 'Volver',
-        type: 'danger',
-      },
+      data: dialogoCancelacion(lote),
     });
 
     dialogRef.afterClosed().subscribe(resultado => {
@@ -461,9 +479,17 @@ export class DetalleLoteCargaMasivaComponent implements OnInit {
         return;
       }
 
-      this.loteService.cancelarEjecucion(lote.loteId).subscribe(() => {
-        this.toastr.success('Ejecución cancelada', 'Exitoso');
-        alCancelar();
+      this.loteService.cancelarEjecucion(lote.loteId).subscribe({
+        next: (cancelacion: CancelacionEjecucion) => {
+          if (cancelacion.estado === 'CANCELADO') {
+            this.toastr.success(cancelacion.mensaje, 'Ejecución cancelada');
+          } else {
+            this.toastr.info(cancelacion.mensaje, 'Cancelación pedida');
+          }
+          alCancelar();
+        },
+        // El interceptor muestra el rechazo; se refresca por si cambio.
+        error: () => alCancelar(),
       });
     });
   }

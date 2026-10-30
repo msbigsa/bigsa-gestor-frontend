@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, effect, forwardRef, input, signal, untracked } from '@angular/core';
 import { ControlValueAccessor, FormControl, NG_VALUE_ACCESSOR, ReactiveFormsModule } from '@angular/forms';
-import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
+import { MatAutocomplete, MatAutocompleteSelectedEvent, MatAutocompleteTrigger } from '@angular/material/autocomplete';
 
 import { MaterialModule } from 'src/app/material.module';
 
@@ -73,7 +73,12 @@ export class SelectorCatalogoComponent implements ControlValueAccessor {
     this.onChange(opcion.codigo);
   }
 
-  limpiar(): void {
+  // Sin propagar: el form-field abriria el panel con la seleccion anterior.
+  limpiar(event: MouseEvent, trigger: MatAutocompleteTrigger, auto: MatAutocomplete): void {
+    event.stopPropagation();
+    trigger.closePanel();
+    auto.options.forEach(opcion => opcion.deselect(false));
+
     this.fijarTexto('');
     this.valor.set(null);
     this.onChange(null);

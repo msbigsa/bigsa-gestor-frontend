@@ -1,5 +1,6 @@
 // CARGADO -> VALIDANDO -> VALIDADO_OK|VALIDADO_CON_ERRORES|ERROR_VALIDACION. Ejecucion: EN_COLA -> VALIDANDO
-// (revalidacion) -> EJECUTANDO -> EJECUTADO_OK|EJECUTADO_CON_ERRORES; ERROR_EJECUCION = falla tecnica definitiva.
+// (revalidacion) -> EJECUTANDO -> EJECUTADO_OK|EJECUTADO_CON_ERRORES; ERROR_EJECUCION = falla tecnica definitiva;
+// CANCELADO = el usuario cancelo en la cola o en ejecucion.
 export enum EstadoLoteCarga {
   CARGADO = 'CARGADO',
   VALIDANDO = 'VALIDANDO',
@@ -11,5 +12,6 @@ export enum EstadoLoteCarga {
   EJECUTADO_OK = 'EJECUTADO_OK',
   EJECUTADO_CON_ERRORES = 'EJECUTADO_CON_ERRORES',
   ERROR_EJECUCION = 'ERROR_EJECUCION',
+  CANCELADO = 'CANCELADO',
   ELIMINADO = 'ELIMINADO',
 }

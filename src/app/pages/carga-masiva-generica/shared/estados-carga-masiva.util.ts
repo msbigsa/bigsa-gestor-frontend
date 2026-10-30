@@ -5,6 +5,7 @@ import { UsuarioCargaMasiva } from 'src/app/models/carga-masiva-generica/Usuario
 import { LayoutPlanilla } from 'src/app/models/carga-masiva-generica/LayoutPlanilla';
 import { FechaPropuestaOrigen } from 'src/app/models/carga-masiva-generica/FechaPropuestaOrigen';
 import { FechasEmisionOrigen } from 'src/app/models/carga-masiva-generica/FechasEmisionOrigen';
+import { ConfirmDialogData } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
 
 // Coincide con EstadoLoteCarga.INTERMEDIOS del backend.
 export const ESTADOS_EN_PROCESO: EstadoLoteCarga[] = [
@@ -19,6 +20,7 @@ export const ESTADOS_EJECUTABLES: EstadoLoteCarga[] = [
   EstadoLoteCarga.VALIDADO_CON_ERRORES,
   EstadoLoteCarga.EJECUTADO_CON_ERRORES,
   EstadoLoteCarga.ERROR_EJECUCION,
+  EstadoLoteCarga.CANCELADO,
 ];
 
 // Estado transitorio o ejecucion en curso (durante la revalidacion el lote pasa un instante por VALIDADO_*).
@@ -30,9 +32,63 @@ export function puedeEjecutarLote(lote: LoteCargaResponse | null | undefined): b
   return !!lote && !lote.ejecucionActiva && ESTADOS_EJECUTABLES.includes(lote.estadoLote);
 }
 
-// Solo se cancela mientras espera en la cola (el backend tambien exige que sea quien la pidio).
-export function puedeCancelarEjecucion(lote: LoteCargaResponse | null | undefined): boolean {
-  return !!lote && lote.ejecucionActiva && lote.estadoLote === EstadoLoteCarga.EN_COLA;
+// Solo quien la pidio y si no esta ya pedida, como exige el backend.
+export function puedeCancelarEjecucion(lote: LoteCargaResponse | null | undefined, codigoUsuario: string | number | undefined): boolean {
+  return !!lote && lote.ejecucionActiva && !lote.cancelacionPedida && esUsuario(lote.usuarioEjecucion, codigoUsuario);
+}
+
+// Mismo criterio que el backend: sin distinguir mayusculas ni espacios.
+export function esUsuario(usuario: UsuarioCargaMasiva | undefined, codigoUsuario: string | number | undefined): boolean {
+  const codigo = String(codigoUsuario ?? '').trim().toLowerCase();
+  return codigo !== '' && (usuario?.codigo ?? '').trim().toLowerCase() === codigo;
+}
+
+// Retoma lo que no se cargo, sin repetir lo ya ejecutado.
+export function esReintentoEjecucion(estado: EstadoLoteCarga | undefined): boolean {
+  return estado === EstadoLoteCarga.EJECUTADO_CON_ERRORES
+    || estado === EstadoLoteCarga.ERROR_EJECUCION
+    || estado === EstadoLoteCarga.CANCELADO;
+}
+
+export function accionEjecutarLabel(estado: EstadoLoteCarga | undefined): string {
+  if (estado === EstadoLoteCarga.CANCELADO) {
+    return 'Retomar ejecución';
+  }
+
+  return esReintentoEjecucion(estado) ? 'Reintentar ejecución' : 'Ejecutar carga';
+}
+
+// Datos del ConfirmDialog de ejecutar, comunes al listado y al detalle.
+export function dialogoEjecucion(lote: LoteCargaResponse): ConfirmDialogData {
+  const reintento = esReintentoEjecucion(lote.estadoLote);
+  const retoma = lote.estadoLote === EstadoLoteCarga.CANCELADO;
+
+  return {
+    title: accionEjecutarLabel(lote.estadoLote),
+    message: reintento
+      ? `¿${retoma ? 'Retomar' : 'Reintentar'} la ejecución del lote #${lote.loteId}? Se vuelven a validar las filas que `
+        + 'no se cargaron y se graban las que pasen; las ya cargadas no se repiten.'
+      : `¿Ejecutar el lote #${lote.loteId} ("${lote.nombreArchivoOrigen}")? Antes de grabar se vuelve a validar, `
+        + 'y se cargan las filas que pasen la validación.',
+    confirmText: retoma ? 'Retomar' : reintento ? 'Reintentar' : 'Ejecutar',
+    cancelText: 'Cancelar',
+    type: 'warning',
+  };
+}
+
+// Datos del ConfirmDialog de cancelar, segun este en la cola o en curso.
+export function dialogoCancelacion(lote: LoteCargaResponse): ConfirmDialogData {
+  return {
+    title: 'Cancelar ejecución',
+    message: lote.estadoLote === EstadoLoteCarga.EN_COLA
+      ? `¿Cancelar la ejecución del lote #${lote.loteId}? Sale de la cola al instante y el lote queda cancelado; `
+        + 'puede volver a ejecutarlo más adelante.'
+      : `¿Cancelar la ejecución del lote #${lote.loteId}? Se detiene después de la fila en curso y cierra las pólizas `
+        + 'que alcanzó a modificar. El lote queda cancelado y se puede retomar sin repetir lo ya cargado.',
+    confirmText: 'Cancelar ejecución',
+    cancelText: 'Volver',
+    type: 'danger',
+  };
 }
 
 const ESTADO_LOTE_LABEL: Record<EstadoLoteCarga, string> = {
@@ -46,6 +102,7 @@ const ESTADO_LOTE_LABEL: Record<EstadoLoteCarga, string> = {
   [EstadoLoteCarga.EJECUTADO_OK]: 'Ejecutado OK',
   [EstadoLoteCarga.EJECUTADO_CON_ERRORES]: 'Ejecutado con errores',
   [EstadoLoteCarga.ERROR_EJECUCION]: 'Error de ejecución',
+  [EstadoLoteCarga.CANCELADO]: 'Cancelado',
   [EstadoLoteCarga.ELIMINADO]: 'Eliminado',
 };
 
@@ -60,6 +117,7 @@ const ESTADO_LOTE_CLASE: Record<EstadoLoteCarga, string> = {
   [EstadoLoteCarga.EJECUTADO_OK]: 'bg-light-success text-success',
   [EstadoLoteCarga.EJECUTADO_CON_ERRORES]: 'bg-light-warning text-warning',
   [EstadoLoteCarga.ERROR_EJECUCION]: 'bg-light-error text-error',
+  [EstadoLoteCarga.CANCELADO]: 'bg-light-secondary text-secondary',
   [EstadoLoteCarga.ELIMINADO]: 'bg-light text-dark',
 };
 
@@ -95,9 +153,17 @@ export function tooltipEstadoLote(lote: LoteCargaResponse): string {
     return `Eliminado el ${formatearFecha(lote.fechaEliminacion)} por ${usuarioTexto(lote.usuarioEliminacion)}`;
   }
 
+  if (lote.estadoLote === EstadoLoteCarga.CANCELADO && lote.fechaCancelacion) {
+    return `Ejecución cancelada el ${formatearFecha(lote.fechaCancelacion)} por ${usuarioTexto(lote.usuarioCancelacion)}`;
+  }
+
   if (lote.estadoLote === EstadoLoteCarga.EN_COLA && lote.fechaEncolado) {
     const posicion = lote.posicionCola != null ? ` (posición ${lote.posicionCola})` : '';
     return `En cola desde el ${formatearFecha(lote.fechaEncolado)}${posicion}, pedido por ${usuarioTexto(lote.usuarioEjecucion)}`;
+  }
+
+  if (lote.cancelacionPedida && lote.fechaCancelacion) {
+    return `Cancelación pedida el ${formatearFecha(lote.fechaCancelacion)} por ${usuarioTexto(lote.usuarioCancelacion)}`;
   }
 
   if (lote.fechaFinEjecucion && !lote.ejecucionActiva) {
@@ -106,10 +172,6 @@ export function tooltipEstadoLote(lote: LoteCargaResponse): string {
 
   if (lote.fechaInicioEjecucion && lote.ejecucionActiva) {
     return `Ejecución iniciada el ${formatearFecha(lote.fechaInicioEjecucion)}, pedida por ${usuarioTexto(lote.usuarioEjecucion)}`;
-  }
-
-  if (lote.fechaCancelacion && !lote.ejecucionActiva) {
-    return `Ejecución cancelada el ${formatearFecha(lote.fechaCancelacion)} por ${usuarioTexto(lote.usuarioCancelacion)}`;
   }
 
   if (lote.fechaValidacion) {

@@ -68,6 +68,18 @@ USING (VALUES
         "route": "/inicio/carga-masiva-generica/listar-lotes"}
     ]', CAST(NULL AS INT)),
 
+  -- Pantalla de ms-bigsa-scheduler: comun a los modulos que ejecutan por la cola.
+  (N'Cola de Ejecución', N'low_priority', N'/menu-level', N'Cargas Masivas',
+    N'[
+      { "displayName": "Cola Activa",
+        "iconName": "pending_actions",
+        "route": "/inicio/cola-ejecucion/cola-activa"},
+
+      { "displayName": "Historial",
+        "iconName": "history",
+        "route": "/inicio/cola-ejecucion/historial"}
+    ]', CAST(NULL AS INT)),
+
   (N'Administración', N'admin_panel_settings', N'/menu-level', N'Sistema',
     N'[
       { "displayName": "Administración",

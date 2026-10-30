@@ -9,6 +9,7 @@ export const environment = {
   HOST_EMISION_MASIVA: 'http://localhost:8082/ms-bigsa-emision-masivas',
   HOST_VIDA_Y_SALUD: 'http://localhost:8082/ms-bigsa-vida-y-salud',
   HOST_CARGA_MASIVA_GENERICA: 'http://localhost:8082/ms-bigsa-carga-masiva-generica',
+  HOST_SCHEDULER: 'http://localhost:8082/ms-bigsa-scheduler',
   REINTENTS: 2,
   TOKEN_NAME: 'jwtToken',
   REFRESH_TOKEN_NAME: 'refreshToken',

@@ -114,6 +114,8 @@ export const appConfig: ApplicationConfig = {
             new URL(environment.HOST_LOGIN).host,
             new URL(environment.HOST_EMISION_MASIVA).host,
             new URL(environment.HOST_VIDA_Y_SALUD).host,
+            new URL(environment.HOST_CARGA_MASIVA_GENERICA).host,
+            new URL(environment.HOST_SCHEDULER).host,
           ],
           disallowedRoutes: [
             `${environment.HOST_LOGIN}/auth/login/forgot`,

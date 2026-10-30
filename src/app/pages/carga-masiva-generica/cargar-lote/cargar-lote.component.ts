@@ -33,6 +33,8 @@ import {
   formaPagoTipoInstitucion,
 } from '../shared/estados-carga-masiva.util';
 import { configTipoCarga } from '../shared/tipos-carga.config';
+import { TourService } from 'src/app/shared/tour/tour.service';
+import { buildCargarLoteTourSteps } from '../carga-masiva-generica-tour.steps';
 import { OpcionCatalogo, SelectorCatalogoComponent } from '../shared/selector-catalogo/selector-catalogo.component';
 
 // yyyy-MM-dd en hora local, el formato de <input type="date"> y el que espera el backend.
@@ -65,6 +67,7 @@ export class CargarLoteCargaMasivaComponent {
   private readonly catalogoService = inject(CargaMasivaGenericaCatalogoService);
   private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
+  private readonly tourService = inject(TourService);
 
   readonly formasPago = FORMAS_PAGO;
   readonly origenesFechaPropuesta = Object.values(FechaPropuestaOrigen);
@@ -304,6 +307,11 @@ export class CargarLoteCargaMasivaComponent {
 
   onArchivoSeleccionado(file: File): void {
     this.archivo.set(file);
+  }
+
+  iniciarTour(): void {
+    const tipo = this.tipoSeleccionado();
+    this.tourService.start(buildCargarLoteTourSteps(!!tipo, !!tipo?.permiteMultiplesCompanias, this.companiaUnica()));
   }
 
   onArchivoRemovido(): void {

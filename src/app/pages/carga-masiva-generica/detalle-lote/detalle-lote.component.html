@@ -3,6 +3,15 @@
     <mat-icon class="mr-1">arrow_back</mat-icon>
     Volver al listado
   </button>
+
+  <button
+    mat-icon-button
+    type="button"
+    matTooltip="Ver tour guiado"
+    (click)="iniciarTour()"
+  >
+    <mat-icon>help_outline</mat-icon>
+  </button>
 </div>
 
 @if (lote(); as loteActual) {
@@ -72,7 +81,7 @@
         </div>
       }
 
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4" data-tour="detalle-resumen">
         <div class="border border-border rounded-md p-3 text-center">
           <p class="text-2xl font-semibold mb-0">{{ loteActual.totalFilas }}</p>
           <p class="text-xs text-gray-500 mb-0">Filas totales</p>
@@ -105,6 +114,26 @@
             <p class="text-xs text-gray-500 mb-0">Error al grabar</p>
           </div>
         }
+
+        @if (polizasSinCerrar() > 0) {
+          <div
+            class="border border-border rounded-md p-3 text-center"
+            matTooltip="Su cierre (totales, comisiones, plan y pago) no alcanzó a hacerse: volver a ejecutar el lote las cierra antes de seguir"
+          >
+            <p class="text-2xl font-semibold mb-0 text-warning">{{ polizasSinCerrar() }}</p>
+            <p class="text-xs text-gray-500 mb-0">Pólizas sin cerrar</p>
+          </div>
+        }
+
+        @if (polizasCierreError() > 0) {
+          <div
+            class="border border-border rounded-md p-3 text-center"
+            matTooltip="El cierre de estas pólizas falló: hay que revisarlas a mano (el motivo está en el detalle del proceso)"
+          >
+            <p class="text-2xl font-semibold mb-0 text-error">{{ polizasCierreError() }}</p>
+            <p class="text-xs text-gray-500 mb-0">Cierres con error</p>
+          </div>
+        }
       </div>
 
       @if (loteActual.estadoLote === 'EN_COLA') {
@@ -117,8 +146,18 @@
         </div>
       }
 
+      @if (loteActual.cancelacionPedida) {
+        <div class="flex items-start gap-2 rounded-md border border-warning bg-light-warning text-warning px-3 py-2 mb-4 text-sm">
+          <mat-icon class="shrink-0">hourglass_top</mat-icon>
+          <span>
+            Cancelación pedida por {{ usuarioTexto(loteActual.usuarioCancelacion) }}. La ejecución se detiene después
+            de la fila en curso y cierra las pólizas que alcanzó a modificar.
+          </span>
+        </div>
+      }
+
       <div class="flex flex-wrap items-center justify-between gap-2">
-        <div class="flex flex-wrap items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2" data-tour="detalle-acciones">
           @if (!loteEliminado()) {
             <button mat-icon-button (click)="actualizar()" matTooltip="Actualizar">
               <mat-icon>refresh</mat-icon>
@@ -135,7 +174,7 @@
           @if (puedeEjecutar()) {
             <button mat-flat-button color="primary" (click)="ejecutar()">
               <mat-icon class="mr-2">{{ esReintento() ? 'replay' : 'play_circle' }}</mat-icon>
-              {{ esReintento() ? 'Reintentar ejecución' : 'Ejecutar carga' }}
+              {{ accionEjecutarLabel(loteActual.estadoLote) }}
             </button>
           }
 
@@ -143,6 +182,13 @@
             <button mat-stroked-button color="warn" (click)="cancelarEjecucion()">
               <mat-icon class="mr-2">cancel</mat-icon>
               Cancelar ejecución
+            </button>
+          }
+
+          @if (puedeVerEnCola()) {
+            <button mat-stroked-button (click)="verEnCola()">
+              <mat-icon class="mr-2">low_priority</mat-icon>
+              Ver en la cola
             </button>
           }
 
@@ -265,7 +311,7 @@
         </mat-expansion-panel-header>
 
         <div class="grid grid-cols-12 gap-4 items-center mb-4">
-          <div class="lg:col-span-6 col-span-12">
+          <div class="lg:col-span-6 col-span-12" data-tour="detalle-filtro-estado">
             <mat-form-field appearance="outline" class="w-full hide-hint">
               <mat-label>Filtrar por estado</mat-label>
               <mat-select
@@ -310,29 +356,14 @@
               </td>
             </ng-container>
 
-            <ng-container matColumnDef="motivos">
-              <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Motivos</th>
-              <td mat-cell *matCellDef="let d">
-                @if (d.registroError) {
-                  <a
-                    (click)="verErroresRegistro(d)"
-                    class="block max-w-[480px] truncate text-sm text-error cursor-pointer hover:underline"
-                    [matTooltip]="motivosError(d.registroError).length > 1 ? 'Ver los ' + motivosError(d.registroError).length + ' motivos' : 'Ver motivo'"
-                  >
-                    {{ motivosError(d.registroError)[0] }}
-                    @if (motivosError(d.registroError).length > 1) {
-                      <span class="text-gray-500">(+{{ motivosError(d.registroError).length - 1 }})</span>
-                    }
-                  </a>
-                } @else {
-                  <span class="text-gray-400">-</span>
-                }
-              </td>
-            </ng-container>
-
             <ng-container matColumnDef="accion">
               <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Acción</th>
-              <td mat-cell *matCellDef="let d" class="action-link whitespace-nowrap">
+              <td
+                mat-cell
+                *matCellDef="let d; let first = first"
+                class="action-link whitespace-nowrap"
+                [attr.data-tour]="first ? 'detalle-accion' : null"
+              >
                 <a
                   (click)="eliminarDetalle(d)"
                   class="me-2.5"

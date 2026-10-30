@@ -26,6 +26,12 @@ export const serverErrorInterceptor: HttpInterceptorFn = (req, next) => {
       let errorMessage = '';
       let is404Error: boolean = false;
 
+      // CMG y Scheduler tambien traen "mensaje" en 409 y 503.
+      const mensajeExtendido = (error.url?.includes(environment.HOST_CARGA_MASIVA_GENERICA)
+        || error.url?.includes(environment.HOST_SCHEDULER)) ? error.error?.mensaje : undefined;
+      // En el Scheduler, 403 y 404 son rechazos de negocio, no de sesion.
+      const esScheduler = !!error.url?.includes(environment.HOST_SCHEDULER);
+
       if (error.error instanceof ErrorEvent) {
 
         errorMessage = `Error en cliente: ${error.error.message}`;
@@ -37,10 +43,10 @@ export const serverErrorInterceptor: HttpInterceptorFn = (req, next) => {
           case 400:
             errorMessage = 'Solicitud incorrecta';
 
-            // ms-bigsa-aviso-cobranza, ms-bigsa-emision-masivas, ms-bigsa-vida-y-salud y ms-bigsa-carga-masiva-generica ya devuelven un mensaje de negocio legible en "mensaje"
+            // ms-bigsa-aviso-cobranza, ms-bigsa-emision-masivas, ms-bigsa-vida-y-salud, ms-bigsa-carga-masiva-generica y ms-bigsa-scheduler ya devuelven un mensaje de negocio legible en "mensaje"
             if (
               (error.url?.includes(environment.HOST_AVISO_COBRANZA) || error.url?.includes(environment.HOST_EMISION_MASIVA) || error.url?.includes(environment.HOST_VIDA_Y_SALUD)
-                || error.url?.includes(environment.HOST_CARGA_MASIVA_GENERICA))
+                || error.url?.includes(environment.HOST_CARGA_MASIVA_GENERICA) || error.url?.includes(environment.HOST_SCHEDULER))
               && error.error?.mensaje
             ) {
               errorMessage = error.error.mensaje;
@@ -50,13 +56,28 @@ export const serverErrorInterceptor: HttpInterceptorFn = (req, next) => {
 
           case 401:
           case 403:
+            if (error.status === 403 && esScheduler) {
+              errorMessage = error.error?.mensaje ?? 'No tiene permiso para realizar esta acción';
+              break;
+            }
+
             errorMessage = 'No autorizado o prohibido';
             router.navigate(['/authentication/login']);
             break;
 
           case 404:
+            if (esScheduler) {
+              errorMessage = error.error?.mensaje ?? 'Recurso no encontrado';
+              break;
+            }
+
             errorMessage = 'Recurso no encontrado';
             is404Error = true;
+            break;
+
+          case 409:
+          case 503:
+            errorMessage = mensajeExtendido ?? 'Ha ocurrido un error inesperado';
             break;
 
           case 500:

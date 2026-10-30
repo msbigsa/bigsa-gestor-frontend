@@ -17,6 +17,8 @@ import { ListarCompaniasVidaSaludComponent } from './vida-y-salud/mantenedor-com
 import { CargarLoteCargaMasivaComponent } from './carga-masiva-generica/cargar-lote/cargar-lote.component';
 import { ListarLotesCargaMasivaComponent } from './carga-masiva-generica/listar-lotes/listar-lotes.component';
 import { DetalleLoteCargaMasivaComponent } from './carga-masiva-generica/detalle-lote/detalle-lote.component';
+import { ColaActivaComponent } from './cola-ejecucion/cola-activa/cola-activa.component';
+import { HistorialColaComponent } from './cola-ejecucion/historial-cola/historial-cola.component';
 import { AdministracionComponent } from './administracion/administracion.component';
 import { ListarNotificacionesComponent } from './notificaciones/listar-notificaciones/listar-notificaciones.component';
 import { MiPerfilComponent } from './perfil/mi-perfil/mi-perfil.component';
@@ -167,6 +169,22 @@ export const PagesRoutes: Routes = [
     component: DetalleLoteCargaMasivaComponent,
     data: {
       title: 'Detalle de Lote de Carga Masiva Genérica'
+    },
+    canActivate: [CertGuard]
+  },
+  {
+    path: 'cola-ejecucion/cola-activa',
+    component: ColaActivaComponent,
+    data: {
+      title: 'Cola de Ejecución'
+    },
+    canActivate: [CertGuard]
+  },
+  {
+    path: 'cola-ejecucion/historial',
+    component: HistorialColaComponent,
+    data: {
+      title: 'Historial de la Cola de Ejecución'
     },
     canActivate: [CertGuard]
   },
