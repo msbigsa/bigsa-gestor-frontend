@@ -132,10 +132,10 @@
             <span class="inline-flex items-center gap-1.5">
               <span
                 class="px-3 py-1 rounded-full text-xs font-semibold"
-                [ngClass]="estadoClase(lote.estadoLote)"
+                [ngClass]="estadoVisibleClase(lote)"
                 [matTooltip]="tooltipEstadoLote(lote)"
               >
-                {{ estadoLabel(lote.estadoLote) }}
+                {{ estadoVisibleLabel(lote) }}
               </span>
               @if (tieneErrorLote(lote)) {
                 <mat-icon

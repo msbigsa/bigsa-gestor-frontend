@@ -117,7 +117,7 @@ const ESTADO_LOTE_CLASE: Record<EstadoLoteCarga, string> = {
   [EstadoLoteCarga.EJECUTADO_OK]: 'bg-light-success text-success',
   [EstadoLoteCarga.EJECUTADO_CON_ERRORES]: 'bg-light-warning text-warning',
   [EstadoLoteCarga.ERROR_EJECUCION]: 'bg-light-error text-error',
-  [EstadoLoteCarga.CANCELADO]: 'bg-light-secondary text-secondary',
+  [EstadoLoteCarga.CANCELADO]: 'bg-gray-500/15 text-gray-500',
   [EstadoLoteCarga.ELIMINADO]: 'bg-light text-dark',
 };
 
@@ -127,6 +127,19 @@ export function estadoLoteLabel(estado: EstadoLoteCarga): string {
 
 export function estadoLoteClase(estado: EstadoLoteCarga): string {
   return ESTADO_LOTE_CLASE[estado] ?? 'bg-light-info text-info';
+}
+
+// Para los badges: con la cancelacion pedida el lote sigue en ejecucion, pero se muestra "Cancelando...".
+function cancelando(lote: LoteCargaResponse): boolean {
+  return lote.ejecucionActiva && lote.cancelacionPedida;
+}
+
+export function estadoVisibleLabel(lote: LoteCargaResponse): string {
+  return cancelando(lote) ? 'Cancelando...' : estadoLoteLabel(lote.estadoLote);
+}
+
+export function estadoVisibleClase(lote: LoteCargaResponse): string {
+  return cancelando(lote) ? 'bg-light-warning text-warning' : estadoLoteClase(lote.estadoLote);
 }
 
 // "codigo - nombre".

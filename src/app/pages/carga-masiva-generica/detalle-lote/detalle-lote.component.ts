@@ -37,6 +37,8 @@ import {
   estadoDetalleLabel,
   estadoLoteClase,
   estadoLoteLabel,
+  estadoVisibleClase,
+  estadoVisibleLabel,
   fechaPropuestaOrigenLabel,
   fechasEmisionOrigenLabel,
   etiquetaInstitucion,
@@ -247,6 +249,8 @@ export class DetalleLoteCargaMasivaComponent implements OnInit {
   readonly tooltipRegistroError = tooltipRegistroError;
   readonly layoutLabel = layoutLabel;
   readonly accionEjecutarLabel = accionEjecutarLabel;
+  readonly estadoVisibleLabel = estadoVisibleLabel;
+  readonly estadoVisibleClase = estadoVisibleClase;
 
   constructor() {
     effect(() => {

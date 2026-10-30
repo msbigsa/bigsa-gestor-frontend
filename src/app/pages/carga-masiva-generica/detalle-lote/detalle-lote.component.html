@@ -67,10 +67,10 @@
 
         <span
           class="px-3 py-1 rounded-full text-sm font-semibold"
-          [ngClass]="estadoClase(loteActual.estadoLote)"
+          [ngClass]="estadoVisibleClase(loteActual)"
           [matTooltip]="tooltipEstadoLote(loteActual)"
         >
-          {{ estadoLabel(loteActual.estadoLote) }}
+          {{ estadoVisibleLabel(loteActual) }}
         </span>
       </div>
 
@@ -248,10 +248,10 @@
                 <span class="inline-flex items-center gap-1.5">
                   <span
                     class="px-2 py-0.5 rounded-full text-xs font-semibold"
-                    [ngClass]="estadoClase(correccion.estadoLote)"
+                    [ngClass]="estadoVisibleClase(correccion)"
                     [matTooltip]="tooltipEstadoLote(correccion)"
                   >
-                    {{ estadoLabel(correccion.estadoLote) }}
+                    {{ estadoVisibleLabel(correccion) }}
                   </span>
                   @if (tieneErrorLote(correccion)) {
                     <mat-icon

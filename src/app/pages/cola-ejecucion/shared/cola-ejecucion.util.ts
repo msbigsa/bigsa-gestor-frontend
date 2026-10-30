@@ -95,7 +95,7 @@ const ESTADO_CLASE: Record<EstadoSolicitudCola, string> = {
   [EstadoSolicitudCola.EN_EJECUCION]: 'bg-light-warning text-warning',
   [EstadoSolicitudCola.FINALIZADA]: 'bg-light-success text-success',
   [EstadoSolicitudCola.ERROR]: 'bg-light-error text-error',
-  [EstadoSolicitudCola.CANCELADA]: 'bg-light-secondary text-secondary',
+  [EstadoSolicitudCola.CANCELADA]: 'bg-gray-500/15 text-gray-500',
   [EstadoSolicitudCola.ABORTADA]: 'bg-light-error text-error',
 };
 

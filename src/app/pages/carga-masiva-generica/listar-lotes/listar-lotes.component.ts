@@ -25,6 +25,8 @@ import {
   dialogoEjecucion,
   estadoLoteClase,
   estadoLoteLabel,
+  estadoVisibleClase,
+  estadoVisibleLabel,
   loteEnProceso,
   puedeCancelarEjecucion,
   puedeEjecutarLote,
@@ -398,4 +400,6 @@ export class ListarLotesCargaMasivaComponent implements OnInit {
   readonly usuarioTexto = usuarioTexto;
   readonly usuarioDescripcion = usuarioDescripcion;
   readonly accionEjecutarLabel = accionEjecutarLabel;
+  readonly estadoVisibleLabel = estadoVisibleLabel;
+  readonly estadoVisibleClase = estadoVisibleClase;
 }

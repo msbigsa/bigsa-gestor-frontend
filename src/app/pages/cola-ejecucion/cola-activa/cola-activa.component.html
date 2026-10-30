@@ -128,12 +128,14 @@
             </ng-container>
 
             <ng-container matColumnDef="usuario">
-              <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Solicitada por</th>
-              <td mat-cell *matCellDef="let s" class="whitespace-nowrap">
-                <span [matTooltip]="usuarioDescripcion(s.usuario)">{{ usuarioTexto(s.usuario) }}</span>
-                @if (s.propia) {
-                  <mat-icon class="text-primary! text-base! align-middle ml-1" matTooltip="La pidió usted">person</mat-icon>
-                }
+              <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Usuario</th>
+              <td
+                mat-cell
+                *matCellDef="let s"
+                class="whitespace-nowrap"
+                [matTooltip]="usuarioDescripcion(s.usuario)"
+              >
+                {{ usuarioTexto(s.usuario) }}
               </td>
             </ng-container>
 
@@ -163,7 +165,7 @@
                   </span>
                 } @else if (enPausa(s)) {
                   <span
-                    class="px-3 py-1 rounded-full text-xs font-semibold bg-light-secondary text-secondary"
+                    class="px-3 py-1 rounded-full text-xs font-semibold bg-gray-500/15 text-gray-500"
                     matTooltip="Su tipo de tarea está desactivado: no sale hasta que se reactive"
                   >
                     En pausa
@@ -179,29 +181,41 @@
               <td
                 mat-cell
                 *matCellDef="let s; let primeraFila = first"
-                class="whitespace-nowrap"
+                class="action-link whitespace-nowrap"
                 [attr.data-tour]="primero && primeraFila ? 'cola-acciones' : null"
               >
-                <span [matTooltip]="motivoNoMovible(s) || (puedeSubir(s, grupo) ? 'Subir' : '')">
-                  <button mat-icon-button [disabled]="!puedeSubir(s, grupo)" (click)="subir(s)">
-                    <mat-icon>arrow_upward</mat-icon>
-                  </button>
-                </span>
-
-                <span [matTooltip]="motivoNoMovible(s) || (puedeBajar(s, grupo) ? 'Bajar' : '')">
-                  <button mat-icon-button [disabled]="!puedeBajar(s, grupo)" (click)="bajar(s)">
-                    <mat-icon>arrow_downward</mat-icon>
-                  </button>
-                </span>
-
-                <span [matTooltip]="motivoNoMovible(s) || 'Mover a una posición'">
-                  <button
-                    mat-icon-button
-                    [disabled]="posicionesDestino(s, grupo).length === 0"
-                    [matMenuTriggerFor]="menuPosicion"
+                <!-- El tooltip va en el span: el <a> deshabilitado no recibe el mouse. -->
+                <span class="me-2.5" [matTooltip]="motivoNoMovible(s) || (puedeSubir(s, grupo) ? 'Subir' : '')">
+                  <a
+                    (click)="subir(s)"
+                    [class.cursor-pointer]="puedeSubir(s, grupo)"
+                    [class.opacity-40]="!puedeSubir(s, grupo)"
+                    [class.pointer-events-none]="!puedeSubir(s, grupo)"
                   >
-                    <mat-icon>low_priority</mat-icon>
-                  </button>
+                    <mat-icon class="text-primary!">arrow_upward</mat-icon>
+                  </a>
+                </span>
+
+                <span class="me-2.5" [matTooltip]="motivoNoMovible(s) || (puedeBajar(s, grupo) ? 'Bajar' : '')">
+                  <a
+                    (click)="bajar(s)"
+                    [class.cursor-pointer]="puedeBajar(s, grupo)"
+                    [class.opacity-40]="!puedeBajar(s, grupo)"
+                    [class.pointer-events-none]="!puedeBajar(s, grupo)"
+                  >
+                    <mat-icon class="text-primary!">arrow_downward</mat-icon>
+                  </a>
+                </span>
+
+                <span class="me-2.5" [matTooltip]="motivoNoMovible(s) || 'Mover a una posición'">
+                  <a
+                    [matMenuTriggerFor]="menuPosicion"
+                    [class.cursor-pointer]="posicionesDestino(s, grupo).length > 0"
+                    [class.opacity-40]="posicionesDestino(s, grupo).length === 0"
+                    [class.pointer-events-none]="posicionesDestino(s, grupo).length === 0"
+                  >
+                    <mat-icon class="text-primary!">low_priority</mat-icon>
+                  </a>
                 </span>
 
                 <mat-menu #menuPosicion="matMenu">
@@ -211,9 +225,9 @@
                 </mat-menu>
 
                 @if (puedeCancelar(s)) {
-                  <button mat-icon-button (click)="cancelar(s)" matTooltip="Cancelar">
-                    <mat-icon class="text-red-600!">cancel</mat-icon>
-                  </button>
+                  <a (click)="cancelar(s)" class="me-2.5 cursor-pointer">
+                    <mat-icon class="text-red-600!" matTooltip="Cancelar">cancel</mat-icon>
+                  </a>
                 }
               </td>
             </ng-container>

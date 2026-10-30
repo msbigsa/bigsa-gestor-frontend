@@ -11,7 +11,7 @@ import { ConfirmDialogResult } from 'src/app/shared/components/confirm-dialog/co
 import { CargaMasivaGenericaLoteService } from 'src/app/services/carga-masiva-generica/cargaMasivaGenericaLote.service';
 import { LoteCargaResponse } from 'src/app/models/carga-masiva-generica/LoteCargaResponse';
 import { EstadoLoteCarga } from 'src/app/models/carga-masiva-generica/EstadoLoteCarga';
-import { ESTADOS_EN_PROCESO, estadoLoteClase, estadoLoteLabel, usuarioTexto, usuarioDescripcion } from 'src/app/pages/carga-masiva-generica/shared/estados-carga-masiva.util';
+import { ESTADOS_EN_PROCESO, estadoLoteLabel, estadoVisibleClase, estadoVisibleLabel, usuarioTexto, usuarioDescripcion } from 'src/app/pages/carga-masiva-generica/shared/estados-carga-masiva.util';
 import {
   EliminarLoteDialogCargaMasivaComponent,
   EliminarLoteDialogData,
@@ -191,7 +191,8 @@ export class AdminLotesCargaMasivaComponent implements OnInit {
   }
 
   readonly estadoLabel = estadoLoteLabel;
-  readonly estadoClase = estadoLoteClase;
+  readonly estadoVisibleLabel = estadoVisibleLabel;
+  readonly estadoVisibleClase = estadoVisibleClase;
   readonly usuarioTexto = usuarioTexto;
   readonly usuarioDescripcion = usuarioDescripcion;
 }
