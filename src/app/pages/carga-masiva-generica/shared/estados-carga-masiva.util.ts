@@ -66,10 +66,10 @@ export function dialogoEjecucion(lote: LoteCargaResponse): ConfirmDialogData {
   return {
     title: accionEjecutarLabel(lote.estadoLote),
     message: reintento
-      ? `¿${retoma ? 'Retomar' : 'Reintentar'} la ejecución del lote #${lote.loteId}? Se vuelven a validar las filas que `
-        + 'no se cargaron y se graban las que pasen; las ya cargadas no se repiten.'
-      : `¿Ejecutar el lote #${lote.loteId} ("${lote.nombreArchivoOrigen}")? Antes de grabar se vuelve a validar, `
-        + 'y se cargan las filas que pasen la validación.',
+      ? `¿${retoma ? 'Retomar' : 'Reintentar'} la ejecución del lote #${lote.loteId}? El lote pasa a la cola de `
+        + 'ejecución; al ejecutarse sigue con lo que no se cargó, sin repetir las filas ya cargadas.'
+      : `¿Ejecutar el lote #${lote.loteId} ("${lote.nombreArchivoOrigen}")? El lote pasa a la cola de ejecución y se `
+        + 'vuelve a validar al ejecutarse.',
     confirmText: retoma ? 'Retomar' : reintento ? 'Reintentar' : 'Ejecutar',
     cancelText: 'Cancelar',
     type: 'warning',
