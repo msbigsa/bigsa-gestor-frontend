@@ -334,25 +334,56 @@
               <td mat-cell *matCellDef="let d" class="whitespace-nowrap">{{ d.nroFila }}</td>
             </ng-container>
 
-            <ng-container matColumnDef="grupo">
+            <ng-container matColumnDef="poliza">
               <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">
-                <span matTooltip="Filas consecutivas que comparten documento (p. ej. la misma póliza)">Grupo</span>
+                <span matTooltip="Póliza como vino en la planilla">Póliza</span>
               </th>
-              <td mat-cell *matCellDef="let d" class="whitespace-nowrap">{{ d.grupo ?? "-" }}</td>
+              <td mat-cell *matCellDef="let d" class="whitespace-nowrap">{{ d.poliza || "-" }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="propuesta">
+              <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">
+                <span matTooltip="Propuesta BIGSA asociada a la fila">Propuesta</span>
+              </th>
+              <td mat-cell *matCellDef="let d" class="whitespace-nowrap">{{ d.docuCodigo ?? "-" }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="item">
+              <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Ítem</th>
+              <td mat-cell *matCellDef="let d" class="whitespace-nowrap">{{ d.item || "-" }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="compania">
+              <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Compañía</th>
+              <td mat-cell *matCellDef="let d" class="whitespace-nowrap">{{ companiaFila(d.ciasCodigo) }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="endoso">
+              <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Endoso</th>
+              <td mat-cell *matCellDef="let d" class="whitespace-nowrap">{{ d.endoso || "-" }}</td>
             </ng-container>
 
             <ng-container matColumnDef="estado">
               <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Estado</th>
               <td mat-cell *matCellDef="let d" class="whitespace-nowrap">
-                <span
-                  class="px-3 py-1 rounded-full text-xs font-semibold"
-                  [ngClass]="detalleEstadoClase(d.estado)"
-                  [matTooltip]="tooltipRegistroError(d.registroError)"
-                  [class.cursor-pointer]="!!d.registroError"
-                  (click)="d.registroError && verErroresRegistro(d)"
-                >
+                <span class="px-3 py-1 rounded-full text-xs font-semibold" [ngClass]="detalleEstadoClase(d.estado)">
                   {{ detalleEstadoLabel(d.estado) }}
                 </span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="error">
+              <th mat-header-cell *matHeaderCellDef class="text-base font-semibold">Error</th>
+              <td mat-cell *matCellDef="let d">
+                @if (d.registroError) {
+                  <a
+                    class="block max-w-xs truncate text-sm text-error cursor-pointer"
+                    matTooltip="Ver detalle del error"
+                    (click)="verErroresRegistro(d)"
+                  >{{ tooltipRegistroError(d.registroError) }}</a>
+                } @else {
+                  -
+                }
               </td>
             </ng-container>
 
@@ -379,11 +410,11 @@
               </td>
             </ng-container>
 
-            <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns" class="interactive-row"></tr>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns(); sticky: true"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns()" class="interactive-row"></tr>
 
             <tr *matNoDataRow>
-              <td [attr.colspan]="displayedColumns.length" class="text-center text-sm text-gray-500 py-6">
+              <td [attr.colspan]="displayedColumns().length" class="text-center text-sm text-gray-500 py-6">
                 No se encontraron coincidencias.
               </td>
             </tr>

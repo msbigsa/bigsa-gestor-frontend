@@ -130,7 +130,18 @@ export class DetalleLoteCargaMasivaComponent implements OnInit {
   readonly parametrosExpandido = signal(false);
   readonly detalleExpandido = signal(true);
 
-  readonly displayedColumns = ['fila', 'grupo', 'estado', 'accion'];
+  // Endoso solo si alguna fila de la pagina lo trae.
+  readonly displayedColumns = computed(() => [
+    'fila',
+    'poliza',
+    'propuesta',
+    'item',
+    'compania',
+    ...(this.detalles().some(d => !!d.endoso) ? ['endoso'] : []),
+    'estado',
+    'error',
+    'accion',
+  ]);
 
   // Agrupados por seccion, como en la pantalla de carga; solo lo que aplica al modo del lote.
   readonly parametros = computed(() => {
@@ -344,7 +355,7 @@ export class DetalleLoteCargaMasivaComponent implements OnInit {
       width: '480px',
       data: {
         nroFila: detalle.nroFila,
-        grupo: detalle.grupo,
+        poliza: detalle.poliza,
         motivos: this.motivosError(detalle.registroError),
       } satisfies ErroresRegistroDialogData,
     });
@@ -428,6 +439,14 @@ export class DetalleLoteCargaMasivaComponent implements OnInit {
 
   puedeDescargar(): boolean {
     return !this.loteEliminado();
+  }
+
+  companiaFila(codigo: number | undefined): string {
+    if (codigo == null) {
+      return '-';
+    }
+    const nombre = this.companias().find(c => c.codigo === codigo)?.descripcion;
+    return nombre ? `${codigo} - ${nombre}` : String(codigo);
   }
 
   compania(lote: LoteCargaResponse): string {

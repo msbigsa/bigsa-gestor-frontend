@@ -6,7 +6,7 @@ import { MaterialModule } from 'src/app/material.module';
 
 export interface ErroresRegistroDialogData {
   nroFila: number;
-  grupo?: number;
+  poliza?: string;
   motivos: string[];
 }
 
