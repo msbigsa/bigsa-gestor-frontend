@@ -1,15 +1,24 @@
 import type { StepOptions } from 'shepherd.js';
 
+// Lo que esta visible en la pantalla de carga: el tour solo apunta a esos controles.
+export interface PantallaCargaTour {
+  hayTipo: boolean;
+  permiteMultiplesCompanias: boolean;
+  companiaUnica: boolean;
+  mostrarPlan: boolean;
+  mostrarMoneda: boolean;
+  mostrarEmision: boolean;
+  mostrarNuevosIntermediarios: boolean;
+  mostrarIntermediarios: boolean;
+}
+
 /**
  * Pasos del tour guiado para el formulario de carga de una planilla de Carga Masiva Genérica.
  * Los selectores [data-tour="..."] se marcan en cargar-lote.component.html.
  * Los parámetros solo existen con un tipo elegido, y los de compañía única sin "Múltiples Compañías".
  */
-export function buildCargarLoteTourSteps(
-  hayTipo: boolean,
-  permiteMultiplesCompanias: boolean,
-  companiaUnica: boolean,
-): StepOptions[] {
+export function buildCargarLoteTourSteps(pantalla: PantallaCargaTour): StepOptions[] {
+  const { hayTipo, permiteMultiplesCompanias, companiaUnica } = pantalla;
   const pasos: StepOptions[] = [
     {
       id: 'carga-tipo',
@@ -33,20 +42,64 @@ export function buildCargarLoteTourSteps(
   }
 
   if (companiaUnica) {
-    pasos.push(
-      {
-        id: 'carga-compania',
-        title: 'Datos generales',
-        text: 'Busque la compañía y complete el negocio, el ramo y los demás datos que aplican a todas las filas.',
-        attachTo: { element: '[data-tour="carga-compania"]', on: 'bottom' },
-      },
-      {
-        id: 'carga-forma-pago',
-        title: 'Forma de pago',
-        text: 'Defina si el pago es automático, el plan y la forma de pago, o si se toman de la planilla.',
-        attachTo: { element: '[data-tour="carga-forma-pago"]', on: 'bottom' },
-      },
-    );
+    pasos.push({
+      id: 'carga-compania',
+      title: 'Datos generales',
+      text: 'Busque la compañía y complete el negocio, el ramo y los demás datos que aplican a todas las filas.',
+      attachTo: { element: '[data-tour="carga-compania"]', on: 'bottom' },
+    });
+
+    if (pantalla.mostrarPlan) {
+      pasos.push({
+        id: 'carga-plan',
+        title: 'Plan de cobertura',
+        text: 'Elija el plan de cobertura (requiere compañía, negocio y ramo) o marque que se use el indicado en cada fila de la planilla. Elegir uno desmarca el otro.',
+        attachTo: { element: '[data-tour="carga-plan"]', on: 'bottom' },
+      });
+    }
+
+    if (pantalla.mostrarMoneda) {
+      pasos.push({
+        id: 'carga-moneda',
+        title: 'Moneda',
+        text: 'Elija la moneda o marque que se use la indicada en cada fila de la planilla. Elegir una desmarca la otra.',
+        attachTo: { element: '[data-tour="carga-moneda"]', on: 'bottom' },
+      });
+    }
+
+    if (pantalla.mostrarNuevosIntermediarios) {
+      pasos.push({
+        id: 'carga-nuevos-intermediarios',
+        title: 'Nuevo organizador / cobrador',
+        text: 'Márquelos para reemplazar al organizador o al cobrador de la póliza por el que elija aquí, con su %. Se habilitan con compañía, negocio y ramo elegidos; si el % queda en 0, se le preguntará antes de cargar.',
+        attachTo: { element: '[data-tour="carga-nuevos-intermediarios"]', on: 'bottom' },
+      });
+    }
+
+    if (pantalla.mostrarIntermediarios) {
+      pasos.push({
+        id: 'carga-intermediarios',
+        title: 'Intermediarios',
+        text: 'Elija el productor (obligatorio) y los demás intermediarios. Al elegir uno se proponen su % y «aplica sobre» programados en BO; si cambia un % propuesto, se le pide confirmar.',
+        attachTo: { element: '[data-tour="carga-intermediarios"]', on: 'bottom' },
+      });
+    }
+
+    if (pantalla.mostrarEmision) {
+      pasos.push({
+        id: 'carga-emision',
+        title: 'Emisión',
+        text: 'Marque si los documentos deben quedar emitidos y elija si las fechas de emisión y recepción se ingresan aquí o se toman de cada fila de la planilla.',
+        attachTo: { element: '[data-tour="carga-emision"]', on: 'bottom' },
+      });
+    }
+
+    pasos.push({
+      id: 'carga-forma-pago',
+      title: 'Forma de pago',
+      text: 'Defina si el pago es automático, el plan y la forma de pago, o si se toman de la planilla.',
+      attachTo: { element: '[data-tour="carga-forma-pago"]', on: 'bottom' },
+    });
   }
 
   pasos.push(
@@ -121,7 +174,11 @@ export function buildListarLotesTourSteps(hayRegistros: boolean, puedeCargarLote
  * Los selectores [data-tour="..."] se marcan en detalle-lote.component.html.
  * El filtro y las filas no existen en un lote eliminado.
  */
-export function buildDetalleLoteTourSteps(mostrarTablaDetalles: boolean, hayRegistrosDetalle: boolean): StepOptions[] {
+export function buildDetalleLoteTourSteps(
+  mostrarTablaDetalles: boolean,
+  hayRegistrosDetalle: boolean,
+  hayPagoExistente: boolean,
+): StepOptions[] {
   const pasos: StepOptions[] = [
     {
       id: 'detalle-resumen',
@@ -143,6 +200,15 @@ export function buildDetalleLoteTourSteps(mostrarTablaDetalles: boolean, hayRegi
       title: 'Filtrar registros',
       text: 'Filtre las filas de la planilla según su estado. Al pasar el mouse o hacer clic en el estado de una fila con error, se ven sus motivos.',
       attachTo: { element: '[data-tour="detalle-filtro-estado"]', on: 'bottom' },
+    });
+  }
+
+  if (hayPagoExistente) {
+    pasos.push({
+      id: 'detalle-pago-existente',
+      title: 'Pago del documento existente',
+      text: 'Una fila rechazada porque su documento ya existía puede igual pagar ese documento si está impago. La fila sigue rechazada; aquí se ve solo el resultado de ese pago.',
+      attachTo: { element: '[data-tour="detalle-pago-existente"]', on: 'bottom' },
     });
   }
 

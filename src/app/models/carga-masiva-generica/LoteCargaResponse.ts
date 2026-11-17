@@ -1,3 +1,4 @@
+import { AplicaSobre } from './AplicaSobre';
 import { EstadoLoteCarga } from './EstadoLoteCarga';
 import { FechaPropuestaOrigen } from './FechaPropuestaOrigen';
 import { FechasEmisionOrigen } from './FechasEmisionOrigen';
@@ -34,6 +35,27 @@ export interface LoteCargaResponse {
   fechasEmisionOrigen?: FechasEmisionOrigen;
   fechaEmision?: string;
   fechaRecepcion?: string;
+  nuevoOrganizador: boolean;
+  codOrganizador?: number;
+  porComOrganizador?: number;
+  nuevoCobrador: boolean;
+  codCobrador?: number;
+  porComCobrador?: number;
+  // Intermediarios de pantalla (carga 2); el organizador y el cobrador son los de arriba.
+  codProductor?: number;
+  porComProductor?: number;
+  aplicaProductor?: AplicaSobre;
+  aplicaOrganizador?: AplicaSobre;
+  codIntermediario?: number;
+  porComIntermediario?: number;
+  aplicaIntermediario?: AplicaSobre;
+  codAgencia?: number;
+  porComAgencia?: number;
+  aplicaAgencia?: AplicaSobre;
+  codEjecutivo?: number;
+  porComEjecutivo?: number;
+  aplicaEjecutivo?: AplicaSobre;
+  aplicaCobrador?: AplicaSobre;
   registraPago: boolean;
   pagoPorItem: boolean;
   pagoDesdePlanilla: boolean;

@@ -5,7 +5,11 @@ import { UsuarioCargaMasiva } from 'src/app/models/carga-masiva-generica/Usuario
 import { LayoutPlanilla } from 'src/app/models/carga-masiva-generica/LayoutPlanilla';
 import { FechaPropuestaOrigen } from 'src/app/models/carga-masiva-generica/FechaPropuestaOrigen';
 import { FechasEmisionOrigen } from 'src/app/models/carga-masiva-generica/FechasEmisionOrigen';
+import { EstadoPagoExistente } from 'src/app/models/carga-masiva-generica/EstadoPagoExistente';
+import { AplicaSobre } from 'src/app/models/carga-masiva-generica/AplicaSobre';
+import { LoteCargaDetalleResponse } from 'src/app/models/carga-masiva-generica/LoteCargaDetalleResponse';
 import { ConfirmDialogData } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
+import { configTipoCarga } from './tipos-carga.config';
 
 // Coincide con EstadoLoteCarga.INTERMEDIOS del backend.
 export const ESTADOS_EN_PROCESO: EstadoLoteCarga[] = [
@@ -69,11 +73,26 @@ export function dialogoEjecucion(lote: LoteCargaResponse): ConfirmDialogData {
       ? `¿${retoma ? 'Retomar' : 'Reintentar'} la ejecución del lote #${lote.loteId}? El lote pasa a la cola de `
         + 'ejecución; al ejecutarse sigue con lo que no se cargó, sin repetir las filas ya cargadas.'
       : `¿Ejecutar el lote #${lote.loteId} ("${lote.nombreArchivoOrigen}")? El lote pasa a la cola de ejecución y se `
-        + 'vuelve a validar al ejecutarse.',
+        + 'vuelve a validar al ejecutarse.' + avisoSinFilasValidas(lote),
     confirmText: retoma ? 'Retomar' : reintento ? 'Reintentar' : 'Ejecutar',
     cancelText: 'Cancelar',
     type: 'warning',
   };
+}
+
+// Con todas las filas rechazadas la ejecucion igual puede pagar documentos existentes impagos.
+function avisoSinFilasValidas(lote: LoteCargaResponse): string {
+  if (lote.totalFilasOk !== 0) {
+    return '';
+  }
+
+  const puedePagar = configTipoCarga(lote.tipoCarga).pagaDocumentoExistente
+    && (lote.multiplesCompanias || (lote.dejaEmitido && lote.registraPago));
+
+  return puedePagar
+    ? ' Ninguna fila quedó válida: si siguen rechazadas al revalidar, la ejecución solo pagará los documentos ya '
+      + 'existentes que estén impagos (filas rechazadas porque el documento ya existía).'
+    : ' Ninguna fila quedó válida: si siguen rechazadas al revalidar, no se grabará nada.';
 }
 
 // Datos del ConfirmDialog de cancelar, segun este en la cola o en curso.
@@ -243,6 +262,47 @@ export function tooltipRegistroError(registroError: string | undefined): string 
   }
 
   return motivos.length === 1 ? motivos[0] : `${motivos.length} errores`;
+}
+
+// Solo en las filas con documento existente a pagar.
+export function tienePagoExistente(detalle: LoteCargaDetalleResponse): boolean {
+  return detalle.pagoExistenteDocuCodigo != null;
+}
+
+export function pagoExistenteLabel(detalle: LoteCargaDetalleResponse): string {
+  switch (detalle.pagoExistenteEstado) {
+    case EstadoPagoExistente.PAGADO: return 'Documento existente pagado';
+    case EstadoPagoExistente.NO_PAGADO: return detalle.pagoExistenteMensaje || 'No se pagó el documento existente';
+    case EstadoPagoExistente.ERROR: return 'Error técnico al pagar; se reintenta al volver a ejecutar';
+    default: return 'Se pagará el documento existente si está impago';
+  }
+}
+
+export function pagoExistenteClase(estado: EstadoPagoExistente | undefined): string {
+  switch (estado) {
+    case EstadoPagoExistente.PAGADO: return 'bg-light-success text-success';
+    case EstadoPagoExistente.NO_PAGADO: return 'bg-light-warning text-warning';
+    case EstadoPagoExistente.ERROR: return 'bg-light-error text-error';
+    default: return 'bg-light-info text-info';
+  }
+}
+
+// La fila sigue rechazada: el pago es aparte del motivo del rechazo.
+export function pagoExistenteTooltip(detalle: LoteCargaDetalleResponse): string {
+  const base = `Documento existente ${detalle.pagoExistenteDocuCodigo}. La fila sigue rechazada; este es solo el pago de ese documento.`;
+  return detalle.pagoExistenteEstado === EstadoPagoExistente.ERROR && detalle.pagoExistenteMensaje
+    ? `${base} ${detalle.pagoExistenteMensaje}`
+    : base;
+}
+
+const APLICA_SOBRE_LABEL: Record<AplicaSobre, string> = {
+  [AplicaSobre.PRIN]: 'Prima neta',
+  [AplicaSobre.PRIT]: 'Prima total',
+  [AplicaSobre.COMP]: 'Comisión del productor',
+};
+
+export function aplicaSobreLabel(aplica: AplicaSobre | null | undefined): string {
+  return aplica ? (APLICA_SOBRE_LABEL[aplica] ?? aplica) : '-';
 }
 
 const LAYOUT_LABEL: Record<LayoutPlanilla, string> = {

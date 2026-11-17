@@ -45,9 +45,7 @@
             <mat-checkbox formControlName="multiplesCompanias">Múltiples Compañías</mat-checkbox>
             <p class="text-xs text-gray-500 mt-1 mb-0">
               @if (multiplesCompanias()) {
-                Compañía, negocio, ramo, plan, moneda, pago automático, pago por ítem, fecha de nacimiento y fecha de
-                propuesta se leen de cada fila de la planilla. La forma de pago se toma de la planilla y la fecha de
-                pago es la de hoy.
+                {{ textoMultiplesCompanias() }}
               } @else {
                 Los parámetros de la carga se definen en esta pantalla y aplican a todas las filas.
               }
@@ -67,7 +65,9 @@
           </div>
 
           <div class="col-span-12 md:col-span-4">
-            <mat-label class="font-medium mb-2 block">Negocio (opcional)</mat-label>
+            <mat-label class="font-medium mb-2 block">
+              Negocio{{ config().negocioObligatorio ? '' : ' (opcional)' }}
+            </mat-label>
             <app-selector-catalogo
               formControlName="negoCodigo"
               [opciones]="negocios()"
@@ -82,19 +82,28 @@
             <app-selector-catalogo formControlName="ramoCodigo" [opciones]="ramos()" placeholder="Busque un ramo..." />
           </div>
 
-          @if (mostrarPlanYMoneda()) {
-            <div class="col-span-12 md:col-span-4">
-              <mat-label class="font-medium mb-2 block">Plan de cobertura</mat-label>
+          @if (mostrarPlan()) {
+            <div class="col-span-12 md:col-span-4" data-tour="carga-plan">
+              <mat-label class="font-medium mb-2 block">
+                Plan de cobertura{{ config().planObligatorio ? '' : ' (opcional)' }}
+              </mat-label>
               <app-selector-catalogo
                 formControlName="plcoCorrelativo"
                 [opciones]="planesCobertura()"
                 placeholder="Requiere compañía, negocio y ramo..."
               />
               <mat-checkbox formControlName="usaPlanPlanilla">Usa plan de cobertura indicado en la planilla</mat-checkbox>
+              @if (config().ayudaPlan) {
+                <p class="text-xs text-gray-500 mt-1 mb-0">{{ config().ayudaPlan }}</p>
+              }
             </div>
+          }
 
-            <div class="col-span-12 md:col-span-4">
-              <mat-label class="font-medium mb-2 block">Moneda</mat-label>
+          @if (mostrarMoneda()) {
+            <div class="col-span-12 md:col-span-4" data-tour="carga-moneda">
+              <mat-label class="font-medium mb-2 block">
+                Moneda{{ config().monedaObligatoria ? '' : ' (opcional)' }}
+              </mat-label>
               <app-selector-catalogo formControlName="domiMoneCod" [opciones]="monedas()" placeholder="Busque una moneda..." />
               <mat-checkbox formControlName="usaMonedaPlanilla">Usa moneda indicada en la planilla</mat-checkbox>
             </div>
@@ -127,9 +136,119 @@
             </div>
           }
 
+          <!-- Nuevo organizador / cobrador (carga 1) -->
+          @if (mostrarNuevosIntermediarios()) {
+            <div class="col-span-12 border-t border-border pt-4" data-tour="carga-nuevos-intermediarios">
+              <p class="text-base font-semibold mb-0">Nuevo organizador / cobrador</p>
+              <p class="text-xs text-gray-500 mt-1 mb-0">
+                Reemplazan al organizador o al cobrador de la póliza. Se pueden marcar con compañía, negocio y ramo
+                elegidos.
+              </p>
+            </div>
+
+            @for (rol of rolesNuevos; track rol.rol) {
+              <div class="col-span-12">
+                <mat-checkbox [formControlName]="rol.rol === 'ORGA' ? 'nuevoOrganizador' : 'nuevoCobrador'">
+                  Utilizar {{ rol.etiqueta.toLowerCase() }} señalado en pantalla
+                </mat-checkbox>
+              </div>
+
+              @if (rol.rol === 'ORGA' ? valores().nuevoOrganizador : valores().nuevoCobrador) {
+                <div class="col-span-12 md:col-span-6">
+                  <mat-label class="font-medium mb-2 block">{{ rol.etiqueta }}</mat-label>
+                  <app-selector-catalogo
+                    [formControlName]="rol.campoCodigo"
+                    [opciones]="opcionesIntermediarios()[rol.rol] ?? []"
+                    [placeholder]="'Busque un ' + rol.etiqueta.toLowerCase() + '...'"
+                  />
+                </div>
+
+                <div class="col-span-12 md:col-span-2">
+                  <mat-label class="font-medium mb-2 block">% comisión</mat-label>
+                  <mat-form-field appearance="outline" class="w-full hide-hint">
+                    <input
+                      matInput
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      [formControlName]="rol.campoPorcentaje"
+                      (blur)="confirmarCambioPorcentaje(rol)"
+                    />
+                  </mat-form-field>
+                </div>
+              }
+            }
+          }
+
+          <!-- Intermediarios de pantalla (carga 2) -->
+          @if (mostrarIntermediarios()) {
+            <div class="col-span-12 border-t border-border pt-4" data-tour="carga-intermediarios">
+              <p class="text-base font-semibold mb-0">Intermediarios</p>
+              <p class="text-xs text-gray-500 mt-1 mb-0">
+                Requieren compañía, negocio y ramo. Al elegir uno se proponen su % y «aplica sobre» programados en BO.
+                El productor es obligatorio; los demás niveles y sus % los exige la validación según la configuración
+                del negocio.
+              </p>
+            </div>
+
+            @if (comisionSoloPorCobertura()) {
+              <div class="col-span-12 flex items-start gap-2 rounded-md border border-warning bg-light-warning text-warning px-3 py-2 text-sm">
+                <mat-icon class="shrink-0">warning</mat-icon>
+                <span>
+                  Con esta relación de comisión, un plan y los seis intermediarios, la comisión es por cobertura y no
+                  se ingresa aquí: los % quedan vacíos y no se puede usar el plan de la planilla. La validación del
+                  lote informará el motivo si no se puede cargar.
+                </span>
+              </div>
+            } @else if (comisionPorCobertura()) {
+              <div class="col-span-12 text-xs text-gray-500">
+                La relación de comisión de esta compañía, negocio y ramo es por cobertura: los % se proponen en 0.
+              </div>
+            }
+
+            @for (rol of rolesPantalla; track rol.rol) {
+              <div class="col-span-12 md:col-span-6">
+                <mat-label class="font-medium mb-2 block">
+                  {{ rol.etiqueta }}{{ rol.rol === 'PROD' ? '' : ' (opcional)' }}
+                </mat-label>
+                <app-selector-catalogo
+                  [formControlName]="rol.campoCodigo"
+                  [opciones]="opcionesIntermediarios()[rol.rol] ?? []"
+                  [placeholder]="hayClaveCnr() ? 'Busque un ' + rol.etiqueta.toLowerCase() + '...' : 'Elija compañía, negocio y ramo'"
+                />
+              </div>
+
+              <div class="col-span-6 md:col-span-2">
+                <mat-label class="font-medium mb-2 block">% comisión</mat-label>
+                <mat-form-field appearance="outline" class="w-full hide-hint">
+                  <input
+                    matInput
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    [formControlName]="rol.campoPorcentaje"
+                    (blur)="confirmarCambioPorcentaje(rol)"
+                  />
+                </mat-form-field>
+              </div>
+
+              <div class="col-span-6 md:col-span-4">
+                <mat-label class="font-medium mb-2 block">Aplica sobre</mat-label>
+                <mat-form-field appearance="outline" class="w-full hide-hint">
+                  <mat-select [formControlName]="rol.campoAplica">
+                    <mat-option [value]="null">Por defecto ({{ aplicaSobreLabel(rol.aplicaPorDefecto) }})</mat-option>
+                    @for (aplica of rol.opcionesAplica; track aplica) {
+                      <mat-option [value]="aplica">{{ aplicaSobreLabel(aplica) }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+              </div>
+            }
+          }
+
           <!-- Dejar emitido (solo tipos que lo permiten) -->
           @if (mostrarEmision()) {
-            <div class="col-span-12 border-t border-border pt-4">
+            <div class="col-span-12 border-t border-border pt-4" data-tour="carga-emision">
               <p class="text-base font-semibold mb-0">Emisión</p>
             </div>
 

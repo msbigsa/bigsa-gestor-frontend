@@ -6,5 +6,7 @@ export interface TipoCargaDisponible {
   opcionLegacy: number;
   descripcion: string;
   permiteDejarEmitido: boolean;
+  // Nuevo organizador / nuevo cobrador de pantalla.
+  permiteNuevosIntermediarios: boolean;
   permiteMultiplesCompanias: boolean;
 }

@@ -5,6 +5,9 @@ import { environment } from 'src/environments/environment';
 import { ItemCatalogo } from '../../models/carga-masiva-generica/ItemCatalogo';
 import { Moneda } from '../../models/carga-masiva-generica/Moneda';
 import { PlanPago } from '../../models/carga-masiva-generica/PlanPago';
+import { IntermediarioCatalogo } from '../../models/carga-masiva-generica/IntermediarioCatalogo';
+import { RelacionComision } from '../../models/carga-masiva-generica/RelacionComision';
+import { RolIntermediario } from '../../models/carga-masiva-generica/RolIntermediario';
 
 // Catalogos de la pantalla de carga; replican los "help" del VB6.
 @Injectable({
@@ -51,5 +54,25 @@ export class CargaMasivaGenericaCatalogoService {
   // tipo 1 = tarjetas, tipo 2 = bancos.
   listarInstituciones(tipo: 1 | 2): Observable<ItemCatalogo[]> {
     return this.http.get<ItemCatalogo[]>(`${this.url}/instituciones-financieras`, { params: { tipo } });
+  }
+
+  // Con su % y "aplica sobre" nominales, que la pantalla propone al elegirlos.
+  listarIntermediarios(ciasCodigo: number, negoCodigo: number, ramoCodigo: number, rol: RolIntermediario): Observable<IntermediarioCatalogo[]> {
+    const params = new HttpParams()
+      .set('ciasCodigo', ciasCodigo)
+      .set('negoCodigo', negoCodigo)
+      .set('ramoCodigo', ramoCodigo)
+      .set('rol', rol);
+
+    return this.http.get<IntermediarioCatalogo[]>(`${this.url}/intermediarios`, { params });
+  }
+
+  obtenerRelacionComision(ciasCodigo: number, negoCodigo: number, ramoCodigo: number): Observable<RelacionComision> {
+    const params = new HttpParams()
+      .set('ciasCodigo', ciasCodigo)
+      .set('negoCodigo', negoCodigo)
+      .set('ramoCodigo', ramoCodigo);
+
+    return this.http.get<RelacionComision>(`${this.url}/relacion-comision`, { params });
   }
 }

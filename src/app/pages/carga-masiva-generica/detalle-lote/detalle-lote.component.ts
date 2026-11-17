@@ -1,19 +1,23 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, effect, inject, input, signal, untracked } from '@angular/core';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { CommonModule, DatePipe } from '@angular/common';
 import { HttpResponse } from '@angular/common/http';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
-import { EMPTY, interval } from 'rxjs';
-import { catchError, exhaustMap, filter } from 'rxjs/operators';
+import { EMPTY, forkJoin, interval, of } from 'rxjs';
+import { catchError, exhaustMap, filter, map, switchMap } from 'rxjs/operators';
 
 import { MaterialModule } from 'src/app/material.module';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
 import { ConfirmDialogResult } from 'src/app/shared/components/confirm-dialog/confirm-dialog-result.enum';
 import { CargaMasivaGenericaLoteService } from 'src/app/services/carga-masiva-generica/cargaMasivaGenericaLote.service';
 import { CargaMasivaGenericaCatalogoService } from 'src/app/services/carga-masiva-generica/cargaMasivaGenericaCatalogo.service';
+import { CargaMasivaGenericaTipoCargaService } from 'src/app/services/carga-masiva-generica/cargaMasivaGenericaTipoCarga.service';
+import { TipoCargaDisponible } from 'src/app/models/carga-masiva-generica/TipoCargaDisponible';
+import { IntermediarioCatalogo } from 'src/app/models/carga-masiva-generica/IntermediarioCatalogo';
+import { RolIntermediario } from 'src/app/models/carga-masiva-generica/RolIntermediario';
 import { ItemCatalogo } from 'src/app/models/carga-masiva-generica/ItemCatalogo';
 import { PlanPago } from 'src/app/models/carga-masiva-generica/PlanPago';
 import { LoteCargaResponse } from 'src/app/models/carga-masiva-generica/LoteCargaResponse';
@@ -30,6 +34,7 @@ import { TourService } from 'src/app/shared/tour/tour.service';
 import { buildDetalleLoteTourSteps } from '../carga-masiva-generica-tour.steps';
 import {
   accionEjecutarLabel,
+  aplicaSobreLabel,
   dialogoCancelacion,
   dialogoEjecucion,
   esReintentoEjecucion,
@@ -50,16 +55,21 @@ import {
   layoutLabel,
   loteEnProceso,
   motivosError,
+  pagoExistenteClase,
+  pagoExistenteLabel,
+  pagoExistenteTooltip,
   puedeCancelarEjecucion,
   puedeEjecutarLote,
   siNo,
   tieneErrorLote,
+  tienePagoExistente,
   tooltipEstadoLote,
   tooltipRegistroError,
   usuarioDescripcion,
   usuarioTexto,
 } from '../shared/estados-carga-masiva.util';
 import { configTipoCarga } from '../shared/tipos-carga.config';
+import { ROLES_NUEVOS, ROLES_PANTALLA, RolPantalla } from '../shared/intermediarios-pantalla';
 import {
   CargarCorreccionDialogCargaMasivaComponent,
   CargarCorreccionDialogData,
@@ -92,6 +102,7 @@ export class DetalleLoteCargaMasivaComponent implements OnInit {
 
   private readonly loteService = inject(CargaMasivaGenericaLoteService);
   private readonly catalogoService = inject(CargaMasivaGenericaCatalogoService);
+  private readonly tipoCargaService = inject(CargaMasivaGenericaTipoCargaService);
   private readonly router = inject(Router);
   private readonly datePipe = inject(DatePipe);
   private readonly dialog = inject(MatDialog);
@@ -118,6 +129,41 @@ export class DetalleLoteCargaMasivaComponent implements OnInit {
   private readonly companias = toSignal(this.catalogoService.listarCompanias(), { initialValue: [] as ItemCatalogo[] });
   private readonly ramos = toSignal(this.catalogoService.listarRamos(), { initialValue: [] as ItemCatalogo[] });
   private readonly planesPago = toSignal(this.catalogoService.listarPlanesPago(), { initialValue: [] as PlanPago[] });
+  private readonly tiposCarga = toSignal(this.tipoCargaService.listarDisponibles(), { initialValue: [] as TipoCargaDisponible[] });
+  readonly tipoCarga = computed(() => this.tiposCarga().find(t => t.tipoCarga === this.lote()?.tipoCarga) ?? null);
+  readonly config = computed(() => configTipoCarga(this.lote()?.tipoCarga));
+
+  // Negocios por compania, para el nombre en las filas y los parametros.
+  private readonly negociosPorCia = signal<Record<number, ItemCatalogo[]>>({});
+  private readonly ciasPedidas = new Set<number>();
+
+  // Intermediarios de pantalla del lote, para mostrar su nombre.
+  private readonly rolesLote = computed<RolPantalla[]>(() => {
+    const lote = this.lote();
+    if (!lote || lote.multiplesCompanias) {
+      return [];
+    }
+    if (this.config().intermediariosPantalla) {
+      return ROLES_PANTALLA;
+    }
+    return lote.nuevoOrganizador || lote.nuevoCobrador ? ROLES_NUEVOS : [];
+  });
+  private readonly consultaIntermediarios = computed(() => {
+    const lote = this.lote();
+    const roles = this.rolesLote().map(r => r.rol);
+    return lote?.ciasCodigo && lote.negoCodigo && lote.ramoCodigo && roles.length
+      ? { clave: [lote.ciasCodigo, lote.negoCodigo, lote.ramoCodigo] as const, roles }
+      : null;
+  }, { equal: (a, b) => a?.clave.join('|') === b?.clave.join('|') && a?.roles.join('|') === b?.roles.join('|') });
+  private readonly intermediarios = toSignal(
+    toObservable(this.consultaIntermediarios).pipe(
+      switchMap(consulta => !consulta ? of({} as Partial<Record<RolIntermediario, IntermediarioCatalogo[]>>) : forkJoin(Object.fromEntries(
+        consulta.roles.map(rol => [rol, this.catalogoService.listarIntermediarios(...consulta.clave, rol)
+          .pipe(catchError(() => of([] as IntermediarioCatalogo[])))])
+      ))),
+    ),
+    { initialValue: {} as Partial<Record<RolIntermediario, IntermediarioCatalogo[]>> },
+  );
 
   readonly detalles = signal<LoteCargaDetalleResponse[]>([]);
   readonly pageIndex = signal(0);
@@ -130,6 +176,9 @@ export class DetalleLoteCargaMasivaComponent implements OnInit {
   readonly parametrosExpandido = signal(false);
   readonly detalleExpandido = signal(true);
 
+  // Pago del documento existente solo si alguna fila de la pagina lo trae.
+  readonly hayPagoExistente = computed(() => this.detalles().some(d => tienePagoExistente(d)));
+
   // Endoso solo si alguna fila de la pagina lo trae.
   readonly displayedColumns = computed(() => [
     'fila',
@@ -137,9 +186,12 @@ export class DetalleLoteCargaMasivaComponent implements OnInit {
     'propuesta',
     'item',
     'compania',
+    'negocio',
+    'ramo',
     ...(this.detalles().some(d => !!d.endoso) ? ['endoso'] : []),
     'estado',
     'error',
+    ...(this.hayPagoExistente() ? ['pagoExistente'] : []),
     'accion',
   ]);
 
@@ -157,6 +209,12 @@ export class DetalleLoteCargaMasivaComponent implements OnInit {
     };
     const fecha = (f: string | undefined) => (f ? this.datePipe.transform(f, 'dd-MM-yyyy') ?? f : '-');
 
+    const config = this.config();
+    const tipo = this.tipoCarga();
+    const intermediario = (rol: RolPantalla, codigo: number | undefined) =>
+      conNombre(codigo, this.intermediarios()[rol.rol] ?? []);
+    const porcentaje = (v: number | undefined) => (v == null ? '-' : `${v}%`);
+
     const generales: ParametroLote[] = [
       { etiqueta: 'Tipo de carga', valor: lote.tipoCargaDescripcion },
       { etiqueta: 'Layout de la planilla', valor: layoutLabel(lote.layout) },
@@ -167,14 +225,19 @@ export class DetalleLoteCargaMasivaComponent implements OnInit {
     if (!lote.multiplesCompanias) {
       generales.push(
         { etiqueta: 'Compañía', valor: conNombre(lote.ciasCodigo, this.companias()) },
-        { etiqueta: 'Negocio', valor: valor(lote.negoCodigo) },
+        { etiqueta: 'Negocio', valor: this.negocioTexto(lote.ciasCodigo, lote.negoCodigo) },
         { etiqueta: 'Ramo', valor: conNombre(lote.ramoCodigo, this.ramos()) },
       );
 
-      if (configTipoCarga(lote.tipoCarga).usaPlanYMoneda) {
+      if (config.usaPlan) {
         generales.push(
           { etiqueta: 'Plan de cobertura', valor: valor(lote.plcoCorrelativo) },
           { etiqueta: 'Usa plan de la planilla', valor: siNo(lote.usaPlanPlanilla) },
+        );
+      }
+
+      if (config.usaMoneda) {
+        generales.push(
           { etiqueta: 'Moneda', valor: valor(lote.domiMoneCod) },
           { etiqueta: 'Usa moneda de la planilla', valor: siNo(lote.usaMonedaPlanilla) },
         );
@@ -232,17 +295,45 @@ export class DetalleLoteCargaMasivaComponent implements OnInit {
       { seccion: 'Forma de pago', items: pago },
     ];
 
-    if (lote.dejaEmitido) {
-      const emision: ParametroLote[] = [
-        { etiqueta: 'Origen de las fechas', valor: fechasEmisionOrigenLabel(lote.fechasEmisionOrigen) },
-      ];
-      if (lote.fechasEmisionOrigen === FechasEmisionOrigen.PANTALLA) {
+    if (lote.dejaEmitido || (tipo?.permiteDejarEmitido && !lote.multiplesCompanias)) {
+      const emision: ParametroLote[] = [{ etiqueta: 'Dejar emitidos', valor: siNo(lote.dejaEmitido) }];
+      if (lote.dejaEmitido) {
+        emision.push({ etiqueta: 'Origen de las fechas', valor: fechasEmisionOrigenLabel(lote.fechasEmisionOrigen) });
+      }
+      if (lote.dejaEmitido && lote.fechasEmisionOrigen === FechasEmisionOrigen.PANTALLA) {
         emision.push(
           { etiqueta: 'Fecha de emisión', valor: fecha(lote.fechaEmision) },
           { etiqueta: 'Fecha de recepción', valor: fecha(lote.fechaRecepcion) },
         );
       }
       secciones.push({ seccion: 'Emisión', items: emision });
+    }
+
+    if (tipo?.permiteNuevosIntermediarios && !lote.multiplesCompanias) {
+      secciones.push({
+        seccion: 'Nuevo organizador / cobrador',
+        items: ROLES_NUEVOS.map(rol => {
+          const marcado = rol.campoCodigo === 'codOrganizador' ? lote.nuevoOrganizador : lote.nuevoCobrador;
+          return {
+            etiqueta: `Nuevo ${rol.etiqueta.toLowerCase()}`,
+            valor: marcado
+              ? `${intermediario(rol, lote[rol.campoCodigo])} · ${porcentaje(lote[rol.campoPorcentaje])}`
+              : 'No',
+          };
+        }),
+      });
+    }
+
+    if (config.intermediariosPantalla && !lote.multiplesCompanias) {
+      secciones.push({
+        seccion: 'Intermediarios',
+        items: ROLES_PANTALLA.map(rol => ({
+          etiqueta: rol.etiqueta,
+          valor: lote[rol.campoCodigo] == null ? '-'
+            : `${intermediario(rol, lote[rol.campoCodigo])} · ${porcentaje(lote[rol.campoPorcentaje])} · `
+              + (lote[rol.campoAplica] ? aplicaSobreLabel(lote[rol.campoAplica]) : `${aplicaSobreLabel(rol.aplicaPorDefecto)} (por defecto)`),
+        })),
+      });
     }
 
     return secciones;
@@ -262,6 +353,10 @@ export class DetalleLoteCargaMasivaComponent implements OnInit {
   readonly accionEjecutarLabel = accionEjecutarLabel;
   readonly estadoVisibleLabel = estadoVisibleLabel;
   readonly estadoVisibleClase = estadoVisibleClase;
+  readonly pagoExistenteLabel = pagoExistenteLabel;
+  readonly pagoExistenteClase = pagoExistenteClase;
+  readonly pagoExistenteTooltip = pagoExistenteTooltip;
+  readonly tienePagoExistente = tienePagoExistente;
 
   constructor() {
     effect(() => {
@@ -275,6 +370,40 @@ export class DetalleLoteCargaMasivaComponent implements OnInit {
         this.cargarCorrecciones();
       });
     });
+
+    // Pide los negocios de las companias que aparecen, una vez por compania.
+    effect(() => {
+      const cias = [this.lote()?.ciasCodigo, ...this.detalles().map(d => d.ciasCodigo)];
+
+      untracked(() => cias.forEach(cia => this.pedirNegocios(cia)));
+    });
+  }
+
+  private pedirNegocios(cia: number | undefined): void {
+    if (cia == null || this.ciasPedidas.has(cia)) {
+      return;
+    }
+
+    this.ciasPedidas.add(cia);
+    this.catalogoService.listarNegocios(cia)
+      .pipe(catchError(() => of([] as ItemCatalogo[])))
+      .subscribe(negocios => this.negociosPorCia.update(actual => ({ ...actual, [cia]: negocios })));
+  }
+
+  negocioTexto(cia: number | undefined, negocio: number | undefined): string {
+    if (negocio == null) {
+      return '-';
+    }
+    const nombre = cia == null ? undefined : this.negociosPorCia()[cia]?.find(n => n.codigo === negocio)?.descripcion;
+    return nombre ? `${negocio} - ${nombre}` : String(negocio);
+  }
+
+  ramoTexto(codigo: number | undefined): string {
+    if (codigo == null) {
+      return '-';
+    }
+    const nombre = this.ramos().find(r => r.codigo === codigo)?.descripcion;
+    return nombre ? `${codigo} - ${nombre}` : String(codigo);
   }
 
   ngOnInit(): void {
@@ -407,7 +536,7 @@ export class DetalleLoteCargaMasivaComponent implements OnInit {
   }
 
   iniciarTour(): void {
-    this.tourService.start(buildDetalleLoteTourSteps(!this.loteEliminado(), this.detalles().length > 0));
+    this.tourService.start(buildDetalleLoteTourSteps(!this.loteEliminado(), this.detalles().length > 0, this.hayPagoExistente()));
   }
 
   ejecutar(): void {
