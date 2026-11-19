@@ -270,18 +270,10 @@ export class CargarLoteCargaMasivaComponent {
     this.datosComision()?.catalogos ?? {}
   );
 
-  // validaCobeComisiones: relacion 2 con plan y los seis intermediarios, la comision es por cobertura y no se ingresa.
-  readonly comisionSoloPorCobertura = computed(() => {
-    const v = this.valores();
-    return this.mostrarIntermediarios() && this.comisionPorCobertura() && !!v.plcoCorrelativo
-      && ROLES_PANTALLA.every(r => !!v[r.campoCodigo]);
-  });
-
   // % propuesto por rol: cambiarlo pide confirmacion.
   private readonly porcentajesPropuestos = new Map<RolIntermediario, number | null>();
   private productorPropuestoPara: string | null = null;
   private confirmandoPorcentaje = false;
-  private soloPorCoberturaAnterior = false;
 
   readonly planPagoSeleccionado = computed(() =>
     this.planesPago().find(plan => plan.fpagCodigo === this.valores().fpagCodigo) ?? null
@@ -465,12 +457,6 @@ export class CargarLoteCargaMasivaComponent {
 
       untracked(() => this.proponerProductorPorDefecto(datos));
     });
-
-    effect(() => {
-      const soloPorCobertura = this.comisionSoloPorCobertura();
-
-      untracked(() => this.aplicarComisionPorCobertura(soloPorCobertura));
-    });
   }
 
   onTipoCargaChange(tipo: TipoCargaDisponible): void {
@@ -571,10 +557,6 @@ export class CargarLoteCargaMasivaComponent {
       return;
     }
 
-    if (this.comisionSoloPorCobertura()) {
-      return;
-    }
-
     if (this.comisionPorCobertura()) {
       this.porcentajesPropuestos.set(rol.rol, 0);
       porcentaje.setValue(0);
@@ -601,32 +583,6 @@ export class CargarLoteCargaMasivaComponent {
     if (this.form.controls.codProductor.value == null && productores.some(p => p.codigo === PRODUCTOR_POR_DEFECTO)) {
       this.form.controls.codProductor.setValue(PRODUCTOR_POR_DEFECTO);
     }
-  }
-
-  // Los % y el "aplica sobre" quedan vacios y bloqueados, y "usar plan de la planilla" desmarcada y bloqueada.
-  private aplicarComisionPorCobertura(soloPorCobertura: boolean): void {
-    const controles = [
-      ...ROLES_PANTALLA.map(r => this.form.controls[r.campoPorcentaje]),
-      ...ROLES_PANTALLA.map(r => this.form.controls[r.campoAplica]),
-      this.form.controls.usaPlanPlanilla,
-    ];
-
-    if (soloPorCobertura) {
-      this.porcentajesPropuestos.clear();
-      this.form.controls.usaPlanPlanilla.setValue(false);
-      ROLES_PANTALLA.forEach(r => {
-        this.form.controls[r.campoPorcentaje].setValue(null);
-        this.form.controls[r.campoAplica].setValue(null);
-      });
-      controles.forEach(control => control.disable());
-    } else {
-      controles.forEach(control => control.enable());
-      // Al salir de ese caso los % vuelven a proponerse.
-      if (this.soloPorCoberturaAnterior) {
-        ROLES_PANTALLA.forEach(r => this.proponerComision(r, this.form.controls[r.campoCodigo].value));
-      }
-    }
-    this.soloPorCoberturaAnterior = soloPorCobertura;
   }
 
   // Deja la pantalla como recien abierta, salvo el modo.

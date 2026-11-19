@@ -191,16 +191,7 @@
               </p>
             </div>
 
-            @if (comisionSoloPorCobertura()) {
-              <div class="col-span-12 flex items-start gap-2 rounded-md border border-warning bg-light-warning text-warning px-3 py-2 text-sm">
-                <mat-icon class="shrink-0">warning</mat-icon>
-                <span>
-                  Con esta relación de comisión, un plan y los seis intermediarios, la comisión es por cobertura y no
-                  se ingresa aquí: los % quedan vacíos y no se puede usar el plan de la planilla. La validación del
-                  lote informará el motivo si no se puede cargar.
-                </span>
-              </div>
-            } @else if (comisionPorCobertura()) {
+            @if (comisionPorCobertura()) {
               <div class="col-span-12 text-xs text-gray-500">
                 La relación de comisión de esta compañía, negocio y ramo es por cobertura: los % se proponen en 0.
               </div>
