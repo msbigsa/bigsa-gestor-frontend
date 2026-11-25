@@ -114,35 +114,16 @@
             <mat-checkbox formControlName="modificaDireccion">Modifica dirección</mat-checkbox>
           </div>
 
-          <!-- Fecha de propuesta -->
-          <div class="col-span-12 border-t border-border pt-4">
-            <p class="text-base font-semibold mb-0">Fecha de propuesta</p>
-          </div>
-
-          <div class="col-span-12 md:col-span-6">
-            <mat-radio-group class="flex flex-col sm:flex-row gap-2 sm:gap-8" formControlName="fechaPropuestaOrigen">
-              @for (origen of origenesFechaPropuesta; track origen) {
-                <mat-radio-button [value]="origen">{{ fechaPropuestaOrigenLabel(origen) }}</mat-radio-button>
-              }
-            </mat-radio-group>
-          </div>
-
-          @if (valores().fechaPropuestaOrigen === 'FIJA') {
-            <div class="col-span-12 md:col-span-4">
-              <mat-label class="font-medium mb-2 block">Fecha de propuesta</mat-label>
-              <mat-form-field appearance="outline" class="w-full hide-hint">
-                <input matInput type="date" formControlName="fechaPropuesta" />
-              </mat-form-field>
-            </div>
-          }
-
-          <!-- Nuevo organizador / cobrador (carga 1) -->
+          <!-- Nuevo organizador / cobrador (cargas 1 y 3) -->
           @if (mostrarNuevosIntermediarios()) {
             <div class="col-span-12 border-t border-border pt-4" data-tour="carga-nuevos-intermediarios">
               <p class="text-base font-semibold mb-0">Nuevo organizador / cobrador</p>
               <p class="text-xs text-gray-500 mt-1 mb-0">
                 Reemplazan al organizador o al cobrador de la póliza. Se pueden marcar con compañía, negocio y ramo
                 elegidos.
+                @if (!config().negocioObligatorio && !config().ramoObligatorio) {
+                  En esta carga, negocio y ramo solo se necesitan para elegir un nuevo organizador o cobrador.
+                }
               </p>
             </div>
 
@@ -186,8 +167,6 @@
               <p class="text-base font-semibold mb-0">Intermediarios</p>
               <p class="text-xs text-gray-500 mt-1 mb-0">
                 Requieren compañía, negocio y ramo. Al elegir uno se proponen su % y «aplica sobre» programados en BO.
-                El productor es obligatorio; los demás niveles y sus % los exige la validación según la configuración
-                del negocio.
               </p>
             </div>
 
@@ -199,8 +178,9 @@
 
             @for (rol of rolesPantalla; track rol.rol) {
               <div class="col-span-12 md:col-span-6">
+                <!-- Lo opcional se sabe recien con compania, negocio y ramo (GET /niveles-intermediacion) -->
                 <mat-label class="font-medium mb-2 block">
-                  {{ rol.etiqueta }}{{ rol.rol === 'PROD' ? '' : ' (opcional)' }}
+                  {{ rol.etiqueta }}{{ hayNivelesIntermediacion() && !rolObligatorio(rol) ? ' (opcional)' : '' }}
                 </mat-label>
                 <app-selector-catalogo
                   [formControlName]="rol.campoCodigo"
@@ -210,7 +190,9 @@
               </div>
 
               <div class="col-span-6 md:col-span-2">
-                <mat-label class="font-medium mb-2 block">% comisión</mat-label>
+                <mat-label class="font-medium mb-2 block">
+                  % comisión{{ hayNivelesIntermediacion() && !porcentajeObligatorio(rol) ? ' (opcional)' : '' }}
+                </mat-label>
                 <mat-form-field appearance="outline" class="w-full hide-hint">
                   <input
                     matInput
@@ -227,51 +209,12 @@
                 <mat-label class="font-medium mb-2 block">Aplica sobre</mat-label>
                 <mat-form-field appearance="outline" class="w-full hide-hint">
                   <mat-select [formControlName]="rol.campoAplica">
-                    <mat-option [value]="null">Por defecto ({{ aplicaSobreLabel(rol.aplicaPorDefecto) }})</mat-option>
                     @for (aplica of rol.opcionesAplica; track aplica) {
                       <mat-option [value]="aplica">{{ aplicaSobreLabel(aplica) }}</mat-option>
                     }
                   </mat-select>
                 </mat-form-field>
               </div>
-            }
-          }
-
-          <!-- Dejar emitido (solo tipos que lo permiten) -->
-          @if (mostrarEmision()) {
-            <div class="col-span-12 border-t border-border pt-4" data-tour="carga-emision">
-              <p class="text-base font-semibold mb-0">Emisión</p>
-            </div>
-
-            <div class="col-span-12">
-              <mat-checkbox formControlName="dejaEmitido">Dejar emitidos los documentos</mat-checkbox>
-            </div>
-
-            @if (valores().dejaEmitido) {
-              <div class="col-span-12">
-                <mat-label class="font-medium mb-2 block">Origen de las fechas de emisión y recepción</mat-label>
-                <mat-radio-group class="flex flex-col sm:flex-row gap-2 sm:gap-8" formControlName="fechasEmisionOrigen">
-                  @for (origen of origenesFechasEmision; track origen) {
-                    <mat-radio-button [value]="origen">{{ fechasEmisionOrigenLabel(origen) }}</mat-radio-button>
-                  }
-                </mat-radio-group>
-              </div>
-
-              @if (mostrarFechasEmision()) {
-                <div class="col-span-12 md:col-span-4">
-                  <mat-label class="font-medium mb-2 block">Fecha de emisión</mat-label>
-                  <mat-form-field appearance="outline" class="w-full hide-hint">
-                    <input matInput type="date" formControlName="fechaEmision" />
-                  </mat-form-field>
-                </div>
-
-                <div class="col-span-12 md:col-span-4">
-                  <mat-label class="font-medium mb-2 block">Fecha de recepción</mat-label>
-                  <mat-form-field appearance="outline" class="w-full hide-hint">
-                    <input matInput type="date" formControlName="fechaRecepcion" />
-                  </mat-form-field>
-                </div>
-              }
             }
           }
 
@@ -382,6 +325,66 @@
                 }
               </div>
             </div>
+          }
+
+          <!-- Fecha de propuesta (abajo, como en SolicitaDatos.frm) -->
+          <div class="col-span-12 border-t border-border pt-4">
+            <p class="text-base font-semibold mb-0">Fecha de propuesta</p>
+          </div>
+
+          <div class="col-span-12 md:col-span-6">
+            <mat-radio-group class="flex flex-col sm:flex-row gap-2 sm:gap-8" formControlName="fechaPropuestaOrigen">
+              @for (origen of origenesFechaPropuesta; track origen) {
+                <mat-radio-button [value]="origen">{{ fechaPropuestaOrigenLabel(origen) }}</mat-radio-button>
+              }
+            </mat-radio-group>
+          </div>
+
+          @if (valores().fechaPropuestaOrigen === 'FIJA') {
+            <div class="col-span-12 md:col-span-4">
+              <mat-label class="font-medium mb-2 block">Fecha de propuesta</mat-label>
+              <mat-form-field appearance="outline" class="w-full hide-hint">
+                <input matInput type="date" formControlName="fechaPropuesta" />
+              </mat-form-field>
+            </div>
+          }
+
+          <!-- Dejar emitido (solo tipos que lo permiten); el VB6 lo pregunta al aceptar -->
+          @if (mostrarEmision()) {
+            <div class="col-span-12 border-t border-border pt-4" data-tour="carga-emision">
+              <p class="text-base font-semibold mb-0">Emisión</p>
+            </div>
+
+            <div class="col-span-12">
+              <mat-checkbox formControlName="dejaEmitido">Dejar emitidos los documentos</mat-checkbox>
+            </div>
+
+            @if (valores().dejaEmitido) {
+              <div class="col-span-12">
+                <mat-label class="font-medium mb-2 block">Origen de las fechas de emisión y recepción</mat-label>
+                <mat-radio-group class="flex flex-col sm:flex-row gap-2 sm:gap-8" formControlName="fechasEmisionOrigen">
+                  @for (origen of origenesFechasEmision; track origen) {
+                    <mat-radio-button [value]="origen">{{ fechasEmisionOrigenLabel(origen) }}</mat-radio-button>
+                  }
+                </mat-radio-group>
+              </div>
+
+              @if (mostrarFechasEmision()) {
+                <div class="col-span-12 md:col-span-4">
+                  <mat-label class="font-medium mb-2 block">Fecha de emisión</mat-label>
+                  <mat-form-field appearance="outline" class="w-full hide-hint">
+                    <input matInput type="date" formControlName="fechaEmision" />
+                  </mat-form-field>
+                </div>
+
+                <div class="col-span-12 md:col-span-4">
+                  <mat-label class="font-medium mb-2 block">Fecha de recepción</mat-label>
+                  <mat-form-field appearance="outline" class="w-full hide-hint">
+                    <input matInput type="date" formControlName="fechaRecepcion" />
+                  </mat-form-field>
+                </div>
+              }
+            }
           }
 
         }

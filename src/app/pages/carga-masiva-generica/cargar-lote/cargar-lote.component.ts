@@ -24,6 +24,7 @@ import { PlanPago } from 'src/app/models/carga-masiva-generica/PlanPago';
 import { AplicaSobre } from 'src/app/models/carga-masiva-generica/AplicaSobre';
 import { IntermediarioCatalogo } from 'src/app/models/carga-masiva-generica/IntermediarioCatalogo';
 import { RolIntermediario } from 'src/app/models/carga-masiva-generica/RolIntermediario';
+import { NivelesIntermediacion } from 'src/app/models/carga-masiva-generica/NivelesIntermediacion';
 import {
   FORMAS_PAGO,
   aplicaSobreLabel,
@@ -70,6 +71,8 @@ interface DatosComision {
   clave: string;
   relacion: number;
   catalogos: Partial<Record<RolIntermediario, IntermediarioCatalogo[]>>;
+  // Solo con los intermediarios de pantalla (carga 2).
+  niveles: NivelesIntermediacion | null;
 }
 
 @Component({
@@ -256,6 +259,9 @@ export class CargarLoteCargaMasivaComponent {
         catalogos: forkJoin(Object.fromEntries(
           consulta.roles.map(rol => [rol, this.catalogoService.listarIntermediarios(...consulta.clave, rol)])
         )),
+        niveles: consulta.roles.includes(RolIntermediario.PROD)
+          ? this.catalogoService.obtenerNivelesIntermediacion(...consulta.clave)
+          : of(null),
       }).pipe(
         map((datos): DatosComision => ({ clave: consulta.clave.join('|'), ...datos })),
         startWith(null),
@@ -266,6 +272,18 @@ export class CargarLoteCargaMasivaComponent {
 
   readonly relacionComision = computed(() => this.datosComision()?.relacion ?? 1);
   readonly comisionPorCobertura = computed(() => this.relacionComision() === RELACION_COMISION_POR_COBERTURA);
+  // Carga 2: lo que exige la validacion; hasta tener compania, negocio y ramo solo se sabe del productor.
+  private readonly nivelesIntermediacion = computed(() => this.datosComision()?.niveles ?? null);
+  readonly hayNivelesIntermediacion = computed(() => !!this.nivelesIntermediacion());
+
+  rolObligatorio(rol: RolPantalla): boolean {
+    return rol.rol === RolIntermediario.PROD || !!this.nivelesIntermediacion()?.rolesObligatorios.includes(rol.rol);
+  }
+
+  porcentajeObligatorio(rol: RolPantalla): boolean {
+    return this.rolObligatorio(rol) && !!this.nivelesIntermediacion()?.porcentajeObligatorio;
+  }
+
   readonly opcionesIntermediarios = computed<Partial<Record<RolIntermediario, IntermediarioCatalogo[]>>>(() =>
     this.datosComision()?.catalogos ?? {}
   );
@@ -325,8 +343,16 @@ export class CargarLoteCargaMasivaComponent {
       if (this.mostrarMoneda() && config.monedaObligatoria && !v.domiMoneCod && !v.usaMonedaPlanilla) {
         faltan.push('Moneda');
       }
-      if (this.mostrarIntermediarios() && !v.codProductor) {
-        faltan.push('Productor');
+      // SolicitaDatos.frm:1494-1531: el % del productor no puede ser 0; el de los demas niveles, no vacio.
+      if (this.mostrarIntermediarios()) {
+        for (const rol of ROLES_PANTALLA) {
+          const porcentaje = v[rol.campoPorcentaje];
+          if (this.rolObligatorio(rol) && !v[rol.campoCodigo]) {
+            faltan.push(rol.etiqueta);
+          } else if (this.porcentajeObligatorio(rol) && (rol.rol === RolIntermediario.PROD ? !porcentaje : porcentaje == null)) {
+            faltan.push(`% de ${rol.etiqueta.toLowerCase()}`);
+          }
+        }
       }
       if (this.mostrarNuevosIntermediarios() && v.nuevoOrganizador && !v.codOrganizador) {
         faltan.push('Organizador');
@@ -557,10 +583,11 @@ export class CargarLoteCargaMasivaComponent {
       return;
     }
 
+    // Sin "aplica sobre" en BO queda seleccionado el que usa el legacy con el combo vacio (ProcesaInfo.bas:21976-21981).
     if (this.comisionPorCobertura()) {
       this.porcentajesPropuestos.set(rol.rol, 0);
       porcentaje.setValue(0);
-      aplica.setValue(null);
+      aplica.setValue(rol.aplicaPorDefecto);
       return;
     }
 
@@ -568,8 +595,8 @@ export class CargarLoteCargaMasivaComponent {
     if (nominal) {
       this.porcentajesPropuestos.set(rol.rol, nominal.porcentaje ?? null);
       porcentaje.setValue(nominal.porcentaje ?? null);
-      aplica.setValue(nominal.aplicaSobre ?? null);
     }
+    aplica.setValue(nominal?.aplicaSobre ?? rol.aplicaPorDefecto);
   }
 
   private proponerProductorPorDefecto(datos: DatosComision | null): void {

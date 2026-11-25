@@ -20,6 +20,7 @@ import { IntermediarioCatalogo } from 'src/app/models/carga-masiva-generica/Inte
 import { RolIntermediario } from 'src/app/models/carga-masiva-generica/RolIntermediario';
 import { ItemCatalogo } from 'src/app/models/carga-masiva-generica/ItemCatalogo';
 import { PlanPago } from 'src/app/models/carga-masiva-generica/PlanPago';
+import { Moneda } from 'src/app/models/carga-masiva-generica/Moneda';
 import { LoteCargaResponse } from 'src/app/models/carga-masiva-generica/LoteCargaResponse';
 import { LoteCargaConfirmacion } from 'src/app/models/carga-masiva-generica/LoteCargaConfirmacion';
 import { LoteCargaDetalleResponse } from 'src/app/models/carga-masiva-generica/LoteCargaDetalleResponse';
@@ -28,6 +29,8 @@ import { EstadoDetalleCarga } from 'src/app/models/carga-masiva-generica/EstadoD
 import { FechaPropuestaOrigen } from 'src/app/models/carga-masiva-generica/FechaPropuestaOrigen';
 import { FechasEmisionOrigen } from 'src/app/models/carga-masiva-generica/FechasEmisionOrigen';
 import { CancelacionEjecucion } from 'src/app/models/carga-masiva-generica/CancelacionEjecucion';
+import { PolizaPorElegir } from 'src/app/models/carga-masiva-generica/PolizaPorElegir';
+import { PolizaElegidaRequest } from 'src/app/models/carga-masiva-generica/PolizaElegidaRequest';
 import { LoginService } from 'src/app/services/login.service';
 import { MenuService } from 'src/app/layouts/full/vertical/sidebar/sidebar-data';
 import { TourService } from 'src/app/shared/tour/tour.service';
@@ -52,6 +55,7 @@ import {
   formaPagoPideBancoEmisor,
   formaPagoPideInstitucion,
   formaPagoPideNumero,
+  formaPagoTipoInstitucion,
   layoutLabel,
   loteEnProceso,
   motivosError,
@@ -84,6 +88,19 @@ import {
 } from '../shared/errores-registro-dialog/errores-registro-dialog.component';
 
 const RUTA_COLA_ACTIVA = '/inicio/cola-ejecucion/cola-activa';
+
+// Solo antes de ejecutar: los estados en que el backend deja validar.
+const ESTADOS_ELIGE_POLIZA: EstadoLoteCarga[] = [
+  EstadoLoteCarga.CARGADO,
+  EstadoLoteCarga.VALIDADO_OK,
+  EstadoLoteCarga.VALIDADO_CON_ERRORES,
+  EstadoLoteCarga.ERROR_VALIDACION,
+];
+
+// Compania + numero + digito: la llave de la eleccion.
+function llavePoliza(poliza: PolizaPorElegir): string {
+  return `${poliza.ciasCodigo}|${poliza.nroPoliza}|${poliza.digPoliza}`;
+}
 
 // Un parametro del lote para el panel "Parametros de la carga".
 interface ParametroLote {
@@ -165,6 +182,39 @@ export class DetalleLoteCargaMasivaComponent implements OnInit {
     { initialValue: {} as Partial<Record<RolIntermediario, IntermediarioCatalogo[]>> },
   );
 
+  // Planes de cobertura de la compania, negocio y ramo del lote, para el nombre del plan.
+  private readonly consultaPlanes = computed(() => {
+    const lote = this.lote();
+    return this.config().usaPlan && lote?.plcoCorrelativo != null && lote.ciasCodigo && lote.negoCodigo && lote.ramoCodigo
+      ? [lote.ciasCodigo, lote.negoCodigo, lote.ramoCodigo] as const
+      : null;
+  }, { equal: (a, b) => a?.join('|') === b?.join('|') });
+  private readonly planesCobertura = toSignal(
+    toObservable(this.consultaPlanes).pipe(
+      switchMap(clave => !clave ? of([] as ItemCatalogo[]) : this.catalogoService.listarPlanesCobertura(...clave)
+        .pipe(catchError(() => of([] as ItemCatalogo[])))),
+    ),
+    { initialValue: [] as ItemCatalogo[] },
+  );
+
+  // Moneda e instituciones del pago, solo si el lote las trae (la institucion es tarjeta o banco segun la forma de pago).
+  private readonly monedas = toSignal(
+    toObservable(computed(() => !!this.lote()?.domiMoneCod)).pipe(
+      switchMap(pide => !pide ? of([] as Moneda[]) : this.catalogoService.listarMonedas()
+        .pipe(catchError(() => of([] as Moneda[])))),
+    ),
+    { initialValue: [] as Moneda[] },
+  );
+  private readonly tipoInstitucion = computed(() => {
+    const lote = this.lote();
+    return lote?.ifinCodigo != null && formaPagoPideInstitucion(lote.formaPago) ? formaPagoTipoInstitucion(lote.formaPago) : null;
+  });
+  private readonly tarjetas = this.institucionesSi(computed(() => this.tipoInstitucion() === 1), 1);
+  private readonly bancos = this.institucionesSi(
+    computed(() => this.tipoInstitucion() === 2 || (this.lote()?.ifinCodigoEmisor != null && formaPagoPideBancoEmisor(this.lote()?.formaPago))),
+    2,
+  );
+
   readonly detalles = signal<LoteCargaDetalleResponse[]>([]);
   readonly pageIndex = signal(0);
   readonly pageSize = signal(10);
@@ -175,6 +225,25 @@ export class DetalleLoteCargaMasivaComponent implements OnInit {
 
   readonly parametrosExpandido = signal(false);
   readonly detalleExpandido = signal(true);
+  readonly polizasExpandido = signal(true);
+
+  // Carga 3: numeros con mas de una poliza emitida, y lo elegido en pantalla sin grabar (llave -> docuCodigo).
+  readonly polizasPorElegir = signal<PolizaPorElegir[]>([]);
+  private readonly eleccionesPantalla = signal<Record<string, number>>({});
+  readonly polizasPendientes = computed(() => this.polizasPorElegir().filter(p => p.docuCodigoElegido == null).length);
+  readonly puedeElegirPolizas = computed(() => {
+    const lote = this.lote();
+    return !!lote && !lote.ejecucionActiva && ESTADOS_ELIGE_POLIZA.includes(lote.estadoLote);
+  });
+  readonly eleccionesCambiadas = computed<PolizaElegidaRequest[]>(() => {
+    const pantalla = this.eleccionesPantalla();
+    return this.polizasPorElegir().flatMap(p => {
+      const docuCodigo = pantalla[llavePoliza(p)];
+      return docuCodigo != null && docuCodigo !== p.docuCodigoElegido
+        ? [{ ciasCodigo: p.ciasCodigo, nroPoliza: p.nroPoliza, digPoliza: p.digPoliza, docuCodigo }]
+        : [];
+    });
+  });
 
   // Pago del documento existente solo si alguna fila de la pagina lo trae.
   readonly hayPagoExistente = computed(() => this.detalles().some(d => tienePagoExistente(d)));
@@ -203,7 +272,7 @@ export class DetalleLoteCargaMasivaComponent implements OnInit {
     }
 
     const valor = (v: string | number | undefined | null) => (v == null || v === '' ? '-' : String(v));
-    const conNombre = (codigo: number | undefined, catalogo: ItemCatalogo[]) => {
+    const conNombre = (codigo: number | string | undefined, catalogo: { codigo: number | string; descripcion: string }[]) => {
       const nombre = catalogo.find(item => item.codigo === codigo)?.descripcion;
       return nombre ? `${codigo} - ${nombre}` : valor(codigo);
     };
@@ -231,14 +300,14 @@ export class DetalleLoteCargaMasivaComponent implements OnInit {
 
       if (config.usaPlan) {
         generales.push(
-          { etiqueta: 'Plan de cobertura', valor: valor(lote.plcoCorrelativo) },
+          { etiqueta: 'Plan de cobertura', valor: conNombre(lote.plcoCorrelativo, this.planesCobertura()) },
           { etiqueta: 'Usa plan de la planilla', valor: siNo(lote.usaPlanPlanilla) },
         );
       }
 
       if (config.usaMoneda) {
         generales.push(
-          { etiqueta: 'Moneda', valor: valor(lote.domiMoneCod) },
+          { etiqueta: 'Moneda', valor: conNombre(lote.domiMoneCod, this.monedas()) },
           { etiqueta: 'Usa moneda de la planilla', valor: siNo(lote.usaMonedaPlanilla) },
         );
       }
@@ -272,10 +341,13 @@ export class DetalleLoteCargaMasivaComponent implements OnInit {
       { etiqueta: 'Forma de pago', valor: formaPagoLabel(lote.formaPago) },
     );
     if (formaPagoPideInstitucion(lote.formaPago)) {
-      pago.push({ etiqueta: etiquetaInstitucion(lote.formaPago), valor: valor(lote.ifinCodigo) });
+      pago.push({
+        etiqueta: etiquetaInstitucion(lote.formaPago),
+        valor: conNombre(lote.ifinCodigo, formaPagoTipoInstitucion(lote.formaPago) === 1 ? this.tarjetas() : this.bancos()),
+      });
     }
     if (formaPagoPideBancoEmisor(lote.formaPago)) {
-      pago.push({ etiqueta: 'Banco emisor', valor: valor(lote.ifinCodigoEmisor) });
+      pago.push({ etiqueta: 'Banco emisor', valor: conNombre(lote.ifinCodigoEmisor, this.bancos()) });
     }
     if (formaPagoPideNumero(lote.formaPago)) {
       pago.push({ etiqueta: etiquetaNumero(lote.formaPago), valor: valor(lote.nroTransaccion) });
@@ -365,6 +437,7 @@ export class DetalleLoteCargaMasivaComponent implements OnInit {
       untracked(() => {
         this.pageIndex.set(0);
         this.filtroEstadoDetalle.set(null);
+        this.polizasPorElegir.set([]);
         this.cargarLote();
         this.cargarDetalles();
         this.cargarCorrecciones();
@@ -377,6 +450,16 @@ export class DetalleLoteCargaMasivaComponent implements OnInit {
 
       untracked(() => cias.forEach(cia => this.pedirNegocios(cia)));
     });
+  }
+
+  private institucionesSi(pide: () => boolean, tipo: 1 | 2) {
+    return toSignal(
+      toObservable(computed(pide)).pipe(
+        switchMap(si => !si ? of([] as ItemCatalogo[]) : this.catalogoService.listarInstituciones(tipo)
+          .pipe(catchError(() => of([] as ItemCatalogo[])))),
+      ),
+      { initialValue: [] as ItemCatalogo[] },
+    );
   }
 
   private pedirNegocios(cia: number | undefined): void {
@@ -420,6 +503,7 @@ export class DetalleLoteCargaMasivaComponent implements OnInit {
         // Al terminar la validacion o la ejecucion se refrescan las filas una vez mas para ver su estado final.
         if (seguiaEnProceso && !this.loteEnProceso()) {
           this.cargarDetalles(true);
+          this.cargarPolizasPorElegir(data, true);
         }
       });
 
@@ -443,7 +527,64 @@ export class DetalleLoteCargaMasivaComponent implements OnInit {
   }
 
   cargarLote(silencioso = false): void {
-    this.loteService.obtenerLote(this.loteId(), silencioso).subscribe(data => this.lote.set(data));
+    this.loteService.obtenerLote(this.loteId(), silencioso).subscribe(data => {
+      this.lote.set(data);
+      this.cargarPolizasPorElegir(data, silencioso);
+    });
+  }
+
+  // Vuelve a pedirlas descartando lo elegido en pantalla sin grabar.
+  private cargarPolizasPorElegir(lote: LoteCargaResponse, silencioso: boolean): void {
+    this.eleccionesPantalla.set({});
+
+    if (!configTipoCarga(lote.tipoCarga).eligePolizas || lote.estadoLote === EstadoLoteCarga.ELIMINADO) {
+      this.polizasPorElegir.set([]);
+      return;
+    }
+
+    this.loteService.listarPolizasPorElegir(lote.loteId, silencioso)
+      .subscribe(polizas => this.polizasPorElegir.set(polizas));
+  }
+
+  // Lo elegido en pantalla, o lo grabado.
+  docuCodigoEnPantalla(poliza: PolizaPorElegir): number | null {
+    return this.eleccionesPantalla()[llavePoliza(poliza)] ?? poliza.docuCodigoElegido;
+  }
+
+  elegirCandidata(poliza: PolizaPorElegir, docuCodigo: number): void {
+    this.eleccionesPantalla.update(actual => ({ ...actual, [llavePoliza(poliza)]: docuCodigo }));
+  }
+
+  descartarEleccionPolizas(): void {
+    this.eleccionesPantalla.set({});
+  }
+
+  // Graba y el backend relanza la validacion: el polling sigue con VALIDANDO.
+  guardarEleccionPolizas(): void {
+    const elecciones = this.eleccionesCambiadas();
+    if (!elecciones.length || !this.puedeElegirPolizas() || this.loteEnProceso()) {
+      return;
+    }
+
+    this.loteService.elegirPolizas(this.loteId(), elecciones).subscribe({
+      next: () => {
+        this.toastr.info('Elección guardada; el lote se vuelve a validar', 'En proceso');
+        this.cargarLote();
+      },
+      // El interceptor muestra el rechazo; se refresca por si cambio.
+      error: () => this.cargarLote(),
+    });
+  }
+
+  // "3, 8 y 12"; con muchas filas, solo las primeras.
+  filasTexto(filas: number[]): string {
+    const maximo = 15;
+    const mostradas = filas.slice(0, maximo).join(', ');
+    return filas.length > maximo ? `${mostradas} y ${filas.length - maximo} más` : mostradas;
+  }
+
+  fechaCorta(fecha: string | undefined): string {
+    return fecha ? this.datePipe.transform(fecha, 'dd-MM-yyyy') ?? fecha : '-';
   }
 
   cargarDetalles(silencioso = false): void {
@@ -536,7 +677,9 @@ export class DetalleLoteCargaMasivaComponent implements OnInit {
   }
 
   iniciarTour(): void {
-    this.tourService.start(buildDetalleLoteTourSteps(!this.loteEliminado(), this.detalles().length > 0, this.hayPagoExistente()));
+    this.tourService.start(buildDetalleLoteTourSteps(
+      !this.loteEliminado(), this.detalles().length > 0, this.hayPagoExistente(), this.polizasPorElegir().length > 0,
+    ));
   }
 
   ejecutar(): void {

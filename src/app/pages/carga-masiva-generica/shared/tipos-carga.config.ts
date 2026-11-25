@@ -19,6 +19,8 @@ export interface ConfigTipoCarga {
   intermediariosPantalla: boolean;
   // Una fila rechazada porque el documento ya existe puede pagar ese documento.
   pagaDocumentoExistente: boolean;
+  // Con mas de una poliza emitida por numero, se elige en el detalle del lote antes de ejecutar.
+  eligePolizas: boolean;
   // Que es la "Propuesta" del listado de filas.
   ayudaPropuesta: string;
   // Ayuda sobre la planilla esperada.
@@ -35,6 +37,7 @@ const CONFIG_POR_DEFECTO: ConfigTipoCarga = {
   monedaObligatoria: false,
   intermediariosPantalla: false,
   pagaDocumentoExistente: false,
+  eligePolizas: false,
   ayudaPropuesta: 'Propuesta BIGSA asociada a la fila',
   ayudaPlanilla: '',
 };
@@ -76,6 +79,21 @@ const CONFIG_TIPOS_CARGA: Partial<Record<TipoCarga, ConfigTipoCarga>> = {
     ayudaPropuesta: 'Propuesta BIGSA de la póliza creada (existe después de ejecutar)',
     ayudaPlanilla: 'Una fila por póliza: cada fila crea una póliza con el ítem 1. La planilla se lee hasta la primera '
       + 'fila sin RUT del contratante (columna D). ' + LAYOUT,
+  },
+  [TipoCarga.CERTIFICADOS_TRANSPORTE]: {
+    ...CONFIG_POR_DEFECTO,
+    // La poliza se busca solo por compania y numero (SolicitaDatos.frm:1431-1436); plan y moneda son los de la poliza.
+    usaPlan: false,
+    usaMoneda: false,
+    pagaDocumentoExistente: true,
+    // Muestra_Polizas del legacy: la poliza se busca sin ramo.
+    eligePolizas: true,
+    ayudaPropuesta: 'Propuesta BIGSA del endoso creado (existe después de ejecutar)',
+    // Sin LAYOUT: siempre columnas de no vehiculos.
+    ayudaPlanilla: 'Una fila por certificado: cada fila crea un endoso de aumento con un ítem en la póliza de la '
+      + 'columna A (compañía + número, con o sin dígito). La planilla se lee hasta la primera fila con la columna A '
+      + 'vacía. Siempre se usan las columnas de no vehículos. Con «usar planilla», la forma de pago se toma de las '
+      + 'columnas BY a CE.',
   },
 };
 

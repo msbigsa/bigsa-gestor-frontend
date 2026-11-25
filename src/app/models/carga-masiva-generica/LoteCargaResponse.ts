@@ -100,4 +100,6 @@ export interface LoteCargaResponse {
   polizasSinCerrar?: number;
   // Solo en el detalle; se revisan a mano (motivo en el log).
   polizasCierreError?: number;
+  // Solo en el detalle (carga 3): numeros de poliza pendientes de elegir con filas sin ejecutar.
+  polizasPorElegir?: number;
 }

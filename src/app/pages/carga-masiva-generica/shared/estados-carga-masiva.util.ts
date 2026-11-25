@@ -69,15 +69,28 @@ export function dialogoEjecucion(lote: LoteCargaResponse): ConfirmDialogData {
 
   return {
     title: accionEjecutarLabel(lote.estadoLote),
-    message: reintento
+    message: (reintento
       ? `¿${retoma ? 'Retomar' : 'Reintentar'} la ejecución del lote #${lote.loteId}? El lote pasa a la cola de `
         + 'ejecución; al ejecutarse sigue con lo que no se cargó, sin repetir las filas ya cargadas.'
       : `¿Ejecutar el lote #${lote.loteId} ("${lote.nombreArchivoOrigen}")? El lote pasa a la cola de ejecución y se `
-        + 'vuelve a validar al ejecutarse.' + avisoSinFilasValidas(lote),
+        + 'vuelve a validar al ejecutarse.' + avisoSinFilasValidas(lote))
+      + avisoPolizasPorElegir(lote),
     confirmText: retoma ? 'Retomar' : reintento ? 'Reintentar' : 'Ejecutar',
     cancelText: 'Cancelar',
     type: 'warning',
   };
+}
+
+// El backend no bloquea la ejecucion: solo se avisa.
+function avisoPolizasPorElegir(lote: LoteCargaResponse): string {
+  const pendientes = lote.polizasPorElegir ?? 0;
+  if (pendientes === 0) {
+    return '';
+  }
+
+  return pendientes === 1
+    ? ' Hay 1 póliza por elegir: sus filas se rechazarán.'
+    : ` Hay ${pendientes} pólizas por elegir: sus filas se rechazarán.`;
 }
 
 // Con todas las filas rechazadas la ejecucion igual puede pagar documentos existentes impagos.

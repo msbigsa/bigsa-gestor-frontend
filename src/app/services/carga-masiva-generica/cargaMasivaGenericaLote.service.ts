@@ -11,6 +11,8 @@ import { LoteCargaResponse } from '../../models/carga-masiva-generica/LoteCargaR
 import { EstadoLoteCarga } from '../../models/carga-masiva-generica/EstadoLoteCarga';
 import { EstadoDetalleCarga } from '../../models/carga-masiva-generica/EstadoDetalleCarga';
 import { TipoCarga } from '../../models/carga-masiva-generica/TipoCarga';
+import { PolizaPorElegir } from '../../models/carga-masiva-generica/PolizaPorElegir';
+import { PolizaElegidaRequest } from '../../models/carga-masiva-generica/PolizaElegidaRequest';
 
 @Injectable({
   providedIn: 'root',
@@ -83,6 +85,18 @@ export class CargaMasivaGenericaLoteService {
   // En la cola o en curso; solo quien la pidio.
   cancelarEjecucion(loteId: number): Observable<CancelacionEjecucion> {
     return this.http.post<CancelacionEjecucion>(`${this.url}/${loteId}/cancelar-ejecucion`, null);
+  }
+
+  // Carga 3: polizas con mas de una emitida por numero; para otros tipos llega vacio.
+  listarPolizasPorElegir(loteId: number, silencioso = false): Observable<PolizaPorElegir[]> {
+    return this.http.get<PolizaPorElegir[]>(`${this.url}/${loteId}/polizas-por-elegir`, {
+      context: new HttpContext().set(SKIP_GLOBAL_LOADING, silencioso),
+    });
+  }
+
+  // Graba y relanza la validacion (el lote pasa a VALIDANDO, seguir con obtenerLote).
+  elegirPolizas(loteId: number, elecciones: PolizaElegidaRequest[]): Observable<void> {
+    return this.http.put<void>(`${this.url}/${loteId}/polizas-por-elegir`, elecciones);
   }
 
   listarDetalles(loteId: number, page: number, size: number, estado?: EstadoDetalleCarga, silencioso = false): Observable<any> {

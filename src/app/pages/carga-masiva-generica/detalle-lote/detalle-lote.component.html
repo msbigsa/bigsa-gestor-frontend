@@ -81,6 +81,17 @@
         </div>
       }
 
+      @if (polizasPendientes() > 0 && puedeElegirPolizas()) {
+        <div class="flex items-start gap-2 rounded-md border border-warning bg-light-warning text-warning px-3 py-2 mb-4 text-sm">
+          <mat-icon class="shrink-0">rule</mat-icon>
+          <span>
+            {{ polizasPendientes() === 1 ? 'Hay 1 póliza por elegir' : 'Hay ' + polizasPendientes() + ' pólizas por elegir' }}:
+            la planilla trae un número con más de una póliza emitida en la compañía. Elíjala en «Pólizas por elegir»
+            antes de ejecutar; si no, sus filas se rechazan.
+          </span>
+        </div>
+      }
+
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4" data-tour="detalle-resumen">
         <div class="border border-border rounded-md p-3 text-center">
           <p class="text-2xl font-semibold mb-0">{{ loteActual.totalFilas }}</p>
@@ -277,6 +288,124 @@
     </mat-card>
   } @else {
     <mat-accordion multi class="block cardWithShadow rounded-xl! overflow-hidden">
+
+      <!-- Carga 3: Muestra_Polizas del legacy, elegido antes de ejecutar -->
+      @if (polizasPorElegir().length > 0) {
+        <mat-expansion-panel
+          data-tour="detalle-polizas-por-elegir"
+          [expanded]="polizasExpandido()"
+          (opened)="polizasExpandido.set(true)"
+          (closed)="polizasExpandido.set(false)"
+        >
+          <mat-expansion-panel-header>
+            <mat-panel-title>Pólizas por elegir</mat-panel-title>
+            <mat-panel-description>
+              {{ polizasPendientes() > 0 ? polizasPendientes() + ' pendiente(s) de ' + polizasPorElegir().length : 'Todas elegidas' }}
+            </mat-panel-description>
+          </mat-expansion-panel-header>
+
+          @if (puedeElegirPolizas()) {
+            <p class="text-xs text-gray-500 mb-4">
+              Estos números tienen más de una póliza emitida en la compañía. La póliza elegida vale para todas sus filas.
+              Al guardar, el lote se vuelve a validar.
+            </p>
+          } @else {
+            <p class="text-xs text-gray-500 mb-4">
+              {{ loteEnProceso() ? 'No se puede cambiar mientras el lote está en proceso.'
+                : 'Solo lectura: la póliza se elige antes de ejecutar. Para corregir, cargue una corrección.' }}
+            </p>
+          }
+
+          <div class="flex flex-col gap-4">
+            @for (poliza of polizasPorElegir(); track poliza.ciasCodigo + '|' + poliza.nroPoliza + '|' + poliza.digPoliza) {
+              <div class="border border-border rounded-md p-4">
+                <div class="flex flex-wrap items-start justify-between gap-2 mb-3">
+                  <div>
+                    <p class="text-base font-semibold mb-0">
+                      Póliza {{ poliza.poliza }} · {{ companiaFila(poliza.ciasCodigo) }}
+                    </p>
+                    <p class="text-xs text-gray-500 mb-0 mt-1">
+                      {{ poliza.filas.length === 1 ? 'Fila' : 'Filas' }} {{ filasTexto(poliza.filas) }}
+                    </p>
+                  </div>
+
+                  @if (poliza.docuCodigoElegido == null) {
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-light-warning text-warning">Pendiente</span>
+                  } @else {
+                    <span class="text-xs text-gray-500 text-right">
+                      Elegida{{ poliza.usuarioDecision ? ' por ' + poliza.usuarioDecision : '' }}
+                      @if (poliza.fechaDecision) {
+                        el {{ poliza.fechaDecision | date: "short" }}
+                      }
+                    </span>
+                  }
+                </div>
+
+                <mat-radio-group
+                  class="block overflow-auto"
+                  [value]="docuCodigoEnPantalla(poliza)"
+                  [disabled]="!puedeElegirPolizas() || loteEnProceso()"
+                  (change)="elegirCandidata(poliza, $event.value)"
+                >
+                  <table class="min-w-full text-sm">
+                    <thead>
+                      <tr class="text-left text-gray-500 border-b border-border">
+                        <th class="py-2 pr-3 w-10"></th>
+                        <th class="py-2 pr-3 font-semibold">Póliza</th>
+                        <th class="py-2 pr-3 font-semibold">Propuesta</th>
+                        <th class="py-2 pr-3 font-semibold">Ramo</th>
+                        <th class="py-2 pr-3 font-semibold">Contratante</th>
+                        <th class="py-2 pr-3 font-semibold">Vigencia</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (candidata of poliza.candidatas; track candidata.docuCodigo) {
+                        <tr class="border-b border-border last:border-b-0">
+                          <td class="py-1 pr-3">
+                            <mat-radio-button [value]="candidata.docuCodigo" [attr.aria-label]="'Elegir propuesta ' + candidata.docuCodigo" />
+                          </td>
+                          <td class="py-1 pr-3 whitespace-nowrap">{{ candidata.poliza }}</td>
+                          <td class="py-1 pr-3 whitespace-nowrap">{{ candidata.docuCodigo }}</td>
+                          <td class="py-1 pr-3 whitespace-nowrap">
+                            {{ candidata.ramoCodigo ?? '-' }}{{ candidata.ramoDescripcion ? ' - ' + candidata.ramoDescripcion : '' }}
+                          </td>
+                          <td class="py-1 pr-3">
+                            {{ candidata.contratanteRut ?? '-' }}{{ candidata.contratanteNombre ? ' · ' + candidata.contratanteNombre : '' }}
+                          </td>
+                          <td class="py-1 pr-3 whitespace-nowrap">
+                            {{ fechaCorta(candidata.inicioVigencia) }} al {{ fechaCorta(candidata.terminoVigencia) }}
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </mat-radio-group>
+              </div>
+            }
+          </div>
+
+          @if (puedeElegirPolizas()) {
+            <div class="flex flex-wrap justify-end gap-2 mt-4">
+              <button
+                mat-stroked-button
+                (click)="descartarEleccionPolizas()"
+                [disabled]="eleccionesCambiadas().length === 0 || loteEnProceso()"
+              >
+                Descartar cambios
+              </button>
+              <button
+                mat-flat-button
+                color="primary"
+                (click)="guardarEleccionPolizas()"
+                [disabled]="eleccionesCambiadas().length === 0 || loteEnProceso()"
+              >
+                <mat-icon class="mr-2">save</mat-icon>
+                Guardar elección
+              </button>
+            </div>
+          }
+        </mat-expansion-panel>
+      }
 
       <mat-expansion-panel
         [expanded]="parametrosExpandido()"

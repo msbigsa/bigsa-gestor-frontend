@@ -8,6 +8,7 @@ import { PlanPago } from '../../models/carga-masiva-generica/PlanPago';
 import { IntermediarioCatalogo } from '../../models/carga-masiva-generica/IntermediarioCatalogo';
 import { RelacionComision } from '../../models/carga-masiva-generica/RelacionComision';
 import { RolIntermediario } from '../../models/carga-masiva-generica/RolIntermediario';
+import { NivelesIntermediacion } from '../../models/carga-masiva-generica/NivelesIntermediacion';
 
 // Catalogos de la pantalla de carga; replican los "help" del VB6.
 @Injectable({
@@ -74,5 +75,14 @@ export class CargaMasivaGenericaCatalogoService {
       .set('ramoCodigo', ramoCodigo);
 
     return this.http.get<RelacionComision>(`${this.url}/relacion-comision`, { params });
+  }
+
+  obtenerNivelesIntermediacion(ciasCodigo: number, negoCodigo: number, ramoCodigo: number): Observable<NivelesIntermediacion> {
+    const params = new HttpParams()
+      .set('ciasCodigo', ciasCodigo)
+      .set('negoCodigo', negoCodigo)
+      .set('ramoCodigo', ramoCodigo);
+
+    return this.http.get<NivelesIntermediacion>(`${this.url}/niveles-intermediacion`, { params });
   }
 }

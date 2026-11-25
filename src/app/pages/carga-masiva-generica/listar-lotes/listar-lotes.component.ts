@@ -6,7 +6,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { EMPTY, interval, of } from 'rxjs';
-import { catchError, exhaustMap, filter } from 'rxjs/operators';
+import { catchError, exhaustMap, filter, switchMap } from 'rxjs/operators';
 
 import { MaterialModule } from 'src/app/material.module';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
@@ -44,6 +44,7 @@ import { LoginService } from 'src/app/services/login.service';
 import { TourService } from 'src/app/shared/tour/tour.service';
 import { CancelacionEjecucion } from 'src/app/models/carga-masiva-generica/CancelacionEjecucion';
 import { buildListarLotesTourSteps } from '../carga-masiva-generica-tour.steps';
+import { configTipoCarga } from '../shared/tipos-carga.config';
 
 const RUTA_CARGAR_LOTE = '/inicio/carga-masiva-generica/cargar-lote';
 const RUTA_DETALLE_LOTE = '/inicio/carga-masiva-generica/listar-lotes/detalle-lote';
@@ -278,14 +279,17 @@ export class ListarLotesCargaMasivaComponent implements OnInit {
   }
 
   // La ejecucion se encola: la revalidacion y la grabacion corren cuando la cola la despacha.
+  // Las polizas por elegir solo vienen en el detalle del lote: se pide antes de confirmar.
   private confirmarEjecucion(lote: LoteCargaResponse, alEncolar: () => void): void {
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      width: '480px',
-      disableClose: true,
-      data: dialogoEjecucion(lote),
-    });
+    const lote$ = configTipoCarga(lote.tipoCarga).eligePolizas ? this.loteService.obtenerLote(lote.loteId) : of(lote);
 
-    dialogRef.afterClosed().subscribe(resultado => {
+    lote$.pipe(
+      switchMap(actual => this.dialog.open(ConfirmDialogComponent, {
+        width: '480px',
+        disableClose: true,
+        data: dialogoEjecucion(actual),
+      }).afterClosed()),
+    ).subscribe(resultado => {
       if (resultado !== ConfirmDialogResult.CONFIRM) {
         return;
       }

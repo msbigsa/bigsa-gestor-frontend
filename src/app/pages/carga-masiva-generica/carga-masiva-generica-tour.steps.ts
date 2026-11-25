@@ -85,6 +85,13 @@ export function buildCargarLoteTourSteps(pantalla: PantallaCargaTour): StepOptio
       });
     }
 
+    pasos.push({
+      id: 'carga-forma-pago',
+      title: 'Forma de pago',
+      text: 'Defina si el pago es automático, el plan y la forma de pago, o si se toman de la planilla.',
+      attachTo: { element: '[data-tour="carga-forma-pago"]', on: 'bottom' },
+    });
+
     if (pantalla.mostrarEmision) {
       pasos.push({
         id: 'carga-emision',
@@ -93,13 +100,6 @@ export function buildCargarLoteTourSteps(pantalla: PantallaCargaTour): StepOptio
         attachTo: { element: '[data-tour="carga-emision"]', on: 'bottom' },
       });
     }
-
-    pasos.push({
-      id: 'carga-forma-pago',
-      title: 'Forma de pago',
-      text: 'Defina si el pago es automático, el plan y la forma de pago, o si se toman de la planilla.',
-      attachTo: { element: '[data-tour="carga-forma-pago"]', on: 'bottom' },
-    });
   }
 
   pasos.push(
@@ -178,6 +178,7 @@ export function buildDetalleLoteTourSteps(
   mostrarTablaDetalles: boolean,
   hayRegistrosDetalle: boolean,
   hayPagoExistente: boolean,
+  hayPolizasPorElegir = false,
 ): StepOptions[] {
   const pasos: StepOptions[] = [
     {
@@ -193,6 +194,16 @@ export function buildDetalleLoteTourSteps(
       attachTo: { element: '[data-tour="detalle-acciones"]', on: 'bottom' },
     },
   ];
+
+  if (mostrarTablaDetalles && hayPolizasPorElegir) {
+    pasos.push({
+      id: 'detalle-polizas-por-elegir',
+      title: 'Pólizas por elegir',
+      text: 'Cuando la planilla trae un número con más de una póliza emitida en la compañía, aquí se elige cuál usar, '
+        + 'antes de ejecutar. La elección vale para todas sus filas y al guardarla el lote se vuelve a validar.',
+      attachTo: { element: '[data-tour="detalle-polizas-por-elegir"]', on: 'bottom' },
+    });
+  }
 
   if (mostrarTablaDetalles) {
     pasos.push({
